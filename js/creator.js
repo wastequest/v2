@@ -2,7 +2,7 @@
    dashboard (Google sign-in, owner only). Never shows raw data itself. SOURCES: none (no facts). */
 (() => {
   if (typeof WQ === "undefined") return;
-  const DASH_URL = "";   // Apps Script "Only myself" deployment URL + "?view=dashboard" (see data_backend/SETUP_GUIDE.md)
+  const DASH_URL = "https://script.google.com/macros/s/AKfycbzt65YEnfjxX9Pbg83-x2pnvMtgnQf9nblUsf5GZhe5fMG197U4Ab6zxbX8uJYY-qEY/exec?view=dashboard";   // Apps Script "Only myself" deployment URL + "?view=dashboard" (see data_backend/SETUP_GUIDE.md)
   const T = {
     h: { en: "Creator", bm: "Pencipta" }, s: { en: "For the WasteQuest team only.", bm: "Untuk pasukan WasteQuest sahaja." },
     p1: { en: "The dashboard shows totals only: players, visits, age bands, learning gain, completion, drop-off and survey results. Groups under 5 players are hidden.",

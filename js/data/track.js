@@ -13,7 +13,7 @@
    notice content from research/v2/05_legal_ethics.md section 6; transport design from research/v2/06_data_tech.md sections 2-4. */
 (() => {
   if (typeof WQ === "undefined") return;
-  const ENDPOINT = "";            // Apps Script ingest URL (".../exec"). Empty = keep queueing, send nothing.
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbxgVar7Topthgj1WRVLbNxczOqMuSw-FuKVxCJiKBT9M9it0LJC18yUjUPOq1QBN-Cu/exec";            // Apps Script ingest URL (".../exec"). Empty = keep queueing, send nothing.
   const SCHEMA = 1, BATCH = 20, CAP = 2000, KEEP = /^(pre|post|survey|profile|consent)/;
   const S = WQ.store, t = o => WQ.t(o), e = s => WQ.esc(s);
   const qs = (k) => { try { return new URLSearchParams(location.search).get(k); } catch (er) { return null; } };

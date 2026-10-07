@@ -516,6 +516,66 @@
     lamp(...G(51, 51), avg >= 2); lamp(...G(79, 51), avg >= 2); lamp(...G(51, 79), avg >= 2);
   }
 
+  /* ---------- placeable decorations (shop items; fixed free spots, drawn over the island) ---------- */
+  function fountain(u, v) {
+    const [x, y] = G(u, v);
+    ell(x, y, 12, 6, O); ell(x, y - 1, 11, 5, "#92a1b9"); ell(x, y - 3, 11, 5, O); ell(x, y - 3, 10, 4, "#c7cfdd");
+    ell(x, y - 3, 8, 3, "#0098dc"); ell(x - 2, y - 4, 4, 1, "#00cdf9");
+    R(x - 2, y - 13, 5, 11, O); R(x - 1, y - 12, 3, 10, "#c7cfdd"); R(x - 1, y - 12, 1, 10, "#ffffff");
+    ell(x, y - 14, 5, 2, O); ell(x, y - 14, 4, 1, "#92a1b9");
+    for (const s of [-1, 1]) for (let i = 0; i < 6; i++) P(x + s * (i + 1), y - 17 + Math.round(i * i / 4), i < 4 ? "#94fdff" : "#00cdf9");
+    R(x, y - 20, 1, 4, "#94fdff"); P(x, y - 21, "#ffffff"); P(x - 6, y - 4, "#ffffff"); P(x + 5, y - 2, "#ffffff");
+  }
+  function mural(u, v) {
+    const f = box(u, v, 2, 14, 16, { left: "#c7cfdd", right: "#f9e6cf", top: "#92a1b9" });
+    ["#0098dc", "#5ac54f", "#ffeb57", "#f68187"].forEach((col, i) => fr(f.R, 2 + i * 6, 2, 6, 12, col));
+    // painted recycling loop + leaf (no words)
+    fr(f.R, 6, 6, 16, 2, "#ffffff"); fr(f.R, 6, 10, 16, 2, "#ffffff"); fr(f.R, 5, 7, 2, 4, "#ffffff"); fr(f.R, 21, 7, 2, 4, "#ffffff");
+    fr(f.R, 12, 8, 4, 2, "#1e6f50"); fr(f.R, 2, 14, 24, 1, "#1e6f50");
+  }
+  function bike(x, y, col) {
+    for (const wx of [-4, 4]) { ell(x + wx, y - 3, 3, 3, O); ell(x + wx, y - 3, 2, 2, "#c7cfdd"); P(x + wx, y - 3, O); }
+    line(x - 4, y - 3, x, y - 7, col); line(x, y - 7, x + 4, y - 3, col); line(x - 4, y - 3, x + 1, y - 3, col); line(x - 1, y - 7, x + 3, y - 7, col);
+    R(x - 2, y - 9, 3, 1, O); R(x + 3, y - 9, 1, 2, O); R(x + 2, y - 10, 3, 1, O);
+  }
+  function bikerack(u, v) {
+    const [x, y] = G(u, v);
+    R(x - 13, y - 1, 27, 2, "#657392");
+    for (let i = -10; i <= 10; i += 5) { R(x + i - 1, y - 7, 4, 7, O); R(x + i, y - 6, 2, 6, "#92a1b9"); R(x + i, y - 6, 2, 1, "#c7cfdd"); }
+    bike(x - 6, y + 1, "#ea323c"); bike(x + 7, y + 2, "#0098dc");
+  }
+  function raingarden(u, v) {
+    ground(u - 1, v - 1, 10, 9, O); ground(u, v, 8, 7, "#5d2c28");
+    ground(u + 2, v + 2, 4, 3, "#0069aa"); ground(u + 3, v + 2, 2, 2, "#00cdf9");
+    [[u + 5, v + 1], [u + 1, v + 4]].forEach(([a, b]) => { const [x, y] = G(a, b); R(x - 2, y - 2, 4, 3, O); R(x - 1, y - 2, 2, 2, "#b4b4b4"); });
+    [[u + 1, v + 1], [u + 7, v + 2], [u + 2, v + 6], [u + 6, v + 6]].forEach(([a, b], i) => { const [x, y] = G(a, b); i % 2 ? flowers(x, y) : shrub(x, y, 3); });
+    const [rx, ry] = G(u + 7, v + 6); for (let i = 0; i < 3; i++) { R(rx - 2 + i * 2, ry - 9 + i, 1, 9 - i, "#1e6f50"); P(rx - 2 + i * 2, ry - 10 + i, "#8a4836"); }
+  }
+  function solarLamp(x, y) {
+    R(x - 1, y - 16, 3, 17, O); R(x, y - 15, 1, 15, "#657392");
+    R(x - 4, y - 21, 9, 4, O); R(x - 3, y - 20, 7, 2, "#00396d"); P(x - 1, y - 20, "#0098dc"); P(x + 2, y - 20, "#0098dc");
+    R(x - 2, y - 17, 5, 3, O); R(x - 1, y - 16, 3, 1, "#ffeb57"); P(x - 2, y - 13, "#fffbd0"); P(x + 2, y - 13, "#fffbd0");
+  }
+  function gazebo(u, v) {
+    // wakaf: timber platform on short stilts, open sides, steep gable roof
+    const C = [[0, 0], [8, 0], [0, 8], [8, 8]];
+    for (const [a, b] of C) { const [x, y] = G(u + a, v + b); R(x - 1, y - 5, 3, 5, O); P(x, y - 4, "#5d2c28"); }
+    box(u, v, 8, 8, 2, { left: "#8a4836", right: "#5d2c28", top: "#bf6f4a", rim: "#e69c69" }, 4);
+    for (let i = 2; i < 8; i += 2) line(...G(u + i, v, 6), ...G(u + i, v + 8, 6), "#8a4836");
+    for (const [a, b] of C) { const [x, y] = G(u + a, v + b, 6); R(x - 1, y - 12, 3, 12, O); R(x, y - 11, 1, 10, "#bf6f4a"); }
+    roof(u, v, 8, 8, 18, 9, "v", { light: "#e07438", mid: "#c64524", dark: "#8e251d", wall: "#bf6f4a" }, 2);
+  }
+  const DECO = {
+    fountain: () => fountain(68, 56),
+    mural: () => mural(121, 54),
+    bikerack: () => bikerack(124, 100),
+    raingarden: () => raingarden(62, 6),
+    solarlamps: () => [[96, 124], [102, 124], [108, 124]].forEach(([u, v]) => solarLamp(...G(u, v))),
+    gazebo: () => gazebo(64, 116),
+  };
+  const DECO_IDS = Object.keys(DECO);
+  const decoList = d => (Array.isArray(d) ? d : []).filter(id => DECO[id]).sort();
+
   /* ---------- whole island ---------- */
   function island(states, avg) {
     const good = avg >= 2, mid = avg >= 1;
@@ -578,8 +638,8 @@
     const st = norm(opts.states), avg = avgOf(st), t = opts.t || 0, hazy = avg < 1;
     const bk = hazy ? "h" : "c";
     if (bk !== bgKey) { const [cv, x] = off(); c = x; background(avg); bg = cv; bgKey = bk; }
-    const fk = JSON.stringify(st);
-    if (fk !== fgKey) { const [cv, x] = off(); c = x; island(st, avg); fg = cv; fgKey = fk; }
+    const dl = decoList(opts.deco), fk = JSON.stringify(st) + dl.join();
+    if (fk !== fgKey) { const [cv, x] = off(); c = x; island(st, avg); dl.forEach(id => DECO[id]()); fg = cv; fgKey = fk; }
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(bg, 0, 0);
     c = ctx;
@@ -670,8 +730,14 @@
     const x0 = Math.round(x) - 7, y0 = Math.round(y) - 21, bob = frame ? 1 : 0;
     // soft shadow
     R(x0 + 2, y0 + 21, 10, 1, "rgba(26,25,50,0.35)");
+    const acc = opts.acc || {}, yb = y0 + bob;
+    if (acc.back === "backpack") { R(x0 - 1, yb + 10, 16, 7, O); R(x0, yb + 11, 14, 5, "#bf6f4a"); R(x0, yb + 11, 14, 1, "#e69c69"); }
     sprite(x0, y0 + 16, body.slice(6), pal);
-    sprite(x0, y0 + bob, HEADS[head].concat(body.slice(0, 6)), pal);
+    sprite(x0, yb, HEADS[head].concat(body.slice(0, 6)), pal);
+    if (acc.back === "backpack") { R(x0 + 3, yb + 10, 1, 4, "#8a4836"); R(x0 + 10, yb + 10, 1, 4, "#8a4836"); }
+    const SC = { "scarf-red": ["#ea323c", "#c42430"], "scarf-blue": ["#0098dc", "#0069aa"], "scarf-green": ["#5ac54f", "#1e6f50"], "scarf-yellow": ["#ffeb57", "#ffc825"] }[acc.scarf];
+    if (SC && head !== "hijab") { R(x0 + 2, yb + 9, 10, 3, O); R(x0 + 3, yb + 10, 8, 1, SC[0]); P(x0 + 5, yb + 10, SC[1]); P(x0 + 8, yb + 10, SC[1]); R(x0 + 8, yb + 11, 3, 4, O); R(x0 + 9, yb + 11, 1, 3, SC[0]); }
+    if (acc.face === "glasses") for (const ex of [4, 7]) { R(x0 + ex, yb + 4, 3, 3, "#424c6e"); P(x0 + ex + 1, yb + 5, O); P(x0 + ex, yb + 4, "#94fdff"); }
     c = prev; trk = tk;
   }
   const ROBOT = [
@@ -709,5 +775,83 @@
     DISTRICTS.forEach(d => { const b = hot[d]; if (b) hotspots[d] = { x: b.x0, y: b.y0, w: b.x1 - b.x0, h: b.y1 - b.y0 }; });
   } catch (e) { c = null; }
 
-  WQ.townArt = { W, H, DISTRICTS, draw, hotspots, spawn: { x: 194, y: 204 }, avatar, SKINS, OUTFITS, HAIRS, robot };
+  /* ---------- single building + section banner (stage 2) ---------- */
+  const FN = { academy, recycle, compost, maker, market, arena };
+  const bCache = {};
+  // render one district lot off-screen once, crop to its pixels; origin later = bottom-centre
+  function bSprite(id, st) {
+    const k = id + st;
+    if (bCache[k]) return bCache[k];
+    const [cv, x] = off(); c = x; const keep = Object.assign({}, hot);
+    try { FN[id](st); } finally { c = null; Object.assign(hot, keep); }
+    const d = x.getImageData(0, 0, W, H).data;
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (let y = 0; y < H; y++) for (let i = 0; i < W; i++) if (d[(y * W + i) * 4 + 3]) { if (i < x0) x0 = i; if (i > x1) x1 = i; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    return (bCache[k] = { cv, x0, y0, w: x1 - x0 + 1, h: y1 - y0 + 1 });
+  }
+  function building(ctx, id, state, x, y) {
+    if (!FN[id]) return;
+    const s = bSprite(id, Math.max(0, Math.min(3, state | 0)));
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(s.cv, s.x0, s.y0, s.w, s.h, Math.round(x - s.w / 2), Math.round(y - s.h), s.w, s.h);
+  }
+  const BW = 400, BH = 120;
+  function banner(canvas, id, state) {
+    if (!canvas || !FN[id]) return;
+    const st = Math.max(0, Math.min(3, state | 0)), hazy = st === 0;
+    canvas.width = BW; canvas.height = BH;
+    if (!canvas.style.imageRendering) canvas.style.imageRendering = "pixelated";
+    const ctx = canvas.getContext("2d"); ctx.imageSmoothingEnabled = false;
+    c = ctx;
+    try {
+      // sky bands with dithered steps
+      const bands = hazy ? ["#657392", "#92a1b9", "#b4b4b4", "#c7cfdd"] : ["#0069aa", "#0098dc", "#00cdf9", "#94fdff"];
+      const ys = [0, 16, 52, 78, BH];
+      for (let i = 0; i < 4; i++) R(0, ys[i], BW, ys[i + 1] - ys[i], bands[i]);
+      for (let i = 1; i < 4; i++) for (let x = i % 2; x < BW; x += 2) P(x, ys[i], bands[i - 1]);
+      if (!hazy) { R(352, 10, 14, 14, "#ffeb57"); R(354, 8, 10, 18, "#ffeb57"); R(350, 12, 18, 10, "#ffeb57"); R(355, 11, 5, 3, "#fffbd0"); }
+      else { R(0, 60, BW, 8, "#858585"); for (let x = 0; x < BW; x += 2) P(x, 59, "#858585"); }
+      cloud(24, 20, 50, hazy); cloud(150, 10, 36, hazy); cloud(300, 30, 56, hazy);
+      // distant hills
+      for (let x = 0; x < BW; x++) { const h = Math.round(10 + 5 * Math.sin(x / 31) + 3 * Math.sin(x / 9)); R(x, 96 - h, 1, h, hazy ? "#657392" : "#1e6f50"); }
+      for (let x = 0; x < BW; x++) { const h = Math.round(5 + 3 * Math.sin(x / 17 + 2)); R(x, 96 - h, 1, h, hazy ? "#424c6e" : "#134c4c"); }
+      // grass strip + edge
+      const gr = st >= 2 ? ["#5ac54f", "#99e65f"] : st === 1 ? ["#33984b", "#5ac54f"] : ["#5d6b3a", "#8a7a4a"];
+      R(0, 92, BW, BH - 92, gr[0]); R(0, 92, BW, 1, O);
+      for (let y = 96; y < BH; y += 4) for (let x = (y * 5) % 11; x < BW; x += 11) { P(x, y, gr[1]); P(x + 1, y - 1, gr[1]); }
+      if (hazy) for (let x = 7; x < BW; x += 23) R(x, 100 + (x % 13), 4, 1, "#8a4836");
+      // building, scaled down by whole pixels only if it would not fit
+      const s = bSprite(id, st), cx = 200, by = 114;
+      const sc = s.h > 108 || s.w > 230 ? 0.5 : 1;   // ponytail: only 1x or 0.5x; all lots fit at 1x today
+      c = ctx;
+      ctx.drawImage(s.cv, s.x0, s.y0, s.w, s.h, Math.round(cx - s.w * sc / 2), Math.round(by - s.h * sc), Math.round(s.w * sc), Math.round(s.h * sc));
+      // side props, mirrored-ish so the plot looks framed
+      const L = cx - (s.w >> 1) - 18, Rr = cx + (s.w >> 1) + 18;
+      if (st === 0) { litter(L + 6, 112, 0); litter(Rr - 4, 110, 1); wilted(L - 26, 108); smog(Rr + 40, 70); lamp(Rr + 14, 110, false); palm(L - 60, 112, 24, true); }
+      else if (st === 1) { potShrub(L, 110); potShrub(Rr, 110); lamp(L - 18, 110, false); lamp(Rr + 18, 110, false); rainTree(L - 56, 112, true); palm(Rr + 60, 112, 24, true); }
+      else {
+        shrub(L, 112); shrub(Rr, 112); lamp(L - 18, 110, st === 3); lamp(Rr + 18, 110, st === 3);
+        rainTree(L - 56, 112); palm(Rr + 60, 112, 26); banana(L - 96, 114); palm(Rr + 108, 114, 20);
+        if (st === 3) { bougain(L - 30, 114); flowers(Rr + 34, 114); flowers(L + 4, 116); butterfly(L - 10, 74); butterfly(Rr + 24, 66, "#ffeb57"); sparkle(cx - 40, 30); sparkle(cx + 52, 22); }
+      }
+    } finally { c = null; }
+  }
+
+  // 32x32 shop icon of one decoration: render alone, crop, bottom-centre it
+  function decoIcon(canvas, id) {
+    if (!canvas || !DECO[id]) return false;
+    const [cv, x] = off(); c = x;
+    try { DECO[id](); } finally { c = null; }
+    const d = x.getImageData(0, 0, W, H).data;
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (let y = 0; y < H; y++) for (let i = 0; i < W; i++) if (d[(y * W + i) * 4 + 3]) { if (i < x0) x0 = i; if (i > x1) x1 = i; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    const w = x1 - x0 + 1, h = y1 - y0 + 1, sc = Math.min(1, 31 / Math.max(w, h));   // ponytail: shrinks (nearest) only if a sprite outgrows 31px
+    canvas.width = 32; canvas.height = 32;
+    if (!canvas.style.imageRendering) canvas.style.imageRendering = "pixelated";
+    const g = canvas.getContext("2d"); g.imageSmoothingEnabled = false;
+    g.drawImage(cv, x0, y0, w, h, Math.round(16 - w * sc / 2), Math.round(31.5 - h * sc), Math.round(w * sc), Math.round(h * sc));
+    return true;
+  }
+
+  WQ.townArt = { W, H, DISTRICTS, draw, hotspots, spawn: { x: 194, y: 204 }, avatar, SKINS, OUTFITS, HAIRS, robot, building, banner, decoIcon, DECO: DECO_IDS };
 })();

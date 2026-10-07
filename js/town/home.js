@@ -1,5 +1,6 @@
 /* WasteQuest v2 home: pixel eco-city town (art from js/town/art.js = WQ.townArt), HUD, guide robot tips,
-   building list, audience chip and first-visit avatar dialog.
+   building list, audience chip and first-visit dialog (start profile + privacy notice from WQ.data in js/data/track.js,
+   avatar, pre-check offer; falls back to the audience pick when WQ.data is missing).
    SOURCES: all facts from SPEC.md (SWCorp via The Star, 2 Jan 2024; SWCorp bin colours). */
 (() => {
   if (typeof WQ === "undefined") return;
@@ -34,6 +35,7 @@
     next: { en: "Next tip ▶", bm: "Tip seterusnya ▶" }, robotBtn: { en: "Kitar the robot: next tip", bm: "Robot Kitar: tip seterusnya" },
     places: { en: "Buildings", bm: "Bangunan" }, go: { en: "Go ▶", bm: "Pergi ▶" },
     cert: { en: "Certificate", bm: "Sijil" }, teacher: { en: "Teachers", bm: "Guru" }, live: { en: "Live class", bm: "Kelas langsung" },
+    scan: { en: "Scan & sort", bm: "Imbas & asing" }, missions: { en: "Home missions", bm: "Misi di rumah" }, shop: { en: "Town shop", bm: "Kedai bandar" }, event: { en: "Event Town", bm: "Bandar Acara" },
     playing: { en: "Playing as:", bm: "Pemain:" },
     skip: { en: "Skip", bm: "Langkau" }, nextStep: { en: "Next ▶", bm: "Seterusnya ▶" }, save: { en: "Save", bm: "Simpan" },
     hi: { en: "Hi! I'm Kitar, your guide robot.", bm: "Hai! Saya Kitar, robot pemandu anda." },
@@ -42,6 +44,10 @@
     heads: { none: { en: "None", bm: "Tiada" }, hijab: { en: "Hijab", bm: "Tudung" }, cap: { en: "Cap", bm: "Topi" } },
     ready: { en: "Let's clean up the town!", bm: "Jom bersihkan bandar!" },
     readyS: { en: "Every badge you earn cleans part of the town. Tap a building to start.", bm: "Setiap lencana yang anda peroleh membersihkan sebahagian bandar. Ketik bangunan untuk bermula." },
+    skipAll: { en: "Skip all", bm: "Langkau semua" },
+    preT: { en: "5 quick questions before you play?", bm: "5 soalan ringkas sebelum bermain?" },
+    preS: { en: "It helps us see what you learn. No marks, and you can skip any question.", bm: "Ia membantu kami melihat apa yang anda pelajari. Tiada markah, dan anda boleh melangkau mana-mana soalan." },
+    start: { en: "Start ▶", bm: "Mula ▶" }, later: { en: "Later", bm: "Nanti" },
     tone: { en: "tone", bm: "ton" }, colour: { en: "colour", bm: "warna" },
   };
   const TIPS = [
@@ -69,6 +75,7 @@
   const rnd = n => Math.floor(Math.random() * n);
   const randAv = () => ({ skin: rnd(6), head: HEADS[rnd(3)], hair: rnd(4), outfit: rnd(6) });
 
+  WQ.townStates = () => states();
   function states() {
     const m = /[?&]town=(0|1|2|3|mix)\b/.exec(location.search), s = {};
     if (m) { const mix = [0, 1, 2, 3, 1, 2]; D.forEach((d, i) => s[d.id] = m[1] === "mix" ? mix[i] : +m[1]); return s; }
@@ -84,7 +91,7 @@
   /* ---------- drawing (falls back to placeholders while art.js is missing) ---------- */
   function drawAvatar(ctx, x, y, av, f) {
     const A = art();
-    if (A && typeof A.avatar === "function") { try { A.avatar(ctx, x, y, av, f); return; } catch (e) {} }
+    if (A && typeof A.avatar === "function") { try { A.avatar(ctx, x, y, { ...av, acc: WQ.rw && WQ.rw.acc ? WQ.rw.acc().on : {} }, f); return; } catch (e) {} }
     const b = f ? 1 : 0; ctx.fillStyle = "#1a1932"; ctx.fillRect(x - 7, y - 22 - b, 14, 22);
     ctx.fillStyle = pal("OUTFITS")[av.outfit] || "#0098dc"; ctx.fillRect(x - 6, y - 12 - b, 12, 10);
     ctx.fillStyle = pal("SKINS")[av.skin] || "#e8b48f"; ctx.fillRect(x - 5, y - 20 - b, 10, 8);
@@ -97,7 +104,7 @@
   }
   function drawScene(ctx, st, t) {
     const A = art();
-    if (A && typeof A.draw === "function") { try { A.draw(ctx, { states: st, t }); return; } catch (e) { console.warn("townArt.draw", e); } }
+    if (A && typeof A.draw === "function") { try { A.draw(ctx, { states: st, t, deco: WQ.rw && WQ.rw.deco ? WQ.rw.deco().placed : [] }); return; } catch (e) { console.warn("townArt.draw", e); } }
     ctx.fillStyle = "#0098dc"; ctx.fillRect(0, 0, 400, 300); ctx.fillStyle = "#5ac54f"; ctx.fillRect(0, 140, 400, 160);
     D.forEach(d => { const h = hot(d.id); ctx.fillStyle = "#1a1932"; ctx.fillRect(h.x, h.y, h.w, h.h);
       ctx.fillStyle = ["#8b93af", "#c7cfdd", "#f9e6cf", "#99e65f"][st[d.id]]; ctx.fillRect(h.x + 2, h.y + 2, h.w - 4, h.h - 4); });
@@ -192,7 +199,7 @@
   WQ.registerPage("home", {
     mount(el, { relang } = {}) {
       const savedAv = WQ.store.getJSON("avatar", null);
-      if (!firstDone) { firstDone = true; if (!savedAv && dlgStep == null) { dlgStep = 1; editOnly = false; } }
+      if (!firstDone) { firstDone = true; if (!savedAv && dlgStep == null) { dlgStep = WQ.data ? "p0" : 1; editOnly = false; } }
       const st = states(), avg = D.reduce((s, d) => s + st[d.id], 0) / D.length, pct = Math.round(avg / 3 * 100);
       const total = Object.keys(WQ.badges).length, got = Object.keys(WQ.earned()).filter(k => WQ.badges[k]).length;
       const av = savedAv || draft || { skin: 2, head: "none", hair: 0, outfit: 0 };
@@ -223,6 +230,7 @@
 <ul class="tw-list">${D.map(d => `<li><a class="tw-card tw-px" href="${d.href}"><span class="ic" aria-hidden="true">${d.icon}</span>
   <span class="tx"><h3>${e(t(d.name))}</h3><p>${e(t(d.desc))}</p><span class="mk">${e(marker(st[d.id]))}</span></span><span class="go">${e(t(T.go))}</span></a></li>`).join("")}</ul>
 <p class="tw-links"><a href="#/cert">🎓 ${e(t(T.cert))}</a><a href="#/badges">🏅 ${e(t(T.badges))}</a><a href="#/teacher">${e(t(T.teacher))}</a><a href="#/class">📱 ${e(t(T.live))}</a></p>
+<p class="tw-links"><a href="#/scan">📷 ${e(t(T.scan))}</a><a href="#/missions">🏠 ${e(t(T.missions))}</a><a href="#/shop">🛍️ ${e(t(T.shop))}</a><a href="#/event">🎪 ${e(t(T.event))}</a></p>
 <details class="tw-who"><summary class="tw-px">${e(t(T.playing))} <b>${e(t(WQ.S.aud[WQ.aud] || WQ.S.aud.kids))}</b> ▾</summary>
   <div class="opts" role="group" aria-label="${e(t(WQ.S.who))}">${AUDS.map(a => `<button type="button" class="tw-btn alt" data-aud="${a}" aria-pressed="${WQ.aud === a}">${e(t(WQ.S.aud[a]))}</button>`).join("")}</div></details>`;
 
@@ -261,8 +269,14 @@
       let dlg = null;
       function closeDlg() { dlgStep = null; editOnly = false; draft = null; if (dlg) { const d = dlg; dlg = null; d.close(); d.remove(); } }
       function saveAv(a) { WQ.store.setJSON("avatar", a); const b = $("#twAv"); b.innerHTML = ""; b.appendChild(avCanvas(a, 2)); Object.assign(av, a); }
+      const D2 = WQ.data;
+      // re-route once so the page picks up the audience set by the profile; the dialog reopens at the new step
+      const afterProfile = () => { dlgStep = D2 && !D2.consentState() ? "priv" : 2; WQ.setAud(WQ.aud); };
       function skip() {
         if (editOnly) return closeDlg();
+        if (/^p\d$/.test(dlgStep)) return afterProfile();
+        if (dlgStep === "priv") { dlgStep = 2; return renderDlg(); }
+        if (dlgStep === "pre") { dlgStep = 3; return renderDlg(); }
         if (!WQ.store.getJSON("avatar", null)) saveAv(draft || randAv());
         closeDlg(); if (WQ.aud !== "kids" && !WQ.store.get("aud")) WQ.setAud("kids");
       }
@@ -277,6 +291,15 @@
         let body = "";
         if (dlgStep === 1) body = `<h2 id="twDlgH">${e(t(WQ.S.who))}</h2><div class="grid4">${AUDS.map(a =>
           `<button type="button" class="tw-btn alt" data-a="${a}" aria-pressed="${WQ.aud === a && !!WQ.store.get("aud")}">${e(t(WQ.S.aud[a]))}</button>`).join("")}</div><div class="tw-row">${skipB}</div>`;
+        else if (/^p\d$/.test(dlgStep)) {
+          const n = +dlgStep[1], P = D2.PROFILE[n], cur = D2.profile()[P.k];
+          body = `<p class="small" style="margin:0">${n + 1} / ${D2.PROFILE.length}</p><h2 id="twDlgH">${e(t(P.q))}</h2><div class="grid4">${P.opts.map(([v, l]) =>
+            `<button type="button" class="tw-btn alt" data-p="${v}" aria-pressed="${cur === v}">${e(t(l))}</button>`).join("")}</div>
+            <div class="tw-row"><button type="button" class="tw-btn alt" data-k="skipall">${e(t(T.skipAll))}</button>${skipB}</div>`;
+        } else if (dlgStep === "priv") body = `<h2 id="twDlgH">${e(t(D2.T.nT))}</h2>${D2.noticeHTML()}
+            <div class="tw-row"><button type="button" class="tw-btn alt" data-c="no">${e(t(D2.T.no))}</button><button type="button" class="tw-btn" data-c="yes">${e(t(D2.T.ok))}</button></div>`;
+        else if (dlgStep === "pre") body = `<h2 id="twDlgH">${e(t(T.preT))}</h2><p>${e(t(T.preS))}</p>
+            <div class="tw-row"><button type="button" class="tw-btn alt" data-k="later">${e(t(T.later))}</button><button type="button" class="tw-btn" data-k="pre">${e(t(T.start))}</button></div>`;
         else if (dlgStep === 2) {
           draft = draft || randAv();
           const sw = (k, arr, lbl) => `<fieldset><legend>${e(t(lbl))}</legend><div class="tw-sw">${arr.map((c, i) =>
@@ -292,12 +315,18 @@
         dlg.innerHTML = head + body;
         const r = dlg.querySelector("#twDR").getContext("2d"); r.imageSmoothingEnabled = false; drawRobot(r, 10, 21, 0);
         const pv = dlg.querySelector("#twPv"); if (pv) pv.appendChild(avCanvas(draft, 4));
+        dlg.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { const n = +dlgStep[1]; D2.setProfile(D2.PROFILE[n].k, b.dataset.p);
+          if (n + 1 < D2.PROFILE.length) { dlgStep = "p" + (n + 1); renderDlg(); } else afterProfile(); });
+        dlg.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { D2.consent(b.dataset.c); dlgStep = 2; renderDlg(); });
         dlg.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { dlgStep = 2; WQ.setAud(b.dataset.a); });
         ["skin", "hair", "outfit"].forEach(k => dlg.querySelectorAll(`[data-${k}]`).forEach(b => b.onclick = () => { draft[k] = +b.dataset[k]; rerender(`[data-${k}="${b.dataset[k]}"]`); }));
         dlg.querySelectorAll("[data-head]").forEach(b => b.onclick = () => { draft.head = b.dataset.head; rerender(`[data-head="${draft.head}"]`); });
         const k = s => dlg.querySelector(`[data-k=${s}]`);
-        if (k("skip")) k("skip").onclick = skip;
-        if (k("next")) k("next").onclick = () => { saveAv({ ...draft }); if (editOnly) closeDlg(); else { dlgStep = 3; renderDlg(); dlg.querySelector("button").focus(); } };
+        if (k("skip")) k("skip").onclick = /^p\d$/.test(dlgStep) && +dlgStep[1] + 1 < D2.PROFILE.length ? () => { dlgStep = "p" + (+dlgStep[1] + 1); renderDlg(); } : skip;
+        if (k("skipall")) k("skipall").onclick = afterProfile;
+        if (k("later")) k("later").onclick = () => { dlgStep = 3; renderDlg(); };
+        if (k("pre")) k("pre").onclick = () => { closeDlg(); WQ.go("check/pre"); };
+        if (k("next")) k("next").onclick = () => { saveAv({ ...draft }); if (editOnly) closeDlg(); else { dlgStep = D2 && !D2.preDone() ? "pre" : 3; renderDlg(); dlg.querySelector("button").focus(); } };
         if (k("close")) k("close").onclick = closeDlg;
         const f = dlg.querySelector("button"); if (f) f.focus();
       }

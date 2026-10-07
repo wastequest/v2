@@ -165,7 +165,7 @@
 .ms-print{display:none}
 @media (prefers-reduced-motion:reduce){.ms-tile:hover{transform:none}}
 @media print{
- body *{visibility:hidden!important}
+ body:has(.ms-print) *{visibility:hidden!important}
  .ms-print,.ms-print *{visibility:visible!important}
  .ms-print{display:block!important;position:fixed;left:0;top:0;width:100%;color:#000;font:12pt/1.4 Nunito,Arial,sans-serif}
  .ms-print h1{font:700 20pt "Pixelify Sans",Arial,sans-serif;margin:0 0 6pt}

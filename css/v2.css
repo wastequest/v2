@@ -106,7 +106,7 @@ footer.v2foot .flinks{display:flex;justify-content:center;flex-wrap:wrap;gap:6px
   .bld-hint{display:none}
 }
 @media print{
-  .bld-banner{display:none}
+  .bld-banner,.dt-bar,.rw-hud{display:none!important}
   .card,.pagehead{box-shadow:none;border:2px solid #1a1932}
   .btn{box-shadow:none}
 }

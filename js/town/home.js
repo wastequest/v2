@@ -165,6 +165,11 @@
 .tw-card p{margin:0;font-size:.95rem}
 .tw-card .mk{font-family:"Pixelify Sans",monospace;font-size:.9rem;font-weight:600}
 .tw-card .go{font:700 1rem "Pixelify Sans",monospace;white-space:nowrap}
+.tw-quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:800px;margin:0 auto 12px}
+.tw-quick a{display:flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:6px 8px;color:#1a1932;text-decoration:none;font:700 1.1rem "Pixelify Sans",monospace;text-align:center}
+.tw-quick a span{font-size:1.6rem;line-height:1}
+.tw-quick a:hover{background:#fff3e3;outline:2px solid #1a1932}
+@media (max-width:699px){.tw-quick{grid-template-columns:1fr 1fr;gap:8px}.tw-quick a{font-size:1rem;min-height:52px}}
 .tw-links{display:flex;flex-wrap:wrap;gap:4px 18px;margin:16px 0 0}
 .tw-links a{display:inline-flex;align-items:center;min-height:44px;font-weight:700}
 .tw-who{margin-top:14px}
@@ -216,6 +221,8 @@
     <a href="#/badges" aria-label="${e(t(T.badges))}: ${got} / ${total}">🏅 ${got}/${total}</a>
     <button type="button" id="twAv" aria-label="${e(t(T.myAv))}"></button>
   </div>
+  <nav class="tw-quick" aria-label="${e(t({ en: "Quick play", bm: "Main pantas" }))}">${[["#/scan", "📷", T.scan], ["#/missions", "🏠", T.missions], ["#/shop", "🛍️", T.shop], ["#/event", "🎪", T.event]]
+    .map(([h, i, l]) => `<a class="tw-px" href="${h}"><span aria-hidden="true">${i}</span>${e(t(l))}</a>`).join("")}</nav>
   <div class="tw-crop">
   <div class="tw-town" id="twTown" role="group" aria-label="${e(t(T.town))}">
     <canvas width="400" height="300" aria-hidden="true"></canvas>
@@ -230,7 +237,6 @@
 <ul class="tw-list">${D.map(d => `<li><a class="tw-card tw-px" href="${d.href}"><span class="ic" aria-hidden="true">${d.icon}</span>
   <span class="tx"><h3>${e(t(d.name))}</h3><p>${e(t(d.desc))}</p><span class="mk">${e(marker(st[d.id]))}</span></span><span class="go">${e(t(T.go))}</span></a></li>`).join("")}</ul>
 <p class="tw-links"><a href="#/cert">🎓 ${e(t(T.cert))}</a><a href="#/badges">🏅 ${e(t(T.badges))}</a><a href="#/teacher">${e(t(T.teacher))}</a><a href="#/class">📱 ${e(t(T.live))}</a></p>
-<p class="tw-links"><a href="#/scan">📷 ${e(t(T.scan))}</a><a href="#/missions">🏠 ${e(t(T.missions))}</a><a href="#/shop">🛍️ ${e(t(T.shop))}</a><a href="#/event">🎪 ${e(t(T.event))}</a></p>
 <details class="tw-who"><summary class="tw-px">${e(t(T.playing))} <b>${e(t(WQ.S.aud[WQ.aud] || WQ.S.aud.kids))}</b> ▾</summary>
   <div class="opts" role="group" aria-label="${e(t(WQ.S.who))}">${AUDS.map(a => `<button type="button" class="tw-btn alt" data-aud="${a}" aria-pressed="${WQ.aud === a}">${e(t(WQ.S.aud[a]))}</button>`).join("")}</div></details>`;
 

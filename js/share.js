@@ -48,7 +48,7 @@
         <h3>${X(T.games)}</h3><ul class="sh-list">${games.map(g => clsLink("#/game/" + g.id, g.title)).join("")}</ul>
         <h3>${X(T.labs)}</h3><ul class="sh-list">${labs.map(l => clsLink("#/lab/" + l.id, l.title)).join("")}</ul></section>
       <section class="card"><h2>${X(T.dl)}</h2><p class="small">${X(T.dlNote)}</p><ul class="sh-dl">
-        <li><a href="dist/WasteQuest_offline.html" download>${X(T.off)}</a></li><li><a href="https://github.com/wastequest/v2/releases/download/offline-pack/WasteQuest_offline_pack.zip">${X(T.pack)}</a></li>
+        <li><a href="dist/WasteQuest_offline.html" download>${X(T.off)}</a></li><li><a href="https://github.com/wastequest/wastequest.github.io/releases/download/v2026.1/WasteQuest_offline_pack.zip">${X(T.pack)}</a></li>
         <li><a href="dist/WasteQuest_Booklet_EN.pdf" target="_blank" rel="noopener">${X(T.bEN)}</a></li><li><a href="dist/WasteQuest_Booklet_BM.pdf" target="_blank" rel="noopener">${X(T.bBM)}</a></li></ul></section>`;
     W.$$("[data-copy]", el).forEach(b => b.onclick = async () => {
       const ta = W.$("#" + b.dataset.copy, el);

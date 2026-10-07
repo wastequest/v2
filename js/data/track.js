@@ -39,8 +39,10 @@
       ["resident", { en: "Parent / resident", bm: "Ibu bapa / penduduk" }], ["staff", { en: "Staff / ESG", bm: "Kakitangan / ESG" }],
       ["visitor", { en: "Event visitor", bm: "Pengunjung acara" }], ["other", { en: "Other", bm: "Lain-lain" }]] },
     { k: "area", q: { en: "Where do you live?", bm: "Di manakah anda tinggal?" }, opts: [
-      ["subang", { en: "Subang Jaya", bm: "Subang Jaya" }], ["selangor", { en: "Selangor (other)", bm: "Selangor (lain)" }],
-      ["klpj", { en: "KL & Putrajaya", bm: "KL & Putrajaya" }], ["other", { en: "Other state", bm: "Negeri lain" }],
+      ["selangor", { en: "Selangor", bm: "Selangor" }], ["klpj", { en: "KL & Putrajaya", bm: "KL & Putrajaya" }],
+      ["north", { en: "Perlis, Kedah, Penang, Perak", bm: "Perlis, Kedah, P. Pinang, Perak" }], ["south", { en: "N. Sembilan, Melaka, Johor", bm: "N. Sembilan, Melaka, Johor" }],
+      ["east", { en: "Pahang, Terengganu, Kelantan", bm: "Pahang, Terengganu, Kelantan" }], ["sabah", { en: "Sabah & Labuan", bm: "Sabah & Labuan" }],
+      ["sarawak", { en: "Sarawak", bm: "Sarawak" }], ["abroad", { en: "Outside Malaysia", bm: "Luar Malaysia" }],
       ["na", { en: "Prefer not to say", bm: "Tidak mahu nyatakan" }]] }];
   const profile = () => S.getJSON("trk-profile", {});
   const audFor = p => p.utype === "teacher" ? "teacher" : /^(7-9|10-12)$/.test(p.age) ? "kids" : p.age === "13-17" ? "teens" : p.age ? "adults" : null;

@@ -112,3 +112,4 @@ footer.v2foot .flinks{display:flex;justify-content:center;flex-wrap:wrap;gap:6px
 }
 
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+html[data-aud=kids] .ad-only{display:none!important}

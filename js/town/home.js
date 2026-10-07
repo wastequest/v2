@@ -236,7 +236,7 @@
 <h2 class="tw-h2">${e(t(T.places))}</h2>
 <ul class="tw-list">${D.map(d => `<li><a class="tw-card tw-px" href="${d.href}"><span class="ic" aria-hidden="true">${d.icon}</span>
   <span class="tx"><h3>${e(t(d.name))}</h3><p>${e(t(d.desc))}</p><span class="mk">${e(marker(st[d.id]))}</span></span><span class="go">${e(t(T.go))}</span></a></li>`).join("")}</ul>
-<p class="tw-links"><a href="#/cert">🎓 ${e(t(T.cert))}</a><a href="#/badges">🏅 ${e(t(T.badges))}</a><a href="#/teacher">${e(t(T.teacher))}</a><a href="#/class">📱 ${e(t(T.live))}</a></p>
+<p class="tw-links"><a href="#/cert">🎓 ${e(t(T.cert))}</a><a href="#/badges">🏅 ${e(t(T.badges))}</a><a class="ad-only" href="#/teacher">${e(t(T.teacher))}</a><a class="ad-only" href="#/class">📱 ${e(t(T.live))}</a></p>
 <details class="tw-who"><summary class="tw-px">${e(t(T.playing))} <b>${e(t(WQ.S.aud[WQ.aud] || WQ.S.aud.kids))}</b> ▾</summary>
   <div class="opts" role="group" aria-label="${e(t(WQ.S.who))}">${AUDS.map(a => `<button type="button" class="tw-btn alt" data-aud="${a}" aria-pressed="${WQ.aud === a}">${e(t(WQ.S.aud[a]))}</button>`).join("")}</div></details>`;
 

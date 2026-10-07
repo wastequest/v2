@@ -91,6 +91,7 @@ const WQ = (() => {
   let cleanup = null, lastHash = null;
   W.go = h => { location.hash = "#/" + h; };
   W.route = () => {
+    document.documentElement.dataset.aud = W.aud;   // kids mode hides .ad-only (teacher links)
     const parts = (location.hash.replace(/^#\/?/, "") || "home").split("/").map(decodeURIComponent);
     const [view, ...args] = parts, el = $("#view"), relang = lastHash === location.hash;
     lastHash = location.hash;

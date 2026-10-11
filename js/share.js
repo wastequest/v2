@@ -23,6 +23,7 @@
     dlNote: L("For places with weak internet. The offline file opens in any browser, even from a USB stick.", "Untuk tempat yang internetnya lemah. Fail luar talian dibuka dalam mana-mana pelayar, walaupun dari pemacu USB."),
     off: L("Offline file (one page)", "Fail luar talian (satu halaman)"), pack: L("Offline pack with lab videos (zip)", "Pek luar talian dengan video makmal (zip)"),
     bEN: L("Facilitator booklet (English, PDF)", "Buku panduan fasilitator (Inggeris, PDF)"), bBM: L("Facilitator booklet (Bahasa Melayu, PDF)", "Buku panduan fasilitator (Bahasa Melayu, PDF)"),
+    eEN: L("WasteQuest eBook (English, PDF)", "eBuku WasteQuest (Inggeris, PDF)"), eBM: L("WasteQuest eBook (Bahasa Melayu, PDF)", "eBuku WasteQuest (Bahasa Melayu, PDF)"), eRead: L("Read the eBook online", "Baca eBuku dalam talian"),
   };
   const base = () => location.origin + location.pathname;
   const copyBox = (id, text) => `<div class="sh-copy"><textarea id="${id}" aria-label="${X(T.copy)}: ${id === "shUrl" ? "link" : "embed code"}" readonly rows="${text.length > 90 ? 4 : 1}">${W.esc(text)}</textarea><button class="btn alt" data-copy="${id}">${X(T.copy)}</button></div>`;
@@ -49,7 +50,8 @@
         <h3>${X(T.labs)}</h3><ul class="sh-list">${labs.map(l => clsLink("#/lab/" + l.id, l.title)).join("")}</ul></section>
       <section class="card"><h2>${X(T.dl)}</h2><p class="small">${X(T.dlNote)}</p><ul class="sh-dl">
         <li><a href="dist/WasteQuest_offline.html" download>${X(T.off)}</a></li><li><a href="https://github.com/wastequest/wastequest.github.io/releases/download/v2026.1/WasteQuest_offline_pack.zip">${X(T.pack)}</a></li>
-        <li><a href="dist/WasteQuest_Booklet_EN.pdf" target="_blank" rel="noopener">${X(T.bEN)}</a></li><li><a href="dist/WasteQuest_Booklet_BM.pdf" target="_blank" rel="noopener">${X(T.bBM)}</a></li></ul></section>`;
+        <li><a href="dist/WasteQuest_Booklet_EN.pdf" target="_blank" rel="noopener">${X(T.bEN)}</a></li><li><a href="dist/WasteQuest_Booklet_BM.pdf" target="_blank" rel="noopener">${X(T.bBM)}</a></li>
+        <li><a href="dist/WasteQuest_eBook_EN.pdf" target="_blank" rel="noopener">${X(T.eEN)}</a></li><li><a href="dist/WasteQuest_eBook_BM.pdf" target="_blank" rel="noopener">${X(T.eBM)}</a></li><li><a href="#/book">📖 ${X(T.eRead)}</a></li></ul></section>`;
     W.$$("[data-copy]", el).forEach(b => b.onclick = async () => {
       const ta = W.$("#" + b.dataset.copy, el);
       try { await navigator.clipboard.writeText(ta.value); W.toast(W.t(T.copied)); } catch (er) { ta.select(); W.toast(W.t(T.copyFail)); }

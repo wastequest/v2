@@ -459,6 +459,7 @@ WQ.registerPage("learn", { mount(el, { args }) {
 }});
 
 /* ---------- print booklet: all chapters expanded, static ---------- */
+WQ.learnChapters = CH;  // read by js/book.js
 WQ.renderLearnPrint = el => {
   const L = "abcd";
   el.innerHTML = `<div class="ln-print">${CH.map((ch, n) => { const qs = WQ.pick(ch.qc);

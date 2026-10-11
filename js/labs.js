@@ -818,6 +818,7 @@ const GATE={
  lifebuoy:L("This is a model for learning how things float. It is not a safety device: never use it in water to hold up a person.","Ini model untuk belajar cara benda terapung. Ia bukan alat keselamatan: jangan sekali-kali gunakannya di dalam air untuk menampung seseorang."),
  sleepbag:L("A learning prototype only: it has not been tested for outdoor or emergency use. An adult supervises needles and any sewing machine.","Prototaip pembelajaran sahaja: ia belum diuji untuk kegunaan luar atau kecemasan. Orang dewasa mengawasi penggunaan jarum dan mesin jahit.")
 };
+WQ.labGate=GATE;WQ.labV2=V2;  // read by js/book.js
 const t=WQ.t,E=WQ.esc,X=o=>E(t(o));
 const get=id=>LABS.find(l=>l.id===id);
 const stars=n=>"★".repeat(n)+"☆".repeat(3-n);

@@ -12,7 +12,7 @@
   const T = {
     title: L("Scan & Sort", "Imbas & Asing"),
     sub: L("Show the camera a piece of rubbish. I'll guess what it's made of, you check, then we find the right bin.",
-           "Tunjukkan sampah kepada kamera. Saya teka bahan apa, anda semak, kemudian kita cari tong yang betul."),
+           "Tunjukkan sampah kepada kamera. Saya akan meneka bahannya, anda semak, kemudian kita cari tong yang betul."),
     kid: L("Ask an adult before using the camera. Only scan clean, empty things. Never touch broken glass, sharp items, batteries or chemicals.",
            "Minta izin orang dewasa sebelum guna kamera. Imbas barang yang bersih dan kosong sahaja. Jangan sentuh kaca pecah, barang tajam, bateri atau bahan kimia."),
     priv: L("Pictures stay on this device. Nothing is uploaded or saved. Only the material you pick is counted (coded, no names).",
@@ -23,10 +23,19 @@
     look: L("Looking…", "Sedang melihat…"),
     noCam: L("Camera not available or not allowed. That's fine: pick a photo or choose yourself.",
              "Kamera tiada atau tidak dibenarkan. Tidak mengapa: pilih foto atau pilih sendiri."),
-    noAI: L("The scanner could not load (maybe offline). You can still choose yourself.",
-            "Pengimbas tidak dapat dimuatkan (mungkin luar talian). Anda masih boleh pilih sendiri."),
+    camDenied: L("Camera permission was blocked. You can allow it in your browser settings, or pick a photo or choose yourself below.",
+                 "Kebenaran kamera disekat. Anda boleh membenarkannya dalam tetapan pelayar, atau pilih foto atau pilih sendiri di bawah."),
+    camNone: L("No camera was found on this device. Pick a photo or choose yourself below.",
+               "Tiada kamera ditemui pada peranti ini. Pilih foto atau pilih sendiri di bawah."),
+    camBusy: L("The camera is being used by another app. Close it and try again, or choose yourself below.",
+               "Kamera sedang digunakan oleh aplikasi lain. Tutup aplikasi itu dan cuba lagi, atau pilih sendiri di bawah."),
+    camHttps: L("The camera only works on a secure (https) page. Pick a photo or choose yourself below.",
+                "Kamera hanya berfungsi pada halaman selamat (https). Pilih foto atau pilih sendiri di bawah."),
+    badImg: L("That file could not be opened as a picture. Try another photo or choose yourself.", "Fail itu tidak dapat dibuka sebagai gambar. Cuba foto lain atau pilih sendiri."),
+    noAI: L("The scanner could not load (it needs the internet the first time). You can still choose yourself below.",
+            "Pengimbas tidak dapat dimuatkan (ia memerlukan internet pada kali pertama). Anda masih boleh pilih sendiri di bawah."),
     guess: L("I think it's", "Saya rasa ia"), maybe: L("or maybe", "atau mungkin"),
-    wrong: L("I may be wrong! Is it right? Tap the correct material.", "Saya mungkin tersilap! Betulkah? Tekan bahan yang betul."),
+    wrong: L("I may be wrong! Is it right? Tap the correct material.", "Saya mungkin tersilap! Betul atau tidak? Tekan bahan yang betul."),
     unsure: L("I'm not sure what this is. Please choose yourself.", "Saya tidak pasti apa ini. Sila pilih sendiri."),
     sure: { hi: L("fairly sure", "agak pasti"), mid: L("a little sure", "kurang pasti"), lo: L("just guessing", "hanya meneka") },
     pick: L("What is it made of?", "Diperbuat daripada apa?"),
@@ -51,7 +60,7 @@
   const BIN = {
     blue:   { c: "#0098dc", h: L("Blue recycling bin", "Tong kitar semula BIRU"), d: L("Paper, newspaper, boxes and cardboard. Flatten boxes; keep them dry.", "Kertas, surat khabar, kotak dan kadbod. Leperkan kotak; pastikan kering.") },
     orange: { c: "#f68a2b", h: L("Orange recycling bin", "Tong kitar semula OREN"), d: L("Plastic bottles and containers, aluminium and metal cans.", "Botol dan bekas plastik, tin aluminium dan logam.") },
-    brown:  { c: "#8a4836", h: L("Brown recycling bin", "Tong kitar semula PERANG"), d: L("Glass bottles and jars. Never put broken glass in by hand: ask an adult to wrap it.", "Botol dan balang kaca. Jangan masukkan kaca pecah dengan tangan: minta orang dewasa membalutnya.") },
+    brown:  { c: "#8a4836", h: L("Brown recycling bin", "Tong kitar semula COKLAT"), d: L("Glass bottles and jars. Never put broken glass in by hand: ask an adult to wrap it.", "Botol dan balang kaca. Jangan masukkan kaca pecah dengan tangan: minta orang dewasa membalutnya.") },
     food:   { c: "#5ac54f", h: L("Compost it, don't bin it", "Kompos, jangan buang"), d: L("Fruit and vegetable scraps, peels and leaves can become compost or eco-enzyme instead of rotting in a landfill.", "Sisa buah dan sayur, kulit dan daun boleh dijadikan kompos atau eko-enzim, bukan reput di tapak pelupusan."),
               links: [["lab/compost", L("🪱 Compost lab", "🪱 Makmal kompos")], ["lab/enzyme", L("🍊 Eco-enzyme lab", "🍊 Makmal eko-enzim")], ["game/compost", L("🌱 Compost Farm sim", "🌱 Simulasi Ladang Kompos")]] },
     textile:{ c: "#b55088", h: L("Reuse, repair or donate", "Guna semula, baiki atau derma"), d: L("Clothes in good condition can be donated; old fabric can be upcycled. Some areas have textile collection bins.", "Pakaian yang elok boleh didermakan; kain lama boleh dikitar naik. Sesetengah kawasan ada tong kutipan tekstil."),
@@ -92,39 +101,43 @@
 
   let tfP = null;
   const addScript = src => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-  const model = () => tfP = tfP || (async () => {
+  const within = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), ms))]);
+  const model = () => tfP = tfP || within((async () => {
+    if (navigator.onLine === false && !window.mobilenet) throw new Error("offline");
     if (!window.tf) await addScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js");
     if (!window.mobilenet) await addScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js");
     return window.mobilenet.load({ version: 2, alpha: 1.0 });
-  })().catch(e => { tfP = null; throw e; });
+  })(), 45000).catch(e => { tfP = null; throw e; });
 
   WQ.registerPage("scan", { mount(el) {
     WQ.css("scan", CSS);
     const t = WQ.t, e = WQ.esc;
-    let stream = null, ai = null, aiTop = null, src = "manual";
+    let stream = null, ai = null, aiTop = null, src = "manual", dead = false, camReq = 0;
     el.innerHTML = WQ.head("📷", T.title, T.sub) + `<div class="sc-wrap">
       <div class="sc-p sc-kid" role="note">🧑‍🤝‍🧑 ${e(t(T.kid))}</div>
       <div class="sc-p"><div class="sc-btns">
-        <button class="sc-b" id="scCam">${t(T.cam)}</button>
-        <label class="sc-b lt" for="scFile">${t(T.photo)}</label><input type="file" id="scFile" accept="image/*" hidden>
-        <button class="sc-b lt" id="scSelf">${t(T.self)}</button></div>
+        <button type="button" class="sc-b" id="scCam">${e(t(T.cam))}</button>
+        <button type="button" class="sc-b lt" id="scPhoto">${e(t(T.photo))}</button><input type="file" id="scFile" accept="image/*" hidden tabindex="-1" aria-hidden="true">
+        <button type="button" class="sc-b lt" id="scSelf">${e(t(T.self))}</button></div>
         <p class="sc-small">🔒 ${e(t(T.priv))}</p></div>
       <div class="sc-p" id="scCamBox" hidden><video class="sc-vid" id="scVid" playsinline muted autoplay aria-label="${e(t(T.title))}"></video>
-        <div class="sc-btns" style="margin-top:10px"><button class="sc-b" id="scSnap" disabled>${t(T.snap)}</button><button class="sc-b lt" id="scClose">${t(T.close)}</button></div></div>
+        <div class="sc-btns" style="margin-top:10px"><button type="button" class="sc-b" id="scSnap" disabled>${e(t(T.snap))}</button><button type="button" class="sc-b lt" id="scClose">${e(t(T.close))}</button></div></div>
       <div id="scMsg" class="sc-p" aria-live="polite" hidden></div>
       <div class="sc-p" id="scPick" hidden><h2>${t(T.pick)}</h2><div class="sc-mats" role="group" aria-label="${e(t(T.pick))}">${
-        Object.entries(M).map(([k, m]) => `<button class="sc-m" data-m="${k}" aria-pressed="false"><span class="i" aria-hidden="true">${m.i}</span>${e(t(m.n))}</button>`).join("")}</div></div>
+        Object.entries(M).map(([k, m]) => `<button type="button" class="sc-m" data-m="${k}" aria-pressed="false"><span class="i" aria-hidden="true">${m.i}</span>${e(t(m.n))}</button>`).join("")}</div></div>
       <div id="scRes" aria-live="polite"></div></div>`;
-    const $ = s => el.querySelector(s), msg = (h, show = true) => { $("#scMsg").hidden = !show; $("#scMsg").innerHTML = h; };
-    const stop = () => { if (stream) stream.getTracks().forEach(tr => tr.stop()); stream = null; $("#scCamBox").hidden = true; };
-    const showPick = () => { $("#scPick").hidden = false; };
-    const loadAI = async () => { if (ai) return ai; msg("⏳ " + e(t(T.load))); try { ai = await model(); msg("", false); return ai; } catch (er) { msg("⚠️ " + e(t(T.noAI))); showPick(); return null; } };
+    const $ = s => el.querySelector(s), msg = (h, show = true) => { const m = $("#scMsg"); if (dead || !m) return; m.hidden = !show; m.innerHTML = h; };
+    const stop = () => { camReq++; if (stream) stream.getTracks().forEach(tr => { try { tr.stop(); } catch (er) {} }); stream = null;
+      const v = $("#scVid"); if (v) v.srcObject = null; const b = $("#scCamBox"); if (b) b.hidden = true; };
+    const showPick = () => { const p = $("#scPick"); if (p && !dead) p.hidden = false; };
+    const loadAI = async () => { if (ai) return ai; msg("⏳ " + e(t(T.load))); try { ai = await model(); if (!dead) msg("", false); return ai; } catch (er) { if (!dead) { msg("⚠️ " + e(t(T.noAI))); showPick(); } return null; } };
 
     const classify = async img => {
-      const m = await loadAI(); if (!m) return;
+      const m = await loadAI(); if (!m || dead) return;
       msg("🔍 " + e(t(T.look)));
       let preds = [];
       try { preds = await m.classify(img, 10); } catch (er) { msg("⚠️ " + e(t(T.noAI))); showPick(); return; }
+      if (dead) return;
       const score = {};
       preds.forEach(p => { const k = toMat(p.className); if (k) score[k] = (score[k] || 0) + p.probability; });
       const top = Object.entries(score).sort((a, b) => b[1] - a[1]);
@@ -144,7 +157,7 @@
         <div class="sc-can" style="background:${b.c}" aria-hidden="true"></div><div>
         <h2>${m.i} ${e(t(m.n))} → ${e(t(b.h))}</h2><p>${e(t(b.d))}</p>${m.rec ? `<p>🚿 ${e(t(T.clean))}</p>` : ""}
         ${links ? `<div class="sc-btns">${links}</div>` : ""}<p class="sc-small">ℹ️ ${e(t(T.local))}</p>
-        <div class="sc-btns"><button class="sc-b" id="scAgain">${t(T.again)}</button></div></div></div></div>`;
+        <div class="sc-btns"><button type="button" class="sc-b" id="scAgain">${e(t(T.again))}</button></div></div></div></div>`;
       $("#scAgain").onclick = () => { $("#scRes").innerHTML = ""; msg("", false); aiTop = null; scrollTo(0, 0); };
       WQ.emit("scan", k);
       try { WQ.data && WQ.data.log && WQ.data.log("scan", { material: k, ai: aiTop, fixed: !!aiTop && aiTop !== k, src }); } catch (er) {}
@@ -153,13 +166,20 @@
     el.querySelectorAll(".sc-m").forEach(b => b.onclick = () => choose(b.dataset.m));
 
     $("#scSelf").onclick = () => { stop(); src = "manual"; aiTop = null; msg("", false); showPick(); $("#scPick button").focus(); };
+    $("#scPhoto").onclick = () => $("#scFile").click();
+    const camErr = er => { const n = er && er.name; return n === "NotAllowedError" || n === "SecurityError" ? T.camDenied : n === "NotFoundError" || n === "OverconstrainedError" ? T.camNone
+      : n === "NotReadableError" || n === "AbortError" ? T.camBusy : !window.isSecureContext ? T.camHttps : T.noCam; };
     $("#scCam").onclick = async () => {
-      src = "camera";
+      stop(); src = "camera"; const my = camReq;
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-        const v = $("#scVid"); v.srcObject = stream; $("#scCamBox").hidden = false; await v.play().catch(() => {});
-        $("#scSnap").disabled = !(await loadAI());
-      } catch (er) { stop(); msg("📵 " + e(t(T.noCam))); showPick(); }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw Object.assign(new Error("no api"), { name: window.isSecureContext ? "NotFoundError" : "SecurityError" });
+        const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+        if (dead || my !== camReq) { s.getTracks().forEach(tr => tr.stop()); return; }   // left the page or closed while the permission prompt was open
+        stream = s; const v = $("#scVid"); v.srcObject = stream; $("#scCamBox").hidden = false; await v.play().catch(() => {});
+        const okAI = await loadAI(); if (dead || my !== camReq) return;
+        if (!okAI) { stop(); return; }   // no scanner: don't leave the camera running for nothing; the manual picker is shown
+        $("#scSnap").disabled = false; $("#scSnap").focus();
+      } catch (er) { if (dead) return; stop(); msg("📵 " + e(t(camErr(er)))); showPick(); }
     };
     $("#scSnap").onclick = async () => { const s = $("#scSnap"); s.disabled = true; await classify($("#scVid")); s.disabled = false; };
     $("#scClose").onclick = stop;
@@ -167,12 +187,12 @@
       const f = ev.target.files && ev.target.files[0]; if (!f) return;
       src = "photo"; stop();
       const url = URL.createObjectURL(f), img = new Image();
-      img.onload = async () => { await classify(img); URL.revokeObjectURL(url); ev.target.value = ""; };
-      img.onerror = () => { URL.revokeObjectURL(url); msg("⚠️ " + e(t(T.noAI))); showPick(); };
+      img.onload = async () => { try { await classify(img); } finally { URL.revokeObjectURL(url); ev.target.value = ""; } };
+      img.onerror = () => { URL.revokeObjectURL(url); ev.target.value = ""; msg("⚠️ " + e(t(T.badImg))); showPick(); };
       img.src = url;
     };
     const vis = () => { if (document.hidden) stop(); };
     document.addEventListener("visibilitychange", vis);
-    return () => { stop(); document.removeEventListener("visibilitychange", vis); };
+    return () => { dead = true; stop(); document.removeEventListener("visibilitychange", vis); };
   } });
 })();

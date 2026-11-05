@@ -46,17 +46,17 @@
     { k: "ans", v: "game/quiz", n: 5, en: "Get 5 right in Eco Quiz Blast", bm: "Dapatkan 5 jawapan betul dalam Kuiz Kilat Eko" },
     { k: "ans", v: "game/myth", n: 3, en: "Spot 3 myths or facts correctly", bm: "Kenal pasti 3 mitos atau fakta dengan betul" },
     { k: "ans", v: "", n: 10, en: "Get 10 answers right anywhere", bm: "Dapatkan 10 jawapan betul di mana-mana" },
-    { k: "fin", v: "quiz", n: 1, en: "Finish one quiz", bm: "Habiskan satu kuiz" },
-    { k: "fin", v: "match", n: 1, en: "Finish a round of Eco-Match", bm: "Habiskan satu pusingan Padanan Eko" },
-    { k: "fin", v: "sort", n: 1, en: "Finish a round of Sort It Out!", bm: "Habiskan satu pusingan Asingkan Sampah!" },
-    { k: "fin", v: "myth", n: 1, en: "Finish Myth or Fact?", bm: "Habiskan Mitos atau Fakta?" },
+    { k: "fin", v: "quiz", n: 1, en: "Finish one quiz", bm: "Selesaikan satu kuiz" },
+    { k: "fin", v: "match", n: 1, en: "Finish a round of Eco-Match", bm: "Selesaikan satu pusingan Padanan Eko" },
+    { k: "fin", v: "sort", n: 1, en: "Finish a round of Sort It Out!", bm: "Selesaikan satu pusingan Asingkan Sampah!" },
+    { k: "fin", v: "myth", n: 1, en: "Finish Myth or Fact?", bm: "Selesaikan Mitos atau Fakta?" },
     { k: "newlab", n: 1, en: "Open a lab you haven't tried", bm: "Buka makmal yang belum pernah anda cuba" },
     { k: "newgame", n: 1, en: "Play a game you haven't tried", bm: "Main permainan yang belum pernah anda cuba" },
     { k: "visit", v: "learn/", n: 1, en: "Read one Academy chapter", bm: "Baca satu bab di Akademi" },
-    { k: "fin", v: "ph", n: 1, en: "Test something in the pH lab sim", bm: "Uji sesuatu dalam simulasi pH" },
+    { k: "fin", v: "ph", n: 1, en: "Test something in the pH lab sim", bm: "Uji sesuatu dalam simulasi makmal pH" },
     { k: "visit", v: "game/compost", n: 1, en: "Visit the compost simulator", bm: "Lawati simulasi kompos" },
     { k: "visit", v: "game/enzyme", n: 1, en: "Mix a batch in the Eco-Enzyme Mixer", bm: "Adun satu kelompok dalam Pengadun Eko-Enzim" },
-    { k: "fin", v: "cash", n: 1, en: "Finish a round at the recycling Market", bm: "Habiskan satu pusingan di Pasar kitar semula" },
+    { k: "fin", v: "cash", n: 1, en: "Finish a round at the recycling Market", bm: "Selesaikan satu pusingan di Pasar kitar semula" },
     { k: "visit", v: "game/footprint", n: 1, en: "Check My Waste Footprint", bm: "Semak Jejak Sisa Saya" },
     { k: "badge", n: 1, en: "Earn any new badge", bm: "Dapatkan mana-mana lencana baharu" },
     { k: "mission", n: 1, en: "Complete one home mission", bm: "Selesaikan satu misi di rumah" },
@@ -129,10 +129,10 @@
     { id: "solarlamps", icon: "💡", bg: "#ffeb57", price: 80, name: { en: "Solar lamp row", bm: "Deretan lampu solar" } },
     { id: "gazebo", icon: "🛖", bg: "#1e6f50", price: 120, name: { en: "Kampung-style gazebo", bm: "Wakaf gaya kampung" } }];
   const ACC = [
-    { id: "scarf-red", slot: "scarf", icon: "🧣", bg: "#e83b3b", price: 15, name: { en: "Red scarf", bm: "Skarf merah" } },
-    { id: "scarf-blue", slot: "scarf", icon: "🧣", bg: "#0098dc", price: 15, name: { en: "Blue scarf", bm: "Skarf biru" } },
-    { id: "scarf-green", slot: "scarf", icon: "🧣", bg: "#5ac54f", price: 15, name: { en: "Green scarf", bm: "Skarf hijau" } },
-    { id: "scarf-yellow", slot: "scarf", icon: "🧣", bg: "#ffeb57", price: 15, name: { en: "Yellow scarf", bm: "Skarf kuning" } },
+    { id: "scarf-red", slot: "scarf", icon: "🧣", bg: "#e83b3b", price: 15, name: { en: "Red scarf", bm: "Skaf merah" } },
+    { id: "scarf-blue", slot: "scarf", icon: "🧣", bg: "#0098dc", price: 15, name: { en: "Blue scarf", bm: "Skaf biru" } },
+    { id: "scarf-green", slot: "scarf", icon: "🧣", bg: "#5ac54f", price: 15, name: { en: "Green scarf", bm: "Skaf hijau" } },
+    { id: "scarf-yellow", slot: "scarf", icon: "🧣", bg: "#ffeb57", price: 15, name: { en: "Yellow scarf", bm: "Skaf kuning" } },
     { id: "backpack", slot: "back", icon: "🎒", bg: "#f68187", price: 30, name: { en: "Backpack", bm: "Beg galas" } },
     { id: "glasses", slot: "face", icon: "👓", bg: "#f9e6cf", price: 25, name: { en: "Glasses", bm: "Cermin mata" } }];
   const deco = () => ({ owned: [], placed: [], ...st.getJSON("rw-deco", {}) });
@@ -144,7 +144,7 @@
       const active = kind === "deco" ? d.placed.includes(it.id) : d.on[it.slot] === it.id;
       const btn = !own
         ? `<button class="rw-btn" data-buy="${it.id}" data-kind="${kind}" ${coins() < it.price ? "disabled" : ""}>${t({ en: "Buy", bm: "Beli" })} · 🪙 ${it.price}</button>`
-        : `<button class="rw-btn rw-light" data-use="${it.id}" data-kind="${kind}" aria-pressed="${active}">${active ? "✔ " : ""}${t(kind === "deco" ? (active ? { en: "Placed", bm: "Diletak" } : { en: "Place in town", bm: "Letak di bandar" }) : (active ? { en: "Wearing", bm: "Dipakai" } : { en: "Wear", bm: "Pakai" }))}</button>`;
+        : `<button class="rw-btn rw-light" data-use="${it.id}" data-kind="${kind}" aria-pressed="${active}">${active ? "✔ " : ""}${t(kind === "deco" ? (active ? { en: "Placed", bm: "Sudah diletakkan" } : { en: "Place in town", bm: "Letak di bandar" }) : (active ? { en: "Wearing", bm: "Dipakai" } : { en: "Wear", bm: "Pakai" }))}</button>`;
       return `<li class="rw-item"><div class="rw-prev" style="background:${it.bg}" aria-hidden="true">${kind === "deco" && W.townArt && W.townArt.decoIcon ? `<canvas data-ci="${it.id}" width="32" height="32" style="width:64px;height:64px;image-rendering:pixelated"></canvas>` : `<span>${it.icon}</span>`}</div>
         <div class="rw-iname">${esc(t(it.name))}</div><div class="rw-ist">${own ? t({ en: "Owned", bm: "Dimiliki" }) : ""}</div>${btn}</li>`;
     };
@@ -180,11 +180,14 @@
   function paintHud(gain) {
     if (!hud) return;
     const x = xp(), l = lvOf(x), lo = LV[l][0], hi = LV[l + 1] ? LV[l + 1][0] : lo, pct = hi > lo ? Math.round((x - lo) / (hi - lo) * 100) : 100;
-    const main = hud.querySelector(".rw-main");
-    main.querySelector(".rw-lv").textContent = l + 1;
-    main.querySelector(".rw-fill").style.width = pct + "%";
-    main.querySelector(".rw-c").textContent = coins();
-    main.setAttribute("aria-label", t({ en: `Level ${l + 1}, ${t(LV[l][1])}. ${x} XP${hi > lo ? `, ${hi - x} to next level` : ""}. ${coins()} coins. Open rewards`, bm: `Tahap ${l + 1}, ${t(LV[l][1])}. ${x} XP${hi > lo ? `, ${hi - x} lagi ke tahap seterusnya` : ""}. ${coins()} syiling. Buka ganjaran` }));
+    const main = hud.querySelector(".rw-main"), q = s => main.querySelector(s);
+    // accessible name = the button's own text (visible numbers + screen-reader-only words), so it always contains what is shown
+    q(".rw-s1").textContent = t({ en: "Level ", bm: "Tahap " });
+    q(".rw-lv").textContent = l + 1;
+    q(".rw-s2").textContent = `: ${t(LV[l][1])}, ${x} XP${hi > lo ? t({ en: `, ${hi - x} XP to next level`, bm: `, ${hi - x} XP lagi ke tahap seterusnya` }) : ""}. `;
+    q(".rw-fill").style.width = pct + "%";
+    q(".rw-c").textContent = coins();
+    q(".rw-s3").textContent = " " + t({ en: "coins", bm: "syiling" });
     main.title = t(LV[l][1]);
     const s = hud.querySelector(".rw-snd"), on = snd().on;
     s.textContent = on ? "🔊" : "🔇"; s.setAttribute("aria-pressed", on); s.setAttribute("aria-label", t({ en: "Sound", bm: "Bunyi" }));
@@ -200,7 +203,7 @@
       <p class="rw-dc"><span aria-hidden="true">${s.done ? "✅" : "⬜"}</span> ${esc(t(c))} <b class="rw-num">${Math.min(s.p, c.n)}/${c.n}</b>${s.done ? ` <span class="rw-sr">${t({ en: "done", bm: "selesai" })}</span>` : ""}</p>
       <p class="rw-small">${t({ en: "+40 XP. Skip any day — you never lose anything.", bm: "+40 XP. Boleh langkau mana-mana hari — anda tidak akan kehilangan apa-apa." })}</p>
       <div class="rw-ph">🔊 ${t({ en: "Sound", bm: "Bunyi" })}</div>
-      <label class="rw-tg"><input type="checkbox" data-snd="on" ${sn.on ? "checked" : ""}> ${t({ en: "Sound on", bm: "Bunyi dihidupkan" })}</label>
+      <label class="rw-tg"><input type="checkbox" data-snd="on" ${sn.on ? "checked" : ""}> ${t({ en: "Sound on", bm: "Hidupkan bunyi" })}</label>
       <label class="rw-tg"><input type="checkbox" data-snd="music" ${sn.music ? "checked" : ""} ${sn.on ? "" : "disabled"}> ${t({ en: "Music", bm: "Muzik" })}</label>
       <label class="rw-tg"><input type="checkbox" data-snd="sfx" ${sn.sfx ? "checked" : ""} ${sn.on ? "" : "disabled"}> ${t({ en: "Sound effects", bm: "Kesan bunyi" })}</label>
       ${quietRoute() ? `<p class="rw-small">${t({ en: "Sound is muted on class and event screens.", bm: "Bunyi disenyapkan pada skrin kelas dan acara." })}</p>` : ""}
@@ -213,8 +216,8 @@
   function mountHud() {
     const top = document.querySelector("header.top"); if (!top || top.querySelector(".rw-hud")) return;
     hud = document.createElement("div"); hud.className = "rw-hud";
-    hud.innerHTML = `<button class="rw-main" aria-expanded="false" aria-controls="rwPop"><span class="rw-lv"></span><span class="rw-meter" aria-hidden="true"><span class="rw-fill"></span></span><span class="rw-coin" aria-hidden="true">🪙<span class="rw-c"></span></span></button>
-      <button class="rw-snd" aria-pressed="false"></button><div class="rw-pop" id="rwPop" role="dialog" aria-label="Rewards" hidden></div>`;
+    hud.innerHTML = `<button type="button" class="rw-main" aria-expanded="false" aria-controls="rwPop"><span class="rw-sr rw-s1"></span><span class="rw-lv"></span><span class="rw-sr rw-s2"></span><span class="rw-meter" aria-hidden="true"><span class="rw-fill"></span></span><span class="rw-coin"><span aria-hidden="true">🪙</span><span class="rw-c"></span></span><span class="rw-sr rw-s3"></span></button>
+      <button type="button" class="rw-snd" aria-pressed="false"></button><div class="rw-pop" id="rwPop" role="dialog" aria-label="Rewards" hidden></div>`;
     const seg = top.querySelector(".seg"); seg ? seg.after(hud) : top.appendChild(hud);
     pop = hud.querySelector(".rw-pop");
     hud.querySelector(".rw-main").onclick = () => togglePop();
@@ -257,7 +260,7 @@
 .rw-prev span{font-size:36px;filter:drop-shadow(2px 2px 0 rgba(26,25,50,.4))}
 .rw-iname{font-family:"Pixelify Sans",monospace;font-size:17px}.rw-ist{font-size:14px;min-height:1em}
 .rw-note{font-size:15px;margin-top:14px}
-.rw-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.rw-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:-1px;padding:0}
 .rw-px{position:fixed;top:-12px;width:10px;height:10px;z-index:90;pointer-events:none;border:2px solid #1a1932;animation:rwFall linear forwards}
 @keyframes rwFall{to{transform:translateY(105vh)}}
 @media (max-width:420px){.rw-meter{width:40px}}

@@ -17,7 +17,8 @@
   const SCHEMA = 1, BATCH = 20, CAP = 2000, KEEP = /^(pre|post|survey|profile|consent)/;
   const S = WQ.store, t = o => WQ.t(o), e = s => WQ.esc(s);
   const qs = (k) => { try { return new URLSearchParams(location.search).get(k); } catch (er) { return null; } };
-  const endpoint = () => qs("wqend") || ENDPOINT;
+  // ?wqend= test override: only another Apps Script deployment or a local test server, never an arbitrary site
+  const endpoint = () => { const o = qs("wqend"); return o && /^(https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/(exec|dev)|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/)/.test(o) ? o : ENDPOINT; };
   const rid = n => { try { const a = new Uint8Array(n); crypto.getRandomValues(a); return [...a].map(b => (b % 36).toString(36)).join(""); }
     catch (er) { return Math.random().toString(36).slice(2, 2 + n).padEnd(n, "0"); } };
 
@@ -54,9 +55,11 @@
 
   /* ---------- consent / opt-out ---------- */
   const consentState = () => S.get("trk-consent") || "";          // "" undecided | yes | no
+  // GoatCounter (core WQ.track: page and event names only, no player code) respects "Don't track me" too
+  { const gc = WQ.track; if (typeof gc === "function") WQ.track = (...a) => { if (consentState() !== "no") { try { gc(...a); } catch (er) {} } }; }
   let mem = [];                                                    // events made before the notice was answered
   function consent(v) {
-    S.set("trk-consent", v); hideBar();
+    v = v === "yes" ? "yes" : "no"; S.set("trk-consent", v); hideBar();
     if (v === "no") { mem = []; S.setJSON("trk-q", []); return; }
     const q = load(); q.push(...mem); mem = []; save(q); log("consent", { answer: "yes" }); schedule(2000);
   }
@@ -115,7 +118,7 @@
   const leave = type => { if (cur) log(type, { module: cur, secs: active }); active = 0; };
   WQ.on("route", (view, args, relang) => {
     if (WQ.lang !== lang) { lang = WQ.lang; log("lang", { answer: lang }); }
-    if (relang) return;
+    if (relang) return maybeBar(view);
     leave("leave"); cur = keyOf(view, args); log("view", { module: cur });
     if (view === "game" && args[0]) log("start", { module: "game/" + args[0] });
     else if (view === "lab" && args[0]) log("start", { module: "lab/" + args[0] });
@@ -138,18 +141,23 @@
   /* ---------- UI strings ---------- */
   const T = {
     privT: { en: "Privacy", bm: "Privasi" },
-    short: { en: "We record a coded player number, no names.", bm: "Kami merekod nombor pemain berkod, tanpa nama." },
+    short: { en: "May we record how you play? We use a coded player number, never names.", bm: "Bolehkah kami merekod cara anda bermain? Kami guna nombor pemain berkod, tanpa nama." },
     privS: { en: "What WasteQuest records, and your choice.", bm: "Apa yang direkodkan oleh WasteQuest, dan pilihan anda." },
     nT: { en: "Your information", bm: "Maklumat anda" },
-    n1: { en: "To improve WasteQuest, we record a random player code (no names), your age group, user type and area if you choose them, which pages you open, time spent, and quiz and survey answers.",
-          bm: "Untuk menambah baik WasteQuest, kami merekodkan kod pemain rawak (tanpa nama), kumpulan umur, jenis pengguna dan kawasan jika anda memilihnya, halaman yang dibuka, masa yang digunakan, serta jawapan kuiz dan soal selidik." },
+    n1: { en: "If you tap OK, we record a random player code (no names), your age group, user type and area if you choose them, your language and reading level, which pages you open and for how long, your game, quiz, check and survey answers, badges, coins, shop items, missions and scanned materials. Nothing is sent before you choose.",
+          bm: "Jika anda tekan OK, kami merekodkan kod pemain rawak (tanpa nama), kumpulan umur, jenis pengguna dan kawasan jika anda memilihnya, bahasa dan tahap bacaan, halaman yang dibuka dan tempohnya, jawapan permainan, kuiz, semakan dan tinjauan, lencana, syiling, barang kedai, misi dan bahan yang diimbas. Tiada apa-apa dihantar sebelum anda membuat pilihan." },
     n2: { en: "The records are coded, not anonymous. Only the UPM WasteQuest team sees them; anyone else sees grouped totals only. We use Google Sheets, so Google may process them outside Malaysia.",
           bm: "Rekod ini berkod, bukan tanpa nama. Hanya pasukan WasteQuest UPM boleh melihatnya; pihak lain hanya melihat jumlah berkumpulan. Kami menggunakan Google Sheets, jadi Google mungkin memprosesnya di luar Malaysia." },
     n3: { en: "Never type your name, address or phone number. Under 18? Ask your parent or teacher first. You can play fully without being tracked.",
           bm: "Jangan taip nama, alamat atau nombor telefon anda. Bawah 18 tahun? Tanya ibu bapa atau guru dahulu. Anda boleh bermain sepenuhnya tanpa dijejak." },
+    n4: { en: "We also count page visits with GoatCounter (no cookies, no player code, no answers). Photos from the camera never leave your device. Badges, avatar, coins and certificate names are saved only in this browser.",
+          bm: "Kami juga mengira lawatan halaman dengan GoatCounter (tanpa kuki, tanpa kod pemain, tanpa jawapan). Foto daripada kamera tidak pernah keluar dari peranti anda. Lencana, avatar, syiling dan nama pada sijil disimpan dalam pelayar ini sahaja." },
+    n5: { en: "Class Battle and Event Town: the nickname you type is sent only to the host's screen through a free connection service (PeerJS). WasteQuest does not save it.",
+          bm: "Pertandingan Kelas dan Bandar Acara: nama samaran yang anda taip dihantar ke skrin hos sahaja melalui perkhidmatan sambungan percuma (PeerJS). WasteQuest tidak menyimpannya." },
     ok: { en: "OK", bm: "OK" }, no: { en: "Don't track me", bm: "Jangan jejak saya" }, more: { en: "More", bm: "Lagi" },
     stOn: { en: "Tracking is ON (coded records).", bm: "Penjejakan HIDUP (rekod berkod)." },
     stOff: { en: "Tracking is OFF. Nothing is recorded or sent.", bm: "Penjejakan MATI. Tiada apa-apa direkod atau dihantar." },
+    stNone: { en: "You have not chosen yet, so nothing is sent. Tap OK to help us, or Don't track me.", bm: "Anda belum membuat pilihan, jadi tiada apa-apa dihantar. Tekan OK untuk membantu kami, atau Jangan jejak saya." },
     code: { en: "Your player code (keep it if you want to ask us to delete your records):", bm: "Kod pemain anda (simpan jika anda mahu meminta kami memadam rekod anda):" },
     waiting: { en: "events waiting to send", bm: "rekod menunggu untuk dihantar" },
     newP: { en: "New player on this device", bm: "Pemain baharu pada peranti ini" },
@@ -168,7 +176,7 @@
     start: { en: "Start", bm: "Mula" }, later: { en: "Later", bm: "Nanti" },
     off: { en: "Tracking is off, so answers are not recorded. You can still try it.", bm: "Penjejakan dimatikan, jadi jawapan tidak direkodkan. Anda masih boleh mencubanya." },
   };
-  function noticeHTML() { return `<p>${e(t(T.n1))}</p><p>${e(t(T.n2))}</p><p>${e(t(T.n3))}</p>`; }
+  function noticeHTML(full) { return `<p>${e(t(T.n1))}</p><p>${e(t(T.n2))}</p><p>${e(t(T.n3))}</p>${full ? `<p>${e(t(T.n4))}</p><p>${e(t(T.n5))}</p>` : ""}`; }
 
   /* ---------- 5-question checks (same items before and after; per age form) ---------- */
   const Q = (id, q, a, c) => ({ id, q, a, c });
@@ -243,22 +251,22 @@
 .dt-bar .tw-btn{min-height:36px;padding:0 10px;font-size:.9rem;box-shadow:2px 2px 0 #5d6a7c}
 .dt-bar p{margin:0 0 6px;line-height:1.4}
 .dt-st{font-weight:800}
+body.dt-hasbar{padding-bottom:110px}
 @media (max-width:420px){.dt-scale{grid-template-columns:1fr}.dt-scale .tw-btn{flex-direction:row;gap:8px;justify-content:flex-start;padding:6px 10px;font-size:.95rem;min-height:44px}.dt-scale .f{font-size:1.3rem}}
 `);
 
   /* ---------- non-home first visit: slim notice bar (home shows it inside the welcome dialog) ---------- */
   let bar = null;
-  function hideBar() { if (bar) { bar.remove(); bar = null; } }
-  // shown once per device; moving on without answering = notice given (opt-out stays in #/privacy)
+  function hideBar() { if (bar) { bar.remove(); bar = null; } document.body.classList.remove("dt-hasbar"); }
+  // stays (on every page except home/privacy/event) until answered; ignoring it is NOT consent: nothing is sent meanwhile
   function maybeBar(view) {
-    if (bar && !consentState()) return consent("yes");
-    if (consentState() || S.get("trk-bar") || view === "home" || view === "privacy" || view === "event") return hideBar();
-    S.set("trk-bar", "1");
+    if (consentState() || view === "home" || view === "privacy" || view === "event") return hideBar();
+    if (bar) { bar.querySelectorAll("[data-t]").forEach(n => n.textContent = t(T[n.dataset.t])); bar.setAttribute("aria-label", t(T.privT)); return; }
     bar = document.createElement("div"); bar.className = "dt-bar tw-px"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", t(T.privT));
-    bar.innerHTML = `<span>${e(t(T.short))}</span><span class="b"><a href="#/privacy">${e(t(T.more))}</a>
-      <button type="button" class="tw-btn alt" data-c="no">${e(t(T.no))}</button><button type="button" class="tw-btn" data-c="yes">${e(t(T.ok))}</button></span>`;
+    bar.innerHTML = `<span data-t="short">${e(t(T.short))}</span><span class="b"><a href="#/privacy" data-t="more">${e(t(T.more))}</a>
+      <button type="button" class="tw-btn alt" data-c="no" data-t="no">${e(t(T.no))}</button><button type="button" class="tw-btn" data-c="yes" data-t="ok">${e(t(T.ok))}</button></span>`;
     bar.querySelectorAll("[data-c]").forEach(b => b.onclick = () => consent(b.dataset.c));
-    document.body.appendChild(bar);
+    document.body.appendChild(bar); document.body.classList.add("dt-hasbar");
   }
 
   /* ---------- post-check offer after the 3rd badge (once) ---------- */
@@ -273,16 +281,17 @@
 
   /* ---------- pages ---------- */
   WQ.registerPage("privacy", { mount(el) {
-    const draw = () => { const on = consentState() !== "no";
-      el.innerHTML = WQ.head("🔒", T.privT, T.privS) + `<div class="dt-wrap"><section class="dt-p tw-px"><h2>${e(t(T.nT))}</h2>${noticeHTML()}
-        <p class="dt-st" aria-live="polite">${e(t(on ? T.stOn : T.stOff))}</p>
-        <div class="dt-row"><button type="button" class="tw-btn alt" id="dtOff" aria-pressed="${!on}">${e(t(T.no))}</button>
+    const draw = () => { const cs = consentState(), on = cs !== "no";
+      el.innerHTML = WQ.head("🔒", T.privT, T.privS) + `<div class="dt-wrap"><section class="dt-p tw-px"><h2>${e(t(T.nT))}</h2>${noticeHTML(true)}
+        <p class="dt-st" aria-live="polite">${e(t(cs === "yes" ? T.stOn : cs === "no" ? T.stOff : T.stNone))}</p>
+        <div class="dt-row"><button type="button" class="tw-btn alt" id="dtOff">${e(t(T.no))}</button>
         ${consentState() === "" ? `<button type="button" class="tw-btn" id="dtOk">${e(t(T.ok))}</button>` : ""}</div></section>
         <section class="dt-p tw-px"><p>${e(t(T.code))} <span class="dt-code">${e(pid)}</span></p>
         <p class="small">${load().length} ${e(t(T.waiting))}</p>
         <button type="button" class="tw-btn alt" id="dtNew">${e(t(T.newP))}</button></section>
         <section class="dt-p tw-px"><h2>${e(t(T.chkT))}</h2><p>${e(t(T.chkS))}</p><p><a href="#/check">${e(t(T.chkT))} ▶</a></p></section></div>`;
       el.querySelector("#dtOff").onclick = () => { consent(on ? "no" : "yes"); draw(); el.querySelector("#dtOff").focus(); };
+      if (cs === "no") el.querySelector("#dtOff").textContent = t({ en: "Tracking is off: turn it back on", bm: "Penjejakan dimatikan: hidupkan semula" });
       const ok = el.querySelector("#dtOk"); if (ok) ok.onclick = () => { consent("yes"); draw(); };
       el.querySelector("#dtNew").onclick = () => { if (!confirm(t(T.newPq))) return;
         ["trk-pid", "trk-profile", "trk-pre", "trk-post", "trk-survey", "trk-postoffer", "trk-first", "trk-visits"].forEach(k => { try { localStorage.removeItem("wq-" + k); } catch (er) {} });

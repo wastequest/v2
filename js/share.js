@@ -1,5 +1,5 @@
 /* WasteQuest v2 — #/share for teachers and partners: QR + link, embed snippet, Google Classroom links, downloads.
-   Also handles ?embed=1 (hides the footer; language toggle stays). QR lib: qrcodejs 1.0.0 from cdnjs, loaded only on this page. */
+   Also handles ?embed=1 (hides the footer; language toggle stays). QR lib: qrcodejs 1.0.0, vendored in js/vendor/qrcode.js (works offline). */
 (() => {
   const W = WQ, L = (en, bm) => ({ en, bm }), X = o => W.esc(W.t(o));
   if (new URLSearchParams(location.search).get("embed") === "1") {
@@ -11,7 +11,9 @@
     sub: L("For teachers and partners: a QR code, a website embed, Google Classroom links and downloads.", "Untuk guru dan rakan kongsi: kod QR, benaman laman web, pautan Google Classroom dan muat turun."),
     qr: L("QR code and link", "Kod QR dan pautan"),
     qrNote: L("Show this on a screen or print it. Scanning opens WasteQuest straight away; no sign-up.", "Paparkan pada skrin atau cetak. Imbasan terus membuka WasteQuest; tiada pendaftaran."),
-    qrOff: L("The QR code needs internet to draw. Use the link below instead.", "Kod QR memerlukan internet untuk dilukis. Guna pautan di bawah."),
+    qrOff: L("The QR code could not be drawn here. Use the link below instead.", "Kod QR tidak dapat dipaparkan di sini. Guna pautan di bawah."),
+    qrAlt: L("QR code that opens", "Kod QR yang membuka"), link: L("link", "pautan"), code: L("embed code", "kod benaman"),
+    offNote: L("You are using an offline copy, so the QR code and links point to the public website.", "Anda menggunakan salinan luar talian, jadi kod QR dan pautan menghala ke laman web awam."),
     copy: L("Copy", "Salin"), copied: L("Copied", "Disalin"), copyFail: L("Select the text and copy it by hand.", "Pilih teks dan salin secara manual."),
     embed: L("Put WasteQuest on your website", "Letak WasteQuest di laman web anda"),
     embedNote: L("Paste this code into your web page. It fits phones and laptops. Embed mode hides the footer; the language button stays.", "Tampal kod ini ke halaman web anda. Ia muat pada telefon dan komputer riba. Mod benaman menyembunyikan bahagian bawah; butang bahasa kekal."),
@@ -25,25 +27,22 @@
     bEN: L("Facilitator booklet (English, PDF)", "Buku panduan fasilitator (Inggeris, PDF)"), bBM: L("Facilitator booklet (Bahasa Melayu, PDF)", "Buku panduan fasilitator (Bahasa Melayu, PDF)"),
     eEN: L("WasteQuest eBook (English, PDF)", "eBuku WasteQuest (Inggeris, PDF)"), eBM: L("WasteQuest eBook (Bahasa Melayu, PDF)", "eBuku WasteQuest (Bahasa Melayu, PDF)"), eRead: L("Read the eBook online", "Baca eBuku dalam talian"),
   };
-  const base = () => location.origin + location.pathname;
-  const copyBox = (id, text) => `<div class="sh-copy"><textarea id="${id}" aria-label="${X(T.copy)}: ${id === "shUrl" ? "link" : "embed code"}" readonly rows="${text.length > 90 ? 4 : 1}">${W.esc(text)}</textarea><button class="btn alt" data-copy="${id}">${X(T.copy)}</button></div>`;
+  // the public address: this page's own address when served over http(s), else (offline file / USB copy) the public site
+  const SITE = "https://wastequest.github.io/";
+  const base = () => /^https?:$/.test(location.protocol) ? location.origin + location.pathname.replace(/index\.html$/, "") : SITE;
+  const copyBox = (id, text) => `<div class="sh-copy"><textarea id="${id}" aria-label="${X(T.copy)}: ${X(id === "shUrl" ? T.link : T.code)}" readonly rows="${text.length > 90 ? 4 : 1}">${W.esc(text)}</textarea><button type="button" class="btn alt" data-copy="${id}">${X(T.copy)}</button></div>`;
   const clsLink = (hash, name) => `<li><span>${X(name)}</span><a class="btn alt" target="_blank" rel="noopener" href="https://classroom.google.com/share?url=${encodeURIComponent(base() + hash)}">${X(T.toCls)}</a></li>`;
-  let qrLib = null;
-  const loadQR = () => qrLib || (qrLib = new Promise((ok, no) => {
-    if (window.QRCode) return ok();
-    const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
-    s.onload = ok; s.onerror = () => { qrLib = null; no(); }; document.head.appendChild(s);
-  }));
+  W.css("share", `.sh-copy{display:flex;gap:8px;align-items:flex-start;margin-top:8px}.sh-copy textarea{flex:1;min-width:0;font:13px/1.4 monospace;padding:8px;border:2px solid #5d6a7c;border-radius:8px;resize:vertical}
+.sh-qr{display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;width:max-content;max-width:100%;margin:8px auto}.sh-qr img,.sh-qr canvas{max-width:100%;height:auto}
+.sh-list{list-style:none;padding:0;margin:8px 0}.sh-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e6ecf1}.sh-list .btn{padding:6px 14px;font-size:.9rem;flex:none}
+.sh-dl{display:grid;gap:8px;padding-left:1.2em}.sh-dl a{display:inline-block;padding:4px 0}
+@media (max-width:420px){.sh-copy{flex-direction:column;align-items:stretch}.sh-list li{flex-wrap:wrap}}`);
 
   W.registerPage("share", { mount(el) {
     const url = base(), games = Object.values(W.games).sort((a, b) => a.order - b.order), labs = W.labs || [];
     const iframe = `<div style="position:relative;width:100%;max-width:1100px;aspect-ratio:4/5;max-height:90vh;margin:auto"><iframe src="${url}?embed=1#/home" title="WasteQuest" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px" allow="camera; fullscreen" loading="lazy"></iframe></div>`;
-    el.innerHTML = `<style>.sh-copy{display:flex;gap:8px;align-items:flex-start;margin-top:8px}.sh-copy textarea{flex:1;min-width:0;font:13px/1.4 monospace;padding:8px;border:1px solid #c9d3dd;border-radius:8px;resize:vertical}
-      .sh-qr{display:flex;justify-content:center;padding:12px;background:#fff;border-radius:12px;width:max-content;max-width:100%;margin:8px auto}.sh-qr img,.sh-qr canvas{max-width:100%;height:auto}
-      .sh-list{list-style:none;padding:0;margin:8px 0}.sh-list li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e6ecf1}.sh-list .btn{padding:6px 14px;font-size:.9rem;flex:none}
-      .sh-dl{display:grid;gap:8px;padding-left:1.2em}</style>` +
-      W.head("🔗", T.title, T.sub) +
-      `<section class="card"><h2>${X(T.qr)}</h2><p class="small">${X(T.qrNote)}</p><div class="sh-qr" id="shQR" role="img" aria-label="QR code: ${W.esc(url)}"></div>${copyBox("shUrl", url)}</section>
+    el.innerHTML = W.head("🔗", T.title, T.sub) +
+      `<section class="card"><h2>${X(T.qr)}</h2><p class="small">${X(T.qrNote)}</p>${/^https?:$/.test(location.protocol) ? "" : `<p class="small">${X(T.offNote)}</p>`}<div class="sh-qr" id="shQR" role="img" aria-label="${X(T.qrAlt)} ${W.esc(url)}"></div>${copyBox("shUrl", url)}</section>
       <section class="card"><h2>${X(T.embed)}</h2><p class="small">${X(T.embedNote)}</p>${copyBox("shEmbed", iframe)}</section>
       <section class="card"><h2>${X(T.cls)}</h2><p class="small">${X(T.clsNote)}</p>
         <h3>${X(T.games)}</h3><ul class="sh-list">${games.map(g => clsLink("#/game/" + g.id, g.title)).join("")}</ul>
@@ -57,7 +56,9 @@
       try { await navigator.clipboard.writeText(ta.value); W.toast(W.t(T.copied)); } catch (er) { ta.select(); W.toast(W.t(T.copyFail)); }
     });
     const box = W.$("#shQR", el);
-    loadQR().then(() => { if (box.isConnected) { new QRCode(box, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M }); box.querySelectorAll("img,canvas").forEach(n => n.setAttribute("alt", "")); } })
-      .catch(() => { box.textContent = W.t(T.qrOff); });
+    try { if (!window.QRCode) throw new Error("no QR lib");
+      new QRCode(box, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+      box.querySelectorAll("img,canvas").forEach(n => { n.setAttribute("alt", ""); n.setAttribute("aria-hidden", "true"); }); box.removeAttribute("title");
+    } catch (er) { box.removeAttribute("role"); box.removeAttribute("aria-label"); box.textContent = W.t(T.qrOff); }
   } });
 })();

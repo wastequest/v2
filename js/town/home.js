@@ -26,9 +26,9 @@
   ];
   const T = {
     sub: { en: "Clean up the town. Turn waste into wealth!", bm: "Bersihkan bandar. Tukar sisa jadi harta!" },
-    clean: { en: "Town cleaned", bm: "Bandar bersih" },
+    clean: { en: "Town cleaned", bm: "Kebersihan bandar" },
     badges: { en: "My badges", bm: "Lencana saya" },
-    myAv: { en: "Edit my player", bm: "Ubah pemain saya" },
+    myAv: { en: "Edit my player", bm: "Ubah avatar saya" },
     town: { en: "Town map. Tap a building to go inside.", bm: "Peta bandar. Ketik bangunan untuk masuk." },
     messy: { en: "messy", bm: "bersepah" }, done: { en: "all clean", bm: "bersih sepenuhnya" },
     stars: { en: "cleaning level", bm: "tahap kebersihan" },
@@ -39,8 +39,8 @@
     playing: { en: "Playing as:", bm: "Pemain:" },
     skip: { en: "Skip", bm: "Langkau" }, nextStep: { en: "Next ▶", bm: "Seterusnya ▶" }, save: { en: "Save", bm: "Simpan" },
     hi: { en: "Hi! I'm Kitar, your guide robot.", bm: "Hai! Saya Kitar, robot pemandu anda." },
-    makeAv: { en: "Make your player", bm: "Reka pemain anda" },
-    skin: { en: "Skin", bm: "Kulit" }, head: { en: "Headwear", bm: "Penutup kepala" }, hair: { en: "Hair colour", bm: "Warna rambut" }, outfit: { en: "Outfit", bm: "Pakaian" },
+    makeAv: { en: "Make your player", bm: "Reka avatar anda" },
+    skin: { en: "Skin", bm: "Warna kulit" }, head: { en: "Headwear", bm: "Penutup kepala" }, hair: { en: "Hair colour", bm: "Warna rambut" }, outfit: { en: "Outfit", bm: "Pakaian" },
     heads: { none: { en: "None", bm: "Tiada" }, hijab: { en: "Hijab", bm: "Tudung" }, cap: { en: "Cap", bm: "Topi" } },
     ready: { en: "Let's clean up the town!", bm: "Jom bersihkan bandar!" },
     readyS: { en: "Every badge you earn cleans part of the town. Tap a building to start.", bm: "Setiap lencana yang anda peroleh membersihkan sebahagian bandar. Ketik bangunan untuk bermula." },
@@ -52,7 +52,7 @@
   };
   const TIPS = [
     { en: "Every badge you earn cleans part of the town. Clean all six buildings!", bm: "Setiap lencana yang anda peroleh membersihkan sebahagian bandar. Bersihkan keenam-enam bangunan!" },
-    { en: "Blue bin = paper. Orange bin = plastic & metal. Brown bin = glass.", bm: "Tong biru = kertas. Tong oren = plastik & logam. Tong perang = kaca." },
+    { en: "Blue bin = paper. Orange bin = plastic & metal. Brown bin = glass.", bm: "Tong biru = kertas. Tong oren = plastik & logam. Tong coklat = kaca." },
     { en: "Food is the biggest part of Malaysian household waste (30.6%). The Compost Farm turns it into compost.", bm: "Makanan ialah bahagian terbesar sisa isi rumah di Malaysia (30.6%). Ladang Kompos menukarnya menjadi kompos." },
     { en: "Malaysia made about 39,000 tonnes of solid waste a day in 2024. That is about 1.17 kg per person!", bm: "Malaysia menghasilkan kira-kira 39,000 tan sisa pepejal sehari pada 2024. Itu kira-kira 1.17 kg seorang!" },
     { en: "At the Maker Lab you make useful things from waste. Ask an adult to help with hot or sharp steps.", bm: "Di Makmal Pereka anda menghasilkan barang berguna daripada sisa. Minta orang dewasa membantu untuk langkah yang panas atau tajam." },
@@ -204,7 +204,7 @@
   WQ.registerPage("home", {
     mount(el, { relang } = {}) {
       const savedAv = WQ.store.getJSON("avatar", null);
-      if (!firstDone) { firstDone = true; if (!savedAv && dlgStep == null) { dlgStep = WQ.data ? "p0" : 1; editOnly = false; } }
+      if (!firstDone) { firstDone = true; if (!savedAv && dlgStep == null) { dlgStep = !WQ.data ? 1 : WQ.data.consentState() ? "p0" : "priv"; editOnly = false; } }
       const st = states(), avg = D.reduce((s, d) => s + st[d.id], 0) / D.length, pct = Math.round(avg / 3 * 100);
       const total = Object.keys(WQ.badges).length, got = Object.keys(WQ.earned()).filter(k => WQ.badges[k]).length;
       const av = savedAv || draft || { skin: 2, head: "none", hair: 0, outfit: 0 };
@@ -261,15 +261,17 @@
       fit(); const ro = new ResizeObserver(fit); ro.observe(town.parentElement);
 
       /* animation: only while visible, paused when hidden, single frame for reduced motion */
-      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches, sp = spawn();
-      let raf = 0, visible = true, lastF = -1;
-      const frame = now => { raf = 0; const f = reduce ? 0 : Math.floor(now / 500) % 2;
-        drawScene(ctx, st, now); drawAvatar(ctx, sp.x, sp.y, av, f); drawRobot(ctx, sp.x + 20, sp.y, f); lastF = f;
-        if (!reduce && visible && !document.hidden) raf = requestAnimationFrame(frame); };
-      const kick = () => { if (!raf && el.isConnected && visible && !document.hidden) raf = requestAnimationFrame(frame); };
+      // pixel art moves in steps: redraw ~12 times a second, not every display frame (saves phone batteries)
+      const reduce = WQ.calm ? WQ.calm() : matchMedia("(prefers-reduced-motion: reduce)").matches, sp = spawn();
+      let raf = 0, visible = true, dead = false, last = -1e9;
+      const draw = now => { const f = reduce ? 0 : Math.floor(now / 500) % 2; drawScene(ctx, st, reduce ? 0 : now); drawAvatar(ctx, sp.x, sp.y, av, f); drawRobot(ctx, sp.x + 20, sp.y, f); };
+      const frame = now => { raf = 0; if (dead) return;
+        if (now - last >= 80) { last = now; draw(now); }
+        if (!reduce && visible && !document.hidden && cv.isConnected) raf = requestAnimationFrame(frame); };
+      const kick = () => { if (!raf && !dead && !reduce && cv.isConnected && visible && !document.hidden) raf = requestAnimationFrame(frame); };
       const io = new IntersectionObserver(es => { visible = es[0].isIntersecting; kick(); }); io.observe(cv);
       document.addEventListener("visibilitychange", kick);
-      frame(0);
+      draw(0); kick();
 
       /* first-visit / avatar dialog */
       let dlg = null;
@@ -277,11 +279,13 @@
       function saveAv(a) { WQ.store.setJSON("avatar", a); const b = $("#twAv"); b.innerHTML = ""; b.appendChild(avCanvas(a, 2)); Object.assign(av, a); }
       const D2 = WQ.data;
       // re-route once so the page picks up the audience set by the profile; the dialog reopens at the new step
-      const afterProfile = () => { dlgStep = D2 && !D2.consentState() ? "priv" : 2; WQ.setAud(WQ.aud); };
+      // the privacy notice comes first, so nothing is asked before the player has read what is recorded
+      const afterProfile = () => { dlgStep = 2; WQ.setAud(WQ.aud); };
+      const afterPriv = () => { dlgStep = D2 && !Object.keys(D2.profile()).length ? "p0" : 2; renderDlg(); };
       function skip() {
         if (editOnly) return closeDlg();
         if (/^p\d$/.test(dlgStep)) return afterProfile();
-        if (dlgStep === "priv") { dlgStep = 2; return renderDlg(); }
+        if (dlgStep === "priv") return afterPriv();
         if (dlgStep === "pre") { dlgStep = 3; return renderDlg(); }
         if (!WQ.store.getJSON("avatar", null)) saveAv(draft || randAv());
         closeDlg(); if (WQ.aud !== "kids" && !WQ.store.get("aud")) WQ.setAud("kids");
@@ -323,7 +327,7 @@
         const pv = dlg.querySelector("#twPv"); if (pv) pv.appendChild(avCanvas(draft, 4));
         dlg.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { const n = +dlgStep[1]; D2.setProfile(D2.PROFILE[n].k, b.dataset.p);
           if (n + 1 < D2.PROFILE.length) { dlgStep = "p" + (n + 1); renderDlg(); } else afterProfile(); });
-        dlg.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { D2.consent(b.dataset.c); dlgStep = 2; renderDlg(); });
+        dlg.querySelectorAll("[data-c]").forEach(b => b.onclick = () => { D2.consent(b.dataset.c); afterPriv(); });
         dlg.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { dlgStep = 2; WQ.setAud(b.dataset.a); });
         ["skin", "hair", "outfit"].forEach(k => dlg.querySelectorAll(`[data-${k}]`).forEach(b => b.onclick = () => { draft[k] = +b.dataset[k]; rerender(`[data-${k}="${b.dataset[k]}"]`); }));
         dlg.querySelectorAll("[data-head]").forEach(b => b.onclick = () => { draft.head = b.dataset.head; rerender(`[data-head="${draft.head}"]`); });
@@ -339,7 +343,7 @@
       const rerender = sel => { renderDlg(); const b = dlg.querySelector(sel); if (b) b.focus(); };
       if (dlgStep != null) openDlg();
 
-      return () => { if (raf) cancelAnimationFrame(raf); raf = 0; io.disconnect(); ro.disconnect();
+      return () => { dead = true; if (raf) cancelAnimationFrame(raf); raf = 0; io.disconnect(); ro.disconnect();
         document.removeEventListener("visibilitychange", kick); if (dlg && dlg.open) dlg.close(); };
     }
   });

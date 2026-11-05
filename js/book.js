@@ -17,6 +17,7 @@ const AUTHORS = "Wan Azlina Wan Ab Karim Ghani, Shafreeza Sobri, Izzudin Ibrahim
 /* ---------- UI + book text ---------- */
 const S = {
   bind: L("Binding your book…", "Menjilid buku anda…"),
+  title: L("WasteQuest eBook", "eBuku WasteQuest"), tools: L("eBook controls", "Kawalan eBuku"), pages: L("Book pages", "Halaman buku"),
   prev: L("Previous page", "Halaman sebelum"), next: L("Next page", "Halaman seterusnya"),
   toc: L("Contents", "Kandungan"), snd: L("Page sound", "Bunyi halaman"), pdf: L("PDF", "PDF"), pdfL: L("Download PDF", "Muat turun PDF"),
   fs: L("Full screen", "Skrin penuh"), lvl: L("Reading level", "Tahap bacaan"), page: L("Page", "Halaman"),
@@ -252,7 +253,7 @@ function buildSections() {
       `<ul class="bk-list bk-mats">${l.mats.map(m => m.h ? `<li class="bk-lh">${X(m.h)}</li>` : `<li>${X(m)}</li>`).join("")}</ul>`,
       l.table ? `<div class="bk-tbl"><table class="tbl"><thead><tr>${l.table.head.map(h => `<th>${X(h)}</th>`).join("")}</tr></thead><tbody>${l.table.rows.map(r => `<tr>${r.map(c => `<td>${X(c)}</td>`).join("")}</tr>`).join("")}</tbody></table><p class="small muted">${X(l.table.note)}</p></div>` : "",
       H3("🪜 " + X(S.steps)),
-      `<ul class="bk-list bk-steps">${l.steps.map(s => s.h ? `<li class="bk-lh">${X(s.h)}</li>` : `<li><b class="bk-n">${++n}</b><span>${X(s)}${x && s.x ? `<em class="bk-x">🔬 ${X(s.x)}</em>` : ""}</span></li>`).join("")}</ul>`,
+      `<ul class="bk-list bk-steps">${l.steps.map(s => s.h ? `<li class="bk-lh">${X(s.h)}</li>` : `<li><b class="bk-n">${++n}</b><span>${X(s)}${s.x && s.w ? `<em class="bk-x bk-xw">⚠️ ${X(s.x)}</em>` : x && s.x ? `<em class="bk-x">🔬 ${X(s.x)}</em>` : ""}</span></li>`).join("")}</ul>`,
       l.code && x ? `<p class="bk-cl"><b>💻 ${X(S.code)}</b></p><pre class="bk-pre">${E(l.code)}</pre>` : "",
       H3("🦺 " + X(S.safety)),
       ...l.safety.map(s => note(s.lv, `${s.lv === "danger" ? "⛔" : "⚠️"} ${X(s)}`)),
@@ -337,10 +338,10 @@ function buildSections() {
     p(X({ en: "<b>Lab ideas, photos and posters:</b> UPM chemical engineering students (ENG3104 Engineers and Society, 2024 and 2025). Lab guides checked and corrected by the WasteQuest team.", bm: "<b>Idea makmal, foto dan poster:</b> pelajar kejuruteraan kimia UPM (ENG3104 Jurutera dan Masyarakat, 2024 dan 2025). Panduan makmal disemak dan dibetulkan oleh pasukan WasteQuest." }).replace(/&lt;(\/?b)&gt;/g, "<$1>")),
     p(X({ en: "<b>Videos:</b> made by the WasteQuest team in 2026 from the students' demonstrations, narrated with synthetic voices. <b>Pixel art:</b> original drawings made for WasteQuest.", bm: "<b>Video:</b> dihasilkan oleh pasukan WasteQuest pada 2026 daripada demonstrasi pelajar, dengan suara sintetik. <b>Seni piksel:</b> lukisan asli untuk WasteQuest." }).replace(/&lt;(\/?b)&gt;/g, "<$1>")),
     H3("📚 " + X({ en: "Main sources", bm: "Sumber utama" })),
-    list(["SWCorp, via The Star (2 Jan 2024): Malaysian solid waste 39,078 t/day, 1.17 kg/person/day, household composition.",
-      "IPCC Fifth Assessment Report (2013), WG1 ch. 8: methane GWP100 = 28.", "US NOAA: microplastics are pieces smaller than 5 mm.",
-      "Ellen MacArthur Foundation: circular economy principles.", "Environmental Quality Act 1974 (Malaysia), s.29A: open burning.",
-      "Solid Waste and Public Cleansing Management Act 2007 (Act 672).", "GHG Protocol Corporate Value Chain (Scope 3) Standard; GRI 306: Waste 2020; Bursa Malaysia Main Market Listing Requirements.",
+    list([X({ en: "SWCorp, via The Star (2 Jan 2024): Malaysian solid waste 39,078 t/day, 1.17 kg/person/day, household composition.", bm: "SWCorp, melalui The Star (2 Jan 2024): sisa pepejal Malaysia 39,078 tan/hari, 1.17 kg/orang/hari, komposisi sisa isi rumah." }),
+      X({ en: "IPCC Fifth Assessment Report (2013), WG1 ch. 8: methane GWP100 = 28.", bm: "Laporan Penilaian Kelima IPCC (2013), WG1 bab 8: GWP100 metana = 28." }), X({ en: "US NOAA: microplastics are pieces smaller than 5 mm.", bm: "NOAA (AS): mikroplastik ialah kepingan yang lebih kecil daripada 5 mm." }),
+      X({ en: "Ellen MacArthur Foundation: circular economy principles.", bm: "Ellen MacArthur Foundation: prinsip ekonomi kitaran." }), X({ en: "Environmental Quality Act 1974 (Malaysia), s.29A: open burning.", bm: "Akta Kualiti Alam Sekeliling 1974 (Malaysia), s.29A: pembakaran terbuka." }),
+      X({ en: "Solid Waste and Public Cleansing Management Act 2007 (Act 672).", bm: "Akta Pengurusan Sisa Pepejal dan Pembersihan Awam 2007 (Akta 672)." }), "GHG Protocol Corporate Value Chain (Scope 3) Standard; GRI 306: Waste 2020; Bursa Malaysia Main Market Listing Requirements.",
       "MQA Guidelines to Good Practices: Micro-credentials (2020) and Quality Verification of Stand-Alone Micro-credentials (2023).",
       "Global Ecobrick Alliance; US CDC (Aedes life cycle); WSAVA (pet treats); IMO LSA Code (lifebuoys); Kratky (2009) hydroponics.",
       `${X({ en: "Every lab and lesson lists its own sources on the website.", bm: "Setiap makmal dan pelajaran menyenaraikan sumbernya sendiri di laman web." })}`]),
@@ -534,7 +535,8 @@ function indexBlocks(sections) {
 
 /* ---------- sound ---------- */
 let ac = null;
-const sndOn = () => W.store.get("book-snd") !== "0";
+// page sound: the player's own choice here, else follow the site-wide sound switch (off by default)
+const sndOn = () => { const v = W.store.get("book-snd"); return v ? v !== "0" : !!(W.rw && W.rw.sfxOn && W.rw.sfxOn()); };
 function flipSound() {
   if (!sndOn()) return;
   try {
@@ -558,13 +560,13 @@ const pageEl = (pg, i) => {
   return d;
 };
 const shellDone = (pg, i) => { const d = document.createElement("div"); d.innerHTML = shell(pg.part, pg.contRun || pg.run); d.querySelector(".bk-body").innerHTML = pg.html; d.querySelector(".bk-pno").textContent = i; return d.innerHTML; };
-function qrAll(root) { if (!window.QRCode) return; root.querySelectorAll("[data-qr]").forEach(q => { if (q.firstChild) return; try { new QRCode(q, { text: q.dataset.qr, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M }); } catch (e) {} }); }
+function qrAll(root) { if (!window.QRCode) return; root.querySelectorAll("[data-qr]").forEach(q => { if (q.firstChild) return; try { new QRCode(q, { text: q.dataset.qr, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M }); q.removeAttribute("title"); q.querySelectorAll("img,canvas").forEach(n => { n.setAttribute("alt", ""); n.setAttribute("aria-hidden", "true"); }); } catch (e) {} }); }
 
 /* ---------- the page ---------- */
 W.addBadge("book", { icon: "📖", name: S.badge, desc: S.badgeD });
 W.registerPage("book", { mount(el, { args }) {
   document.body.classList.add("bk-on");
-  el.innerHTML = `<div class="bk-wrap" id="bkWrap"><div class="bk-bar" role="toolbar" aria-label="eBook">
+  el.innerHTML = `<div class="bk-wrap" id="bkWrap"><h1 class="bk-sr">${X(S.title)}</h1><div class="bk-bar" role="toolbar" aria-label="${X(S.tools)}">
       <button type="button" data-b="prev" aria-label="${X(S.prev)}">◀</button>
       <button type="button" data-b="toc">📑 <span class="bk-hide">${X(S.toc)}</span></button>
       <span class="bk-count" aria-live="polite"></span>
@@ -574,7 +576,7 @@ W.registerPage("book", { mount(el, { args }) {
       <a class="bk-pdf" data-b="pdf" href="dist/WasteQuest_eBook_${W.lang === "bm" ? "BM" : "EN"}.pdf" download aria-label="${X(S.pdfL)}">⬇️ ${X(S.pdf)}</a>
       <button type="button" data-b="fs" aria-label="${X(S.fs)}">⛶</button>
 </div>
-    <div class="bk-stagebox"><div class="bk-load">📖 ${X(S.bind)} <span id="bkPct"></span></div><div class="bk-stage" id="bkStage"></div>
+    <div class="bk-stagebox"><div class="bk-load" role="status">📖 ${X(S.bind)} <span id="bkPct"></span></div><div class="bk-stage" id="bkStage" role="region" aria-label="${X(S.pages)}"></div>
       <button type="button" class="bk-side l" data-b="prev" aria-label="${X(S.prev)}">‹</button><button type="button" class="bk-side r" data-b="next" aria-label="${X(S.next)}">›</button></div>
     <p class="bk-tip small muted">${X(S.hint)}</p></div>
     <div class="bk-print" id="bkPrint" aria-hidden="true"></div>
@@ -625,7 +627,9 @@ W.registerPage("book", { mount(el, { args }) {
   el.addEventListener("click", onClick);
   dlg.addEventListener("close", () => { dlg.querySelector(".bk-dlgv").innerHTML = ""; });
   dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-  const onKey = e => { if (dlg.open || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; if (e.key === "ArrowRight") pf && pf.flipNext(); else if (e.key === "ArrowLeft") pf && pf.flipPrev(); };
+  const onKey = e => { if (!pf || dlg.open || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || "") || document.querySelector("dialog[open]")) return;
+    const k = e.key; if (k === "ArrowRight") pf.flipNext(); else if (k === "ArrowLeft") pf.flipPrev(); else if (k === "Home") go(0); else if (k === "End") go(total - 1); else return;
+    e.preventDefault(); };
   const onResize = () => { if (SMALL() !== small) W.route(); else fit(); };
   const onFs = () => { fit(); pf && pf.update(); };
   $("[data-b=aud]").onchange = e => W.setAud(e.target.value);
@@ -653,8 +657,11 @@ W.registerPage("book", { mount(el, { args }) {
     if (small && !printMode) wrap.scrollIntoView({ block: "start" });
     if (printMode) { document.body.classList.add("bk-printready"); return; }
     pf = new St.PageFlip(stage, { width: PW, height: PH, size: "stretch", minWidth: 330, maxWidth: 2000, minHeight: 300, maxHeight: 3000,
-      showCover: true, usePortrait: true, mobileScrollSupport: true, disableFlipByClick: true, flippingTime: 700, maxShadowOpacity: .45, startPage: Math.min(startAt, total - 1) });
+      showCover: true, usePortrait: true, mobileScrollSupport: true, disableFlipByClick: true, flippingTime: W.calm && W.calm() ? 120 : 700, maxShadowOpacity: .45, startPage: Math.min(startAt, total - 1) });
     pf.loadFromHTML(els);
+    // StPageFlip 2.0.7 bug: flipPrev() aims at x=10 in stage pixels, which misses a centred book, so "previous", ← and
+    // backward jumps (contents, links) did nothing. Aim at the book's own left edge instead.
+    try { const fc = pf.flipController; if (fc && fc.render && fc.flip) fc.flipPrev = function (c) { const r = this.render.getRect(); this.flip({ x: r.left + 10, y: c === "top" ? 1 : r.height - 2 }); }; } catch (e) {}
     pf.on("flip", count); pf.on("changeOrientation", count); pf.on("init", count);
     pf.on("changeState", e => { if (e.data === "flipping") flipSound(); });
     count();
@@ -675,7 +682,8 @@ body.bk-on #view{max-width:1400px}
 .bk-bar .bk-pdf{background:#5ac54f}
 .bk-count{font-family:var(--pix);font-weight:600;min-width:9ch;text-align:center}
 .bk-lvl{display:flex;gap:6px;align-items:center;font-family:var(--pix);font-weight:600}
-@media (max-width:560px){.bk-hide{display:none}.bk-bar{gap:4px;padding:4px}.bk-bar button,.bk-bar a,.bk-bar select{padding:2px 7px;min-height:36px;font-size:.9rem}.bk-bar select{max-width:110px}.bk-count{min-width:0}}
+.bk-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:-1px;padding:0}
+@media (max-width:560px){.bk-hide{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.bk-bar{gap:4px;padding:4px}.bk-bar button,.bk-bar a,.bk-bar select{padding:2px 7px;min-height:36px;font-size:.9rem}.bk-bar select{max-width:110px}.bk-count{min-width:0}}
 .bk-stagebox{position:relative;min-height:320px}
 .bk-stage{margin:0 auto}
 .bk-load{font-family:var(--pix);font-size:1.3rem;text-align:center;padding:80px 10px}
@@ -787,7 +795,7 @@ body.bk-on #view{max-width:1400px}
 .bk-lh{list-style:none;font:600 13px var(--pix);color:var(--pc);margin-left:-18px!important}
 .bk-steps{list-style:none;padding:0}.bk-steps li{display:flex;gap:7px;align-items:flex-start}
 .bk-n{flex:none;width:22px;height:22px;display:grid;place-items:center;background:var(--pc);color:#fff;font:600 12px var(--pix);border:2px solid #1a1932;margin-top:1px}
-.bk-x{display:block;font-style:normal;font-size:12px;color:#4a4a6a;margin-top:2px}
+.bk-x{display:block;font-style:normal;font-size:12px;color:#4a4a6a;margin-top:2px}.bk-xw{color:#8c1a22;font-weight:700}
 .bk-pre{font-size:9px;line-height:1.3;background:#10243a;color:#e8f1ff;padding:6px;white-space:pre-wrap;word-break:break-word}
 .bk-tag{font:600 10.5px var(--pix);background:#fff;border:2px solid #1a1932;padding:1px 6px;color:#1a1932;vertical-align:middle}
 .bk-poster{margin:0;text-align:center}.bk-poster img{max-height:300px;width:auto;border:2px solid #1a1932;margin:0 auto;display:block}.bk-poster figcaption{font-size:10.5px;color:#4a4a6a}

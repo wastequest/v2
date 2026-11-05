@@ -34,7 +34,8 @@ const CLASS = () => pg("class", "🏟️", "Class Battle", "Pertandingan Kelas")
 const sec = id => pg(`teacher/${id}`, "📎", SEC.find(s => s.id === id).en, SEC.find(s => s.id === id).bm);
 
 /* ---------- building blocks ---------- */
-const tbl = (head, rows, cls = "") => `<div class="tablewrap"><table class="tbl th-tbl ${cls}"><thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+/* wide tables scroll sideways on phones: the scroll box is a labelled, keyboard-focusable region */
+const tbl = (head, rows, cls = "") => `<div class="tablewrap" tabindex="0" role="region" aria-label="${E(B("Table", "Jadual") + ": " + head.map(h => String(h).replace(/<[^>]*>/g, "")).join(" · "))}"><table class="tbl th-tbl ${cls}"><thead><tr>${head.map(h => `<th scope="col">${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 const note = (cls, html) => `<div class="note ${cls} th-note">${html}</div>`;
 const danger = html => note("danger", `⚠️ ${html}`);
 const ul = items => `<ul class="th-ul">${items.map(i => `<li>${i}</li>`).join("")}</ul>`;
@@ -394,6 +395,18 @@ WQ.css("teacher", `
   .th-line{height:26px}
 }`);
 
+/* give each scrollable table region a unique name: nearest heading above it + its column headers */
+function labelTables(root) {
+  const seen = {};
+  root.querySelectorAll(".tablewrap[role=region]").forEach(w => {
+    let h = null;
+    for (let n = w; n && n !== root && !h; n = n.parentElement) for (let p = n.previousElementSibling; p && !h; p = p.previousElementSibling) if (/^H[1-4]$/.test(p.tagName)) h = p; else if (!h) h = p.querySelector && [...p.querySelectorAll("h2,h3,h4")].pop() || null;
+    let lab = (h ? h.textContent.trim() + " · " : "") + w.getAttribute("aria-label");
+    seen[lab] = (seen[lab] || 0) + 1; if (seen[lab] > 1) lab += ` (${seen[lab]})`;
+    w.setAttribute("aria-label", lab);
+  });
+}
+
 /* ---------- page ---------- */
 WQ.registerPage("teacher", { mount(el, { args }) {
   const id = args && args[0], all = id === "all", s = SEC.find(x => x.id === id) || SEC[0];
@@ -401,12 +414,13 @@ WQ.registerPage("teacher", { mount(el, { args }) {
   const bar = `<div class="row noprint th-bar"><button class="btn blue" data-print>🖨️ ${all ? B("Print the full guide", "Cetak panduan penuh") : B("Print this section", "Cetak bahagian ini")}</button>${all ? "" : `<a class="btn alt" href="#/teacher/all">📚 ${B("Show all sections", "Papar semua bahagian")}</a>`}</div>`;
   const aud = WQ.aud !== "teacher" ? `<p class="note small noprint">${B("Tip: choose <b>Teacher</b> on the home page to see teaching notes inside the Learn chapters.", "Tip: pilih <b>Guru</b> di halaman utama untuk melihat nota pengajaran dalam bab Belajar.")}</p>` : "";
   el.innerHTML = `<div class="th-wrap">${WQ.head("🧑‍🏫", TITLE, SUB)}${tabs}${aud}${bar}${all ? `<div class="th-allbox"></div>` : `<section class="card th-sec" aria-labelledby="th-h"><h2 id="th-h"><span aria-hidden="true">${s.icon}</span> ${B(s.en, s.bm)}</h2>${s.html(false)}</section>`}</div>`;
-  if (all) WQ.renderTeacherPrint(el.querySelector(".th-allbox"));
+  if (all) WQ.renderTeacherPrint(el.querySelector(".th-allbox")); else labelTables(el);
   el.querySelector("[data-print]").onclick = () => window.print();
 }});
 
 /* ---------- print booklet: every section, static ---------- */
 WQ.renderTeacherPrint = el => {
   el.innerHTML = `<div class="th-print">${SEC.map(s => `<section class="th-psec"><h2><span aria-hidden="true">${s.icon}</span> ${B(s.en, s.bm)}</h2>${s.html(true)}</section>`).join("")}</div>`;
+  labelTables(el);
 };
 })();

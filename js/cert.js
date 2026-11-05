@@ -39,7 +39,7 @@ const T = {
   noPass:"You haven’t passed the final quest for this track yet.",missT:"Almost there! Here’s what is still missing:",
   kidsCheer:n=>`You passed the quest. Brilliant! 🌟 Earn ${n} more game badge${n===1?"":"s"} and your certificate is yours. Try one of these:`,
   nameL:"Learner’s full name (as it should appear)",orgL:"School or organisation (optional)",make:"Create certificate",edit:"Change name",
-  making:"Preparing your certificate…",dl:"⬇️ Download PNG",print:"🖨️ Print / Save PDF",code:"Verification code",
+  making:"Preparing your certificate…",needName:"Please type your name, using letters.",ready:"Your certificate is ready.",noQ:"Questions could not be loaded. Reload the page and try again.",dl:"⬇️ Download PNG",print:"🖨️ Print / Save PDF",code:"Verification code",
   noImg:"Logos could not be drawn (open the site through a web server to include them).",
   // pitch
   pT:"W2W Product Pitch",pS:"Practitioner portfolio · saved on this device",pName:"Your name",pProd:"Product name",pWaste:"Waste stream used",
@@ -68,7 +68,7 @@ const T = {
   noPass:"Anda belum lulus misi akhir bagi laluan ini.",missT:"Hampir berjaya! Ini yang masih belum lengkap:",
   kidsCheer:n=>`Anda lulus misi. Hebat! 🌟 Dapatkan ${n} lagi lencana permainan dan sijil itu milik anda. Cuba salah satu ini:`,
   nameL:"Nama penuh pelajar (seperti yang mahu dicetak)",orgL:"Sekolah atau organisasi (pilihan)",make:"Hasilkan sijil",edit:"Tukar nama",
-  making:"Menyediakan sijil anda…",dl:"⬇️ Muat turun PNG",print:"🖨️ Cetak / Simpan PDF",code:"Kod pengesahan",
+  making:"Menyediakan sijil anda…",needName:"Sila taip nama anda menggunakan huruf.",ready:"Sijil anda sudah siap.",noQ:"Soalan tidak dapat dimuatkan. Muat semula halaman dan cuba lagi.",dl:"⬇️ Muat turun PNG",print:"🖨️ Cetak / Simpan PDF",code:"Kod pengesahan",
   noImg:"Logo tidak dapat dilukis (buka laman melalui pelayan web untuk memasukkannya).",
   pT:"Pembentangan Produk W2W",pS:"Portfolio pengamal · disimpan pada peranti ini",pName:"Nama anda",pProd:"Nama produk",pWaste:"Aliran sisa yang digunakan",
   pKg:"Sisa yang dialihkan sebulan (kg, anggaran)",pCust:"Pelanggan sasaran",pCost:"Kos seunit (RM)",pPrice:"Harga jualan (RM)",pMargin:"Untung dan margin (automatik)",
@@ -104,7 +104,9 @@ const cyrb53 = (s, seed = 0) => { let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ 
   h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
   h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
   return 4294967296 * (2097151 & h2) + (h1 >>> 0); };
-const normName = s => String(s || "").normalize("NFC").trim().replace(/\s+/g, " ").toUpperCase();
+/* names are typed by learners: drop control, zero-width and bidi-override characters, collapse spaces */
+const cleanText = (s, max = 80) => [...String(s ?? "").normalize("NFC").replace(/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u2028-\u202e\u2060-\u206f\ufeff]/g, "").replace(/\s+/g, " ").trim()].slice(0, max).join("").trim();
+const normName = s => cleanText(s, 200).toUpperCase();
 // Verification code = short hash of name|track|date|score (not a secret; it shows the printed details were not altered).
 const certCode = (name, track, date, pct) => { const h = cyrb53(`${normName(name)}|${track}|${date}|${+pct}`).toString(36).toUpperCase().padStart(8, "0").slice(-8); return `WQ-${h.slice(0, 4)}-${h.slice(4)}`; };
 WQ.certCode = certCode;
@@ -132,6 +134,9 @@ function pitchMissing(p = getPitch()) {
   if (!(p.sdgs || []).length) miss.push("sdgs");
   return miss;
 }
+const focusEl = e => { if (!e) return; if (!e.hasAttribute("tabindex")) e.setAttribute("tabindex", "-1"); e.focus({ preventScroll: true }); };
+const say = (el, msg) => { const r = el.querySelector(".cr-live"); if (!r) return; r.textContent = ""; setTimeout(() => { r.textContent = msg; }, 60); };
+const LIVE = `<p class="vh cr-live" aria-live="polite" aria-atomic="true"></p>`;
 const money = n => "RM" + (Math.round(n * 100) / 100).toFixed(2);
 
 /* ---------- printing: show only .cr-printable ---------- */
@@ -172,13 +177,15 @@ WQ.css("cert", `
 .cr-sheet{display:none}
 @media (max-width:560px){.cr-two{grid-template-columns:1fr}}
 @media print{
-  html.cr-p body{margin:0;min-height:0!important;background:#fff}
+  html.cr-p,html.cr-p body{margin:0!important;padding:0!important;min-height:0!important;height:auto!important;background:#fff!important}
+  html.cr-p body::before,html.cr-p body::after{display:none!important}
   html.cr-p body>:not(#view){display:none!important}
   html.cr-p #view{padding:0!important;margin:0!important;min-height:0!important;max-width:none!important}
   html.cr-p #view>:not(.cr-printable){display:none!important}
   html.cr-p .cr-printable{display:block!important}
   html.cr-p .cr-prev{margin:0!important;background:none;padding:5mm 0 0}
-  html.cr-p .cr-prev img{width:auto;height:200mm;margin:0 auto;box-shadow:none;border-radius:0}
+  html.cr-p .cr-prev{break-inside:avoid}
+  html.cr-p .cr-prev img{width:auto;height:199mm;max-width:100%;object-fit:contain;margin:0 auto;box-shadow:none;border-radius:0}
   html.cr-p .cr-noprint{display:none!important}
   .cr-sheet{font-size:11pt;color:#000}
   .cr-sheet h1{font-size:17pt;margin:0 0 2mm}.cr-sheet table{width:100%;border-collapse:collapse}
@@ -292,36 +299,37 @@ WQ.registerPage("cert", { mount(el, { args, relang }) {
 function questView(el, id, relang) {
   const t = TRACKS[id], l = L();
   if (!relang && (!quest || quest.id !== id || quest.done)) newQuest(id);
-  el.innerHTML = WQ.head(t.icon, { en: T.en.qT(t.short.en), bm: T.bm.qT(t.short.bm) }, { en: T.en.qInfo(t.n, t.pass), bm: T.bm.qInfo(t.n, t.pass) }) + `<div id="crQ"></div>`;
+  el.innerHTML = WQ.head(t.icon, { en: T.en.qT(t.short.en), bm: T.bm.qT(t.short.bm) }, { en: T.en.qInfo(t.n, t.pass), bm: T.bm.qInfo(t.n, t.pass) }) + `<div id="crQ"></div>` + LIVE;
   const box = el.querySelector("#crQ");
   const render = () => {
     if (quest.done) return results();
+    if (!quest.deck.length) { box.innerHTML = `<p class="note warn">${l.noQ}</p>`; return; }
     const n = quest.deck.length, d = quest.deck[quest.idx], pick = quest.picks[quest.idx], last = quest.idx === n - 1;
     box.innerHTML = `<div class="card"><div class="row"><span class="pill">${l.qOf(quest.idx + 1, n)}</span><div class="meter" style="flex:1;min-width:120px"><i style="width:${quest.idx / n * 100}%"></i></div></div>
       <p class="cr-q" id="crQq">${WQ.esc(WQ.t(d.q.q))}</p>
-      <div class="cr-ans" role="group" aria-labelledby="crQq">${d.order.map((ai, i) => `<button class="choice ${pick === ai ? "pick" : ""}" data-a="${ai}" ${pick != null ? "disabled" : ""}><b>${"ABCD"[i]}</b><span>${WQ.esc(WQ.t(d.q.a[ai]))}</span></button>`).join("")}</div>
-      <div class="row" style="justify-content:space-between;margin-top:14px"><span class="small muted" aria-live="polite">${pick != null ? "🔒 " + l.locked : ""}</span>
+      <div class="cr-ans" role="group" aria-labelledby="crQq">${d.order.map((ai, i) => `<button class="choice ${pick === ai ? "pick" : ""}" data-a="${ai}" aria-pressed="${pick === ai}" ${pick != null ? "disabled" : ""}><b>${"ABCD"[i]}</b><span>${WQ.esc(WQ.t(d.q.a[ai]))}</span></button>`).join("")}</div>
+      <div class="row" style="justify-content:space-between;margin-top:14px"><span class="small muted">${pick != null ? "🔒 " + l.locked : ""}</span>
       <button class="btn ${last ? "blue" : ""}" id="crNx" ${pick == null ? "disabled" : ""}>${last ? l.finish : l.next}</button></div></div>`;
-    box.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { if (quest.picks[quest.idx] != null) return; quest.picks[quest.idx] = +b.dataset.a; render(); box.querySelector("#crNx").focus(); });
-    box.querySelector("#crNx").onclick = () => { if (quest.picks[quest.idx] == null) return; if (last) grade(); else { quest.idx++; render(); } };
+    box.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { if (quest.picks[quest.idx] != null) return; quest.picks[quest.idx] = +b.dataset.a; render(); box.querySelector("#crNx").focus(); say(el, l.locked); });
+    box.querySelector("#crNx").onclick = () => { if (quest.picks[quest.idx] == null) return; if (last) grade(); else { quest.idx++; render(); focusEl(box.querySelector("#crQq")); say(el, l.qOf(quest.idx + 1, n)); } };
   };
   const grade = () => {
     const n = quest.deck.length, right = quest.deck.filter((d, i) => quest.picks[i] === d.q.c).length, pct = Math.round(right / n * 100), date = today();
-    Object.assign(quest, { done: true, pct, right });
+    Object.assign(quest, { done: true, pct, right, pass: right * 100 >= t.pass * n });   // raw ratio, so rounding can never lift a fail to a pass
     S.setJSON("cert-last-" + id, { pct, right, n, date });
     const prev = S.getJSON("cert-pass-" + id, null);
-    if (pct >= t.pass && (!prev || pct > prev.pct)) S.setJSON("cert-pass-" + id, { pct, date });
-    WQ.beep(pct >= t.pass); WQ.track(`cert-test/${id}/${pct >= t.pass ? "pass" : "fail"}`); if (pct >= t.pass) WQ.confetti();
-    results(); scrollTo(0, 0);
+    if (quest.pass && (!prev || pct > prev.pct)) S.setJSON("cert-pass-" + id, { pct, date });
+    WQ.beep(quest.pass); WQ.track(`cert-test/${id}/${quest.pass ? "pass" : "fail"}`); if (quest.pass) WQ.confetti();
+    results(); scrollTo(0, 0); focusEl(box.querySelector("h2"));
   };
   const results = () => {
-    const pass = quest.pct >= t.pass, s = status(id), n = quest.deck.length;
+    const pass = quest.pass ?? quest.pct >= t.pass, s = status(id), n = quest.deck.length;
     box.innerHTML = `<div class="card" style="text-align:center"><h2>${l.resT}</h2><div class="cr-big">${quest.pct}%</div><p>${quest.right}/${n} · <b>${pass ? l.pass : l.fail}</b>${pass ? "" : " · " + l.need(t.pass)}</p>
       ${pass ? (s.ready ? `<p><a class="btn blue" href="#/cert/get/${id}">${l.get}</a></p>` : missingBox(id, s)) : `<p class="note warn" style="text-align:left">${t.aud === "kids" ? l.failMsg.kids : l.failMsg.other}</p>`}
       <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="crAg">${l.again}</button><a class="btn alt" href="#/game/quiz">${l.practise}</a><a class="btn alt" href="#/cert">${l.hub}</a></div></div>
       <div class="card cr-res"><h3>${l.all}</h3><ol>${quest.deck.map((d, i) => { const ok = quest.picks[i] === d.q.c; return `<li><b>${ok ? "✅" : "❌"} ${WQ.esc(WQ.t(d.q.q))}</b><br>
         ${ok ? "" : `<span class="tag red">${l.yours}</span> ${WQ.esc(WQ.t(d.q.a[quest.picks[i]]))}<br>`}<span class="tag go">${l.correct}</span> ${WQ.esc(WQ.t(d.q.a[d.q.c]))}<br><span class="small muted">💡 ${WQ.esc(WQ.t(d.q.why))}</span></li>`; }).join("")}</ol></div>`;
-    box.querySelector("#crAg").onclick = () => { newQuest(id); render(); scrollTo(0, 0); };
+    box.querySelector("#crAg").onclick = () => { newQuest(id); render(); scrollTo(0, 0); focusEl(box.querySelector("#crQq")); };
   };
   render();
 }
@@ -338,21 +346,23 @@ function missingBox(id, s) {
 /* ---------- certificate ---------- */
 function getView(el, id) {
   const t = TRACKS[id], l = L(), s = status(id);
-  el.innerHTML = WQ.head(t.icon, t.short, t.level) + `<div id="crG"></div>`;
+  el.innerHTML = WQ.head(t.icon, t.short, t.level) + `<div id="crG"></div>` + LIVE;
   const box = el.querySelector("#crG");
   if (!s.passRec) { box.innerHTML = `<div class="card"><p>${l.noPass}</p><p><a class="btn" href="#/cert/quest/${id}">${l.take}</a></p></div>`; return; }
   if (!s.ready) { box.innerHTML = `<div class="card">${missingBox(id, s)}<p style="margin-top:12px"><a class="btn alt" href="#/cert">${l.hub}</a></p></div>`; return; }
   const form = () => {
-    box.innerHTML = `<div class="card cr-form"><label for="crN">${l.nameL}</label><input id="crN" maxlength="60" autocomplete="name" value="${WQ.esc(S.get("cert-name") || "")}">
-      <label for="crO">${l.orgL}</label><input id="crO" maxlength="80" value="${WQ.esc(S.get("cert-org") || "")}">
+    box.innerHTML = `<div class="card cr-form"><label for="crN">${l.nameL}</label><input id="crN" maxlength="60" autocomplete="name" aria-describedby="crNe" value="${WQ.esc(S.get("cert-name") || "")}">
+      <p class="note danger small" id="crNe" role="alert" hidden></p>
+      <label for="crO">${l.orgL}</label><input id="crO" maxlength="80" autocomplete="organization" value="${WQ.esc(S.get("cert-org") || "")}">
       <p class="row" style="margin-top:14px"><button class="btn" id="crMk">${l.make}</button></p></div>`;
-    const go = () => { const n = box.querySelector("#crN").value.trim().replace(/\s+/g, " "); if (!n) { WQ.anim(box.querySelector("#crN"), "shake"); box.querySelector("#crN").focus(); return; }
-      S.set("cert-name", n); S.set("cert-org", box.querySelector("#crO").value.trim()); show(); };
+    const go = () => { const inp = box.querySelector("#crN"), n = cleanText(inp.value, 60), er = box.querySelector("#crNe");
+      if (!/\p{L}/u.test(n)) { er.textContent = l.needName; er.hidden = false; inp.setAttribute("aria-invalid", "true"); WQ.anim(inp, "shake"); inp.focus(); return; }
+      S.set("cert-name", n); S.set("cert-org", cleanText(box.querySelector("#crO").value, 80)); show(true); };
     box.querySelector("#crMk").onclick = go;
     box.querySelectorAll("input").forEach(i => i.onkeydown = e => { if (e.key === "Enter") go(); });
   };
-  const show = async () => {
-    const d = { name: S.get("cert-name"), org: S.get("cert-org") || "", track: id, date: s.passRec.date, pct: s.passRec.pct };
+  const show = async user => {
+    const d = { name: cleanText(S.get("cert-name"), 60), org: cleanText(S.get("cert-org"), 80), track: id, date: s.passRec.date, pct: s.passRec.pct };
     d.code = certCode(d.name, id, d.date, d.pct);
     box.innerHTML = `<p class="muted" aria-live="polite">${l.making}</p>`;
     el.querySelector(".cr-printable")?.remove();
@@ -368,11 +378,12 @@ function getView(el, id) {
     const pv = document.createElement("div"); pv.className = "cr-printable cr-prev"; pv.style.marginTop = "16px";
     pv.innerHTML = `<img alt="${WQ.esc(`${WQ.t(C[WQ.lang].title)}: ${d.name}, ${WQ.t(t.short)}, ${d.pct}%`)}" src="${url}">`;
     el.appendChild(pv);
-    box.querySelector("#crDl").onclick = () => { WQ.track("certificate/download/" + id); const a = document.createElement("a"); a.href = url; a.download = `WasteQuest-${id}-${d.name.replace(/[^\w]+/g, "_").slice(0, 40)}.png`; document.body.appendChild(a); a.click(); a.remove(); };
+    box.querySelector("#crDl").onclick = () => { WQ.track("certificate/download/" + id); const a = document.createElement("a"); a.href = url; a.download = `WasteQuest-${id}-${d.name.replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_+|_+$/g, "").slice(0, 40) || "certificate"}.png`; document.body.appendChild(a); a.click(); a.remove(); };
     box.querySelector("#crPr").onclick = () => WQ.track("certificate/print/" + id) || printOnly("size:A4 landscape;margin:0");
-    box.querySelector("#crEd").onclick = () => { pv.remove(); form(); };
+    box.querySelector("#crEd").onclick = () => { pv.remove(); form(); box.querySelector("#crN").focus(); };
+    say(el, `${l.ready} ${l.code}: ${d.code}`); if (user) box.querySelector("#crDl").focus();
   };
-  if (S.get("cert-name")) show(); else form();
+  if (/\p{L}/u.test(cleanText(S.get("cert-name"), 60))) show(); else form();
 }
 
 /* ---------- practitioner portfolio: W2W product pitch ---------- */
@@ -408,7 +419,7 @@ function pitchView(el) {
     el.querySelector("#pfSheet").innerHTML = `<img src="assets/logos-upm.jpeg" alt="UPM"><h1>${l.sheetT}</h1><p>WasteQuest · ${fmtDate(today())}</p><table>
       ${row(l.pName, e(q.name))}${row(l.pProd, e(q.product))}${row(l.pWaste, e(q.waste))}${row(l.pKg, kg ? `${kg} kg (≈ ${Math.round(kg * 12 * 10) / 10} kg ${l.perYear})` : "")}
       ${row(l.pCust, e(q.customers))}${row(l.pCost, +q.cost > 0 ? money(+q.cost) : "")}${row(l.pPrice, +q.price > 0 ? money(+q.price) : "")}${row(l.pMargin, calc(q))}
-      ${row(l.pSdg.replace(/\s*\(.*\)/, ""), q.sdgs.map(n => `SDG ${n} ${WQ.esc(SDGS[n - 1][WQ.lang === "bm" ? 1 : 0])}`).join("; "))}${row(l.pSafe, e(q.safety))}</table>
+      ${row(l.pSdg.replace(/\s*\(.*\)/, ""), q.sdgs.filter(n => SDGS[n - 1]).map(n => `SDG ${n} ${WQ.esc(SDGS[n - 1][WQ.lang === "bm" ? 1 : 0])}`).join("; "))}${row(l.pSafe, e(q.safety))}</table>
       <div class="fac"><b>${l.fac}</b> &nbsp; ☐ ${l.chk1} &nbsp; ☐ ${l.chk2} &nbsp; ☐ ${l.chk3}<div><span>${l.facName}</span><span>${l.sign}</span><span>${l.date}</span></div></div>`;
   };
   el.querySelectorAll("input,textarea").forEach(i => i.addEventListener("input", sync));

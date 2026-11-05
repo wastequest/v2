@@ -65,7 +65,7 @@ if (typeof module === "object" && module.exports) {
 }
 
 /* ---------------- constants & text ---------------- */
-const PFX = "wasteq-";
+const PFX = "wasteq-", MAXP = 120;                                  // MAXP: free PeerJS service; beyond this, use Team mode
 const PEER_JS = ["https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js", "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"];
 const QR_JS = ["https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"];
 const TILES = [["▲", "red"], ["◆", "blue"], ["●", "yellow"], ["■", "green"]];
@@ -95,7 +95,7 @@ const T = {
   localWarn: "This page is running only on this computer (a file or localhost), so phones cannot open the link or QR code. Put WasteQuest online (for example on GitHub Pages) and host from there.",
   srvWarn: "Lost contact with the connection service. Players already in can keep playing; new players may not be able to join until it comes back.",
   players: "Players", noPlayers: "Waiting for players to join…", kick: "Remove",
-  start: "Start quiz", needOne: "At least one player must join first.",
+  start: "Start quiz", needOne: "At least one player must join first.", full: "This class is full.",
   settings: "Settings", track: "Level", topic: "Topic", allTopics: "All topics", nq: "Questions", secs: "Seconds per question",
   tracks: { kids: "Kids 7–12", teens: "Teens 13–17", adults: "Adults" },
   onlyN: n => `Only ${n} questions are available for this choice, so the quiz will use ${n}.`, sample: "Using the 8 built-in sample questions.",
@@ -119,7 +119,7 @@ const T = {
   correct: "Correct!", wrong: "Wrong", noAns: "No answer", ansWas: "The answer:",
   rankOf: (r, n) => `You're #${r} of ${n}`, pts: "pts", streak: n => `🔥 ${n} in a row!`,
   youCame: (r, n) => `You finished #${r} of ${n}!`, correctOf: (c, n) => `${c} of ${n} correct`,
-  kicked: "The teacher removed you from this class.", home: "Home", myBadges: "My badges",
+  kicked: "The teacher removed you from this class.", closed: "The teacher has closed this class. Thanks for playing!", home: "Home", myBadges: "My badges",
   teamsN: "Number of teams", teamNames: "Team names", teamHint: "Teams: hold up your answer or call out the shape!",
   whoRight: "Tap every team that got it right (+100 points each):", award: "Add points", scores: "Scores",
   winner: "Winner!", tie: "It's a tie!", playAgain: "Play again", teamBack: "Change teams",
@@ -141,7 +141,7 @@ const T = {
   localWarn: "Halaman ini hanya berjalan pada komputer ini (fail atau localhost), jadi telefon tidak dapat membuka pautan atau kod QR. Letakkan WasteQuest dalam talian (contohnya di GitHub Pages) dan anjurkan dari situ.",
   srvWarn: "Hubungan dengan perkhidmatan sambungan terputus. Pemain yang sudah masuk boleh terus bermain; pemain baharu mungkin tidak dapat menyertai sehingga ia pulih.",
   players: "Pemain", noPlayers: "Menunggu pemain menyertai…", kick: "Keluarkan",
-  start: "Mula kuiz", needOne: "Sekurang-kurangnya seorang pemain perlu menyertai dahulu.",
+  start: "Mula kuiz", needOne: "Sekurang-kurangnya seorang pemain perlu menyertai dahulu.", full: "Kelas ini sudah penuh.",
   settings: "Tetapan", track: "Tahap", topic: "Topik", allTopics: "Semua topik", nq: "Bilangan soalan", secs: "Saat bagi setiap soalan",
   tracks: { kids: "Kanak-kanak 7–12", teens: "Remaja 13–17", adults: "Dewasa" },
   onlyN: n => `Hanya ${n} soalan tersedia untuk pilihan ini, jadi kuiz akan menggunakan ${n} soalan.`, sample: "Menggunakan 8 soalan contoh terbina dalam.",
@@ -165,7 +165,7 @@ const T = {
   correct: "Betul!", wrong: "Salah", noAns: "Tiada jawapan", ansWas: "Jawapannya:",
   rankOf: (r, n) => `Anda di tempat ke-${r} daripada ${n}`, pts: "mata", streak: n => `🔥 ${n} betul berturut-turut!`,
   youCame: (r, n) => `Anda menduduki tempat ke-${r} daripada ${n}!`, correctOf: (c, n) => `${c} daripada ${n} betul`,
-  kicked: "Guru telah mengeluarkan anda daripada kelas ini.", home: "Utama", myBadges: "Lencana saya",
+  kicked: "Guru telah mengeluarkan anda daripada kelas ini.", closed: "Guru telah menutup kelas ini. Terima kasih kerana bermain!", home: "Utama", myBadges: "Lencana saya",
   teamsN: "Bilangan pasukan", teamNames: "Nama pasukan", teamHint: "Pasukan: angkat jawapan anda atau sebut bentuknya!",
   whoRight: "Tekan setiap pasukan yang menjawab dengan betul (+100 mata setiap satu):", award: "Tambah mata", scores: "Markah",
   winner: "Pemenang!", tie: "Seri!", playAgain: "Main lagi", teamBack: "Tukar pasukan",
@@ -173,11 +173,11 @@ const T = {
  }
 };
 const HELP = {
- en: { t: "Live class mode can't connect", old: "This browser is too old for live mode. Please use an up-to-date Chrome, Edge, Safari or Firefox.",
+ en: { t: "Live class mode can't connect", off: "This device is offline right now.", old: "This browser is too old for live mode. Please use an up-to-date Chrome, Edge, Safari or Firefox.",
    why: "Live mode needs internet. It links phones to this screen through a free online service (PeerJS).",
    tips: ["School Wi-Fi may block it. Try a phone hotspot for this device; students can use mobile data or the same hotspot.",
      "Check that this device is online, then press Try again.", "No internet? Use Team mode on the projector: no phones needed."] },
- bm: { t: "Mod kelas langsung tidak dapat disambungkan", old: "Pelayar ini terlalu lama untuk mod langsung. Sila gunakan Chrome, Edge, Safari atau Firefox terkini.",
+ bm: { t: "Mod kelas langsung tidak dapat disambungkan", off: "Peranti ini tiada sambungan internet sekarang.", old: "Pelayar ini terlalu lama untuk mod langsung. Sila gunakan Chrome, Edge, Safari atau Firefox terkini.",
    why: "Mod langsung memerlukan internet. Ia menghubungkan telefon dengan skrin ini melalui perkhidmatan dalam talian percuma (PeerJS).",
    tips: ["Wi-Fi sekolah mungkin menyekatnya. Cuba hotspot telefon untuk peranti ini; murid boleh guna data mudah alih atau hotspot yang sama.",
      "Pastikan peranti ini disambungkan ke internet, kemudian tekan Cuba lagi.", "Tiada internet? Gunakan Mod pasukan pada projektor: tidak perlu telefon."] }
@@ -215,9 +215,9 @@ WQ.addBadge("class", { icon: "📱", name: { en: "Class Battler", bm: "Pejuang K
 WQ.css("class", `
 .cl-modes{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
 .cl-mode{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;transition:transform .15s}
-.cl-mode:hover{transform:translateY(-3px)}.cl-mode .ti{font-size:3rem;line-height:1}.cl-mode h3{font-size:1.3rem}.cl-mode p{margin:0;color:var(--muted)}
+.cl-mode:hover{transform:translateY(-3px)}.cl-mode .ti{font-size:3rem;line-height:1}.cl-mode h2,.cl-tips h2{font-size:1.3rem;margin:0}.cl-mode p{margin:0;color:var(--muted)}
 .cl-tips{margin-top:18px}.cl-tips ul,.cl-help ul{margin:.3em 0;padding-left:1.3em}
-.cl-help h3{font-size:1.2rem}.cl-help2{margin-top:10px;padding-top:10px;border-top:1px dashed #e8a0a8;font-size:.9rem;color:var(--muted)}
+.cl-help h2{font-size:1.2rem;margin:0 0 4px}.cl-help2{margin-top:10px;padding-top:10px;border-top:1px dashed #e8a0a8;font-size:.9rem;color:var(--muted)}
 .cl-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
 .cl-mono{font-family:"Baloo 2",monospace;letter-spacing:.08em}
 .cl-lobby{display:grid;gap:18px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
@@ -246,7 +246,7 @@ WQ.css("class", `
 .cl-tile{display:flex;align-items:center;gap:14px;border-radius:16px;padding:14px 18px;color:#fff;font-weight:800;font-size:clamp(1.05rem,2.1vw,1.85rem);line-height:1.2;min-height:clamp(64px,10vh,120px);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);text-align:left;width:100%;transition:opacity .3s}
 .cl-tile .sh{font-size:1.5em;line-height:1;flex:none;width:1.2em;text-align:center}
 .t-red{background:#d62839}.t-blue{background:#1f6fd1}.t-yellow{background:#ffc83d;color:#1d3557}.t-green{background:#2e8b23}
-.cl-tile.dim{opacity:.28}.cl-tile.ok{outline:6px solid var(--ink);outline-offset:3px}
+.cl-tile.dim{background:#ebe5da;color:#4d5563;box-shadow:none}.cl-tile.ok{outline:6px solid var(--ink);outline-offset:3px}
 .cl-foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:16px}
 .cl-chart{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:14px;height:clamp(130px,24vh,240px);margin:14px auto;max-width:760px}
 .cl-col{display:flex;flex-direction:column;gap:6px;min-width:0}.cl-col .bw{flex:1;position:relative}
@@ -271,7 +271,7 @@ WQ.css("class", `
 .cl-pad .cl-tile .sh{font-size:2.6rem;width:auto}.cl-pad .cl-tile:active{transform:scale(.97)}
 .cl-pq{font-size:clamp(1.1rem,4.5vw,1.45rem);margin:8px 0 0}
 .cl-big{font-family:"Baloo 2";font-weight:800;font-size:clamp(2rem,9vw,3.2rem);line-height:1.1}
-.cl-res{border-radius:var(--radius);padding:22px 16px;color:#fff;box-shadow:var(--shadow)}.cl-res.good{background:var(--grass)}.cl-res.bad{background:var(--red)}.cl-res.none{background:var(--grey)}
+.cl-res{border-radius:var(--radius);padding:22px 16px;color:#fff;box-shadow:var(--shadow)}.cl-res.good{background:#2e7d23}.cl-res.bad{background:var(--red)}.cl-res.none{background:var(--grey)}
 .cl-chosen{max-width:280px;margin:16px auto;flex-direction:column;justify-content:center;text-align:center;min-height:140px}.cl-chosen .sh{font-size:3rem;width:auto}
 .cl-lost{position:sticky;top:6px;z-index:20;background:var(--orange);color:#fff;font-weight:800;border-radius:14px;padding:10px 14px;margin:0 auto 12px;max-width:520px;text-align:center;box-shadow:var(--shadow)}
 .cl-spin{width:52px;height:52px;border:7px solid var(--line);border-top-color:var(--grass);border-radius:50%;animation:clspin 1s linear infinite;margin:18px auto}
@@ -281,10 +281,10 @@ WQ.css("class", `
 .cl-tset{display:flex;flex-direction:column;gap:8px}.cl-trow{display:flex;gap:8px;align-items:center}.cl-trow .sw{font-size:1.6rem;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;flex:none}
 .cl-seg{display:flex;gap:8px;flex-wrap:wrap}.cl-seg button{background:#fff;border:3px solid var(--line);border-radius:999px;padding:6px 18px;font-weight:800}
 .cl-seg button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
-.tm0{background:var(--purple)}.tm1{background:var(--teal)}.tm2{background:var(--orange)}.tm3{background:#d6418a}
+.tm0{background:var(--purple)}.tm1{background:#0e7c75}.tm2{background:#b35900}.tm3{background:#b8306f}
 .cl-teams{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:10px}
-.cl-tm{color:#fff;border-radius:18px;padding:14px;font-weight:800;font-size:clamp(1.05rem,2vw,1.6rem);opacity:.45;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);display:flex;gap:8px;align-items:center;justify-content:center}
-.cl-tm[aria-pressed=true]{opacity:1;outline:5px solid var(--ink);outline-offset:3px}
+.cl-tm{color:#fff;border-radius:18px;padding:14px;font-weight:800;font-size:clamp(1.05rem,2vw,1.6rem);filter:grayscale(.75);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);display:flex;gap:8px;align-items:center;justify-content:center}
+.cl-tm[aria-pressed=true]{filter:none;outline:5px solid var(--ink);outline-offset:3px}
 .cl-tbar{flex:1;min-width:60px;height:22px;background:#e8eef4;border-radius:999px;overflow:hidden}.cl-tbar i{display:block;height:100%;border-radius:999px;transition:width .6s}
 @media (max-width:860px){.cl-lobby{grid-template-columns:1fr}}
 @media (max-width:600px){.cl-tiles{grid-template-columns:1fr}.cl-row{padding:8px 12px;gap:8px}.cl-chart{gap:8px}.cl-kiki .mascot{width:70px}}
@@ -296,13 +296,40 @@ const L = () => T[WQ.lang] || T.en;
 const $ = s => root && root.querySelector(s);
 const esc = s => WQ.esc(s), tt = o => WQ.esc(WQ.t(o));
 const fmt = n => Number(n || 0).toLocaleString("en-MY");
-const main = (html, sub) => { const m = $("#clMain"); if (m) m.innerHTML = (sub ? WQ.head("📱", TITLE, sub) : "") + html; return m; };
+/* re-render the stage; if keyboard/screen-reader focus was inside it, move focus to the next sensible control (never lose it to <body>) */
+const main = (html, sub) => {
+  const m = $("#clMain"); if (!m) return m;
+  const a = document.activeElement, had = a && a !== document.body && (m.contains(a) || !a.isConnected);
+  m.innerHTML = (sub ? WQ.head("📱", TITLE, sub) : "") + html;
+  if (had && !m.contains(document.activeElement)) {
+    const f = m.querySelector("[data-next]:not([disabled]),[data-act=ans],#clName,.cl-phone .btn,[data-act=hNew],.cl-big,h2");
+    if (f) { if (!/^(BUTTON|A|INPUT|SELECT)$/.test(f.tagName)) f.setAttribute("tabindex", "-1"); f.focus({ preventScroll: true }); }
+  }
+  return m;
+};
+/* one polite live region per page for scores, results and phase changes (timer ticks are never announced) */
+const say = msg => { const r = $("#clLive"); if (!r) return; r.textContent = ""; setTimeout(() => { if (r.isConnected) r.textContent = msg; }, 60); };
+/* host → phone messages are untrusted (anyone who knows the code could pretend to be the host): keep only well-formed fields */
+const str = (v, n = 300) => typeof v === "string" ? v.slice(0, n) : "";
+const txt = o => typeof o === "string" ? str(o) : o && typeof o === "object" ? { en: str(o.en), bm: str(o.bm) || str(o.en) } : "";
+const num = (v, lo, hi, d = lo) => v != null && v !== "" && Number.isFinite(+v) ? Math.min(hi, Math.max(lo, Math.round(+v))) : d;
+function cleanMsg(d) {
+  const m = { type: str(d.type, 20) }, a = Array.isArray(d.a) ? d.a.slice(0, 4).map(txt) : [];
+  ["n", "total", "rank", "count", "correct", "score", "gained", "streak"].forEach(k => m[k] = num(d[k], 0, 1e7, 0));
+  m.total = Math.max(1, m.total); m.rank = Math.max(1, m.rank); m.count = Math.max(m.rank, m.count);
+  m.left = num(d.left, 0, 600000, 0); m.secs = num(d.secs, 1, 600, 20);
+  m.q = txt(d.q); m.why = d.why ? txt(d.why) : null; m.a = a; m.ok = d.ok === true;
+  ["c", "i", "mine", "answered"].forEach(k => m[k] = num(d[k], 0, a.length ? a.length - 1 : 3, null));
+  m.name = str(d.name, 16);
+  m.top = Array.isArray(d.top) ? d.top.slice(0, 5).map(t => ({ name: str(t && t.name, 16), score: num(t && t.score, 0, 1e7, 0) })) : [];
+  if (["question", "reveal"].includes(m.type) && (a.length < 2 || (m.type === "reveal" && m.c == null))) return null;
+  return m;
+}
 const kiki = (msg, cls = "") => `<div class="cl-kiki ${cls}">${WQ.MASCOT}${msg ? `<div class="bubble">${msg}</div>` : ""}</div>`;
 const tile = (a, i, cls = "") => `<div class="cl-tile t-${TILES[i][1]} ${cls}"><span class="sh" aria-hidden="true">${TILES[i][0]}</span><span>${tt(a)}</span></div>`;
 const fsBtn = () => document.fullscreenEnabled ? `<button class="btn alt" data-act="fs">⛶ ${document.fullscreenElement ? L().exitFs : L().fs}</button>` : "";
 const sget = k => { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } };
 const sset = (k, v) => { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
-const sdel = k => { try { sessionStorage.removeItem(k); } catch (e) {} };
 const getPid = () => {
   let p = sget("wq-class-pid");
   if (typeof p !== "string" || !/^[a-z0-9]{12,40}$/.test(p)) { p = Array.from({ length: 16 }, () => "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(rand() * 36)]).join(""); sset("wq-class-pid", p); }
@@ -326,6 +353,7 @@ const loadAny = (urls, ready) => loading[urls[0]] = loading[urls[0]] || new Prom
 const keepAwake = async () => { try { if (!wake && navigator.wakeLock && document.visibilityState === "visible") { wake = await navigator.wakeLock.request("screen"); wake.addEventListener("release", () => { wake = null; }); } } catch (e) {} };
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && (H || (J && J.st !== "form"))) keepAwake(); });
 document.addEventListener("fullscreenchange", () => { if (root) root.querySelectorAll("[data-act=fs]").forEach(b => b.textContent = "⛶ " + (document.fullscreenElement ? L().exitFs : L().fs)); });
+window.addEventListener("online", () => { if (H && H.phase === "error") { killAll(); startHost(); } else if (J && J.st === "fail" && !J.dead) joinGo(); });   // back online: retry by itself
 const onUnload = e => { if (H && H.players.size && !["lobby", "final", "error"].includes(H.phase)) { e.preventDefault(); e.returnValue = ""; } };
 
 /* question bank: WQ.questions (from questions.js), falling back to the built-in sample */
@@ -356,7 +384,7 @@ function bindSet(box, s) {
 }
 function helpBox(kind) {
   return `<div class="note danger cl-help" role="alert">${(WQ.lang === "bm" ? ["bm", "en"] : ["en", "bm"]).map((g, k) => { const h = HELP[g];
-    return `<div lang="${g === "bm" ? "ms" : "en"}"${k ? ' class="cl-help2"' : ""}><h3>📶 ${h.t}</h3>${kind === "browser" ? `<p><b>${h.old}</b></p>` : ""}<p>${h.why}</p><ul>${h.tips.map(x => `<li>${x}</li>`).join("")}</ul></div>`; }).join("")}</div>`;
+    return `<div lang="${g === "bm" ? "ms" : "en"}"${k ? ' class="cl-help2"' : ""}><h2><span aria-hidden="true">📶</span> ${h.t}</h2>${kind === "browser" ? `<p><b>${h.old}</b></p>` : kind === "offline" ? `<p><b>${h.off}</b></p>` : ""}<p>${h.why}</p><ul>${h.tips.map(x => `<li>${x}</li>`).join("")}</ul></div>`; }).join("")}</div>`;
 }
 function paintClock(end, dur, id = "clClock") {
   const c = $("#" + id); if (!c) return;
@@ -374,10 +402,10 @@ const revealTiles = q => `<div class="cl-tiles">${q.a.map((a, i) => tile(a, i, i
 function renderMenu() {
   const l = L();
   main(`<div class="cl-modes">
-    <a class="card cl-mode" href="#/class/host"><span class="ti">🧑\u200d🏫</span><h3>${l.host}</h3><p>${l.hostD}</p><span><span class="tag warn">📶 ${l.needNet}</span></span></a>
-    <a class="card cl-mode" href="#/class/join"><span class="ti">📱</span><h3>${l.join}</h3><p>${l.joinD}</p><span><span class="tag warn">📶 ${l.needNet}</span></span></a>
-    <a class="card cl-mode" href="#/class/team"><span class="ti">👥</span><h3>${l.team}</h3><p>${l.teamD}</p><span><span class="tag go">✅ ${l.offline}</span></span></a></div>
-    <div class="card cl-tips"><h3>💡 ${l.tipsT}</h3><ul>${l.tips.map(x => `<li>${x}</li>`).join("")}</ul></div>`, l.sub);
+    <a class="card cl-mode" href="#/class/host"><span class="ti" aria-hidden="true">🧑\u200d🏫</span><h2>${l.host}</h2><p>${l.hostD}</p><span><span class="tag warn">📶 ${l.needNet}</span></span></a>
+    <a class="card cl-mode" href="#/class/join"><span class="ti" aria-hidden="true">📱</span><h2>${l.join}</h2><p>${l.joinD}</p><span><span class="tag warn">📶 ${l.needNet}</span></span></a>
+    <a class="card cl-mode" href="#/class/team"><span class="ti" aria-hidden="true">👥</span><h2>${l.team}</h2><p>${l.teamD}</p><span><span class="tag go">✅ ${l.offline}</span></span></a></div>
+    <div class="card cl-tips"><h2><span aria-hidden="true">💡</span> ${l.tipsT}</h2><ul>${l.tips.map(x => `<li>${x}</li>`).join("")}</ul></div>`, l.sub);
 }
 
 /* ---------------- host (teacher, projector) ---------------- */
@@ -390,8 +418,9 @@ const hsend = (p, m) => { try { if (m && p.conn && p.conn.open) p.conn.send(m); 
 function startHost() {
   H = { phase: "boot", players: new Map(), kicked: new Set(), set: defSet(), qs: [], qi: -1, seq: 0, warn: false };
   const h = H; renderHost();
-  window.addEventListener("beforeunload", onUnload);
-  loadAny(PEER_JS, peerClass).then(() => { if (H === h) openHostPeer(h, 0); }).catch(() => { if (H === h) hostFail("net"); });
+  window.addEventListener("beforeunload", onUnload); window.addEventListener("pagehide", hostBye);
+  if (navigator.onLine === false) return hostFail("offline");
+  loadAny(PEER_JS, peerClass).then(() => { if (H === h) openHostPeer(h, 0); }).catch(() => { if (H === h) hostFail(navigator.onLine === false ? "offline" : "net"); });
   loadAny(QR_JS, () => window.QRCode).then(drawQR).catch(() => { if (H === h) { h.qrFail = true; drawQR(); } });
 }
 function openHostPeer(h, tries) {
@@ -428,10 +457,11 @@ function onHostData(c, d) {
   if (!H || !d || typeof d !== "object" || typeof d.type !== "string") return;
   if (d.type === "hello") {
     const pid = String(d.pid || "");
-    if (!/^[a-z0-9]{6,40}$/i.test(pid)) { try { c.close(); } catch (e) {} return; }
+    if (!/^[a-z0-9]{6,40}$/i.test(pid) || (c.pid && c.pid !== pid)) { try { c.close(); } catch (e) {} return; }
     if (H.kicked.has(pid)) { try { c.send({ type: "kick" }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); return; }
     let p = H.players.get(pid);
     if (p) { if (p.conn && p.conn !== c) try { p.conn.close(); } catch (e) {} }
+    else if (H.players.size >= MAXP) { try { c.send({ type: "full" }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); return; }
     else { p = { pid, name: uniqueName(cleanName(d.name), [...H.players.values()].map(x => x.name)), score: 0, streak: 0, ans: {}, joined: ++H.seq, prev: 0, delta: 0 }; H.players.set(pid, p); }
     p.conn = c; c.pid = pid; p.lang = d.lang === "bm" ? "bm" : "en"; p.seen = Date.now();
     hsend(p, { type: "welcome", pid, name: p.name, code: H.code });
@@ -483,16 +513,17 @@ function hostBroadcast() { const rk = rankMap(); H.players.forEach(p => hsend(p,
 function hostAsk() {
   H.qi++; H.phase = "question"; H.dur = H.set.secs * 1000; H.end = Date.now() + H.dur; clearTimeout(H.autoT); H.autoT = 0;
   clearInterval(H.tick); H.tick = setInterval(() => { if (!H) return; paintClock(H.end, H.dur); if (Date.now() >= H.end) hostReveal(); }, 200);
-  hostBroadcast(); renderHost();
+  hostBroadcast(); renderHost(); say(`${L().qOf(H.qi + 1, H.qs.length)}. ${WQ.t(H.qs[H.qi].q)}`);
 }
 function hostReveal() {
   if (!H || H.phase !== "question") return;
   clearInterval(H.tick); clearTimeout(H.autoT); H.autoT = 0;
   H.players.forEach(p => { const a = p.ans[H.qi]; if (a && a.ok) { p.streak++; a.pts = points(true, a.left, H.dur, p.streak); p.score += a.pts; } else p.streak = 0; });
   H.phase = "reveal"; hostBroadcast(); renderHost(); WQ.beep(true);
+  const q = H.qs[H.qi], n = H.players.size; say(`${L().ansWas} ${WQ.t(q.a[q.c])}. ${n ? L().pct(Math.round([...H.players.values()].filter(p => p.ans[H.qi] && p.ans[H.qi].ok).length / n * 100)) : ""}`);
 }
 function hostEnd() {
-  H.phase = "final"; clearInterval(H.tick); hostBroadcast(); renderHost();
+  H.phase = "final"; clearInterval(H.tick); hostBroadcast(); renderHost(); say(L().ended);
   if (!WQ.award("class")) WQ.confetti();
 }
 function hostCSV() {
@@ -512,11 +543,12 @@ function paintPlayers() {
   $("#clCount").textContent = on;
   $("#clStart").disabled = !on; $("#clNeed").textContent = on ? "" : l.needOne;
 }
+const qrAlt = (box, url) => box.querySelectorAll("img,canvas").forEach(e => { e.setAttribute("alt", `QR: ${url}`); e.setAttribute("role", "img"); e.setAttribute("aria-label", `QR: ${url}`); });
 function drawQR() {
   const box = $("#clQR"); if (!box || !H || !H.code) return;
   const url = joinURL(H.code);
   if (window.QRCode) for (const lv of ["M", "L"]) {          // qrcodejs can throw "code length overflow" on some lengths: try another level
-    box.innerHTML = ""; try { new window.QRCode(box, { text: url, width: 256, height: 256, correctLevel: window.QRCode.CorrectLevel[lv] }); box.title = url; return; } catch (e) {}
+    box.innerHTML = ""; try { new window.QRCode(box, { text: url, width: 256, height: 256, correctLevel: window.QRCode.CorrectLevel[lv] }); box.title = url; qrAlt(box, url); return; } catch (e) {}
   }
   if (window.QRCode || H.qrFail) box.innerHTML = `<a class="small" href="${esc(url)}">${esc(url)}</a>`;
 }
@@ -565,7 +597,7 @@ function renderHost() {
       const pod = [1, 0, 2].map(k => list[k] ? `<div class="cl-pod p${k + 1}"><div class="nm">${esc(list[k].name)}</div><div class="sc">${fmt(list[k].score)} ${l.pts}</div><div class="blk">${["🥇", "🥈", "🥉"][k]}</div></div>` : "<div></div>").join("");
       return main(hostBar() + `<h2 class="cl-title">🎉 ${l.ended}</h2><div class="cl-podium">${pod}</div>
         <div class="cl-foot">${kiki(l.kFinal)}<span class="spacer"></span><button class="btn blue" data-act="hCsv">⬇ ${l.csv}</button><button class="btn" data-act="hAgain">🔁 ${l.again}</button><button class="btn alt" data-act="hNew">${l.newClass}</button></div>
-        <section class="card" style="margin-top:16px"><h3>${l.results}</h3><div class="tablewrap"><table class="tbl"><thead><tr><th>#</th><th>${l.nameCol}</th><th>${l.scoreCol}</th><th>${l.correctCol}</th></tr></thead>
+        <section class="card" style="margin-top:16px" aria-labelledby="clRes"><h3 id="clRes">${l.results}</h3><div class="tablewrap" tabindex="0" role="region" aria-labelledby="clRes"><table class="tbl"><thead><tr><th>#</th><th>${l.nameCol}</th><th>${l.scoreCol}</th><th>${l.correctCol}</th></tr></thead>
         <tbody>${list.map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.name)}</td><td>${fmt(p.score)}</td><td>${nOk(p)}/${N}</td></tr>`).join("")}</tbody></table></div></section>`);
     }
   }
@@ -579,16 +611,19 @@ function initJoin(code) {
   renderJoin();
 }
 function joinGo() {
-  const j = J; clearTimeout(J.retryT); J.st = "connecting"; J.err = ""; J.tries = 0; J.everOpen = false; J.lost = false;
-  sset("wq-class-join", { code: J.code, name: J.name }); renderJoin(); keepAwake();
-  loadAny(PEER_JS, peerClass).then(() => { if (J === j) connect(); }).catch(() => { if (J === j) { J.st = "fail"; renderJoin(); } });
+  const j = J; clearTimeout(J.retryT); J.st = "connecting"; J.err = ""; J.tries = 0; J.gone = 0; J.everOpen = false; J.lost = false; J.dead = false;
+  sset("wq-class-join", { code: J.code, name: J.name });
+  if (navigator.onLine === false) { J.st = "fail"; J.err = "offline"; return renderJoin(); }
+  renderJoin(); keepAwake();
+  loadAny(PEER_JS, peerClass).then(() => { if (J === j) connect(); }).catch(() => { if (J === j) { J.st = "fail"; J.err = navigator.onLine === false ? "offline" : ""; renderJoin(); } });
   clearInterval(J.wd); J.wd = setInterval(() => { if (J && J.conn && J.conn.open && Date.now() - J.last > 9000) jFail("stale"); }, 2000);
   clearInterval(J.tick); J.tick = setInterval(() => {
     if (!J || J.st !== "question") return;
     const left = J.deadline - Date.now(), c = $("#clJClock"); if (c) c.textContent = Math.max(0, Math.ceil(left / 1000));
-    if (left <= 0) { J.st = "timeup"; renderJoin(); }
+    if (left <= 0) { J.st = "timeup"; renderJoin(); say(L().timeUp); }
   }, 250);
 }
+function jStop() { if (!J) return; J.dead = true; clearTimeout(J.retryT); clearInterval(J.wd); killPeer(J); }
 function killPeer(o) { clearTimeout(o.openT); const p = o.peer; o.peer = null; o.conn = null; try { p && p.destroy(); } catch (e) {} }
 function connect() {
   if (!J || J.dead) return;
@@ -610,34 +645,44 @@ function connect() {
 function jFail(type) {
   if (!J || J.dead) return;
   killPeer(J); clearTimeout(J.retryT);
-  if (J.st === "kicked") return;
+  if (J.st === "closed") return;
   if (type === "browser-incompatible") { J.st = "fail"; J.err = "browser"; return renderJoin(); }
   J.tries++;
   if (!J.everOpen) {
     if (type === "peer-unavailable") { J.st = "notfound"; return renderJoin(); }
     if (J.tries >= 3) { J.st = "fail"; return renderJoin(); }
-  } else if (!J.lost) { J.lost = true; renderJoin(); }
+  } else {
+    J.gone = type === "peer-unavailable" ? (J.gone || 0) + 1 : 0;   // the host page is gone (closed or reloaded: a reload makes a new code)
+    if (J.gone >= 6) { J.st = "closed"; J.why = L().closed; J.lost = false; jStop(); say(J.why); return renderJoin(); }
+    if (!J.lost) { J.lost = true; renderJoin(); say(L().reconn); }
+  }
   J.retryT = setTimeout(connect, Math.min(1000 * J.tries, 5000));
 }
-function onJoinData(d) {
-  if (!J || !d || typeof d !== "object") return;
+function onJoinData(raw) {
+  if (!J || !raw || typeof raw !== "object" || Array.isArray(raw)) return;
+  const d = cleanMsg(raw); if (!d) return;
   J.last = Date.now();
-  const wasLost = J.lost; J.lost = false;
+  const wasLost = J.lost, l = L(), was = J.st; J.lost = false;
   switch (d.type) {
     case "ping": try { J.conn.send({ type: "ping" }); } catch (e) {} if (wasLost) renderJoin(); return;
-    case "welcome": J.name = String(d.name || J.name); sset("wq-class-join", { code: J.code, name: J.name }); if (J.st === "connecting") J.st = "lobby"; break;
-    case "lobby": J.st = "lobby"; J.count = d.count; J.score = 0; J.beeped = null; break;
-    case "question": J.q = d; J.deadline = Date.now() + (+d.left || 0); J.mine = d.answered;
-      J.st = d.answered != null ? "answered" : d.left > 0 ? "question" : "timeup"; break;
-    case "ack": if (J.q && d.n === J.q.n) { J.st = "answered"; J.mine = d.i; } break;
+    case "welcome": J.name = d.name || J.name; sset("wq-class-join", { code: J.code, name: J.name }); if (J.st === "connecting") { J.st = "lobby"; say(l.waitStart); } break;
+    case "lobby": J.st = "lobby"; J.count = d.count; J.score = 0; J.beeped = null; if (was !== "lobby") say(l.waitStart); break;
+    case "question": J.q = d; J.deadline = Date.now() + d.left; J.mine = d.answered;
+      J.st = d.answered != null ? "answered" : d.left > 0 ? "question" : "timeup";
+      if (J.st === "question" && (was !== "question" || !J.q || J.said !== d.n)) { J.said = d.n; say(`${l.qOf(d.n + 1, d.total)}. ${WQ.t(d.q)}`); }
+      break;
+    case "ack": if (J.q && d.n === J.q.n) { J.st = "answered"; J.mine = d.i; say(l.locked); } break;
     case "reveal": J.r = d; J.score = d.score; J.st = "reveal";
-      if (J.beeped !== d.n) { J.beeped = d.n; if (d.mine != null) WQ.beep(d.ok); try { navigator.vibrate && navigator.vibrate(d.ok ? 60 : [60, 60, 60]); } catch (e) {} }
+      if (J.beeped !== d.n) { J.beeped = d.n; if (d.mine != null) WQ.beep(d.ok); try { navigator.vibrate && navigator.vibrate(d.ok ? 60 : [60, 60, 60]); } catch (e) {}
+        say(`${d.mine == null ? l.noAns : d.ok ? `${l.correct} +${fmt(d.gained)} ${l.pts}` : l.wrong}. ${l.ansWas} ${d.a[d.c] ? WQ.t(d.a[d.c]) : ""}. ${l.rankOf(d.rank, d.count)}`); }
       break;
-    case "leaderboard": J.b = d; J.score = d.score; J.st = "board"; break;
+    case "leaderboard": J.b = d; J.score = d.score; J.st = "board"; if (was !== "board") say(`${l.rankOf(d.rank, d.count)}, ${fmt(d.score)} ${l.pts}`); break;
     case "end": J.e = d; J.score = d.score; J.st = "end";
-      if (!J.awarded) { J.awarded = true; if (!WQ.award("class") && d.rank <= 3) WQ.confetti(); }
+      if (!J.awarded) { J.awarded = true; say(`${l.youCame(d.rank, d.count)} ${fmt(d.score)} ${l.pts}`); if (!WQ.award("class") && d.rank <= 3) WQ.confetti(); }
       break;
-    case "kick": J.st = "kicked"; sdel("wq-class-join"); killPeer(J); clearTimeout(J.retryT); break;
+    case "kick": case "full": case "bye":
+      if (d.type === "bye" && J.st === "end") { J.lost = false; jStop(); return renderJoin(); }   // game over: keep the results on screen
+      J.st = "closed"; J.why = d.type === "kick" ? l.kicked : d.type === "full" ? l.full : l.closed; sset("wq-class-join", { code: "", name: J.name }); jStop(); say(J.why); break;
     default: if (!wasLost) return;
   }
   renderJoin();
@@ -649,8 +694,8 @@ function renderJoin() {
   switch (J.st) {
     case "form": sub = l.subJoin;
       h = `<form class="card stack" id="clForm" novalidate>${kiki(l.hiJoin)}
-        <label class="cl-lbl">${l.name}<input class="cl-in" id="clName" maxlength="16" autocomplete="nickname" value="${esc(J.name)}"></label><div class="small muted">${l.nameH}</div>
-        <label class="cl-lbl">${l.code}<input class="cl-in cl-mono cl-codein" id="clCode" maxlength="7" autocapitalize="characters" autocomplete="off" spellcheck="false" value="${esc(J.code)}"></label>
+        <label class="cl-lbl">${l.name}<input class="cl-in" id="clName" maxlength="16" autocomplete="nickname" aria-describedby="clNameH" value="${esc(J.name)}"></label><div class="small muted" id="clNameH">${l.nameH}</div>
+        <label class="cl-lbl">${l.code}<input class="cl-in cl-mono cl-codein" id="clCode" maxlength="7" autocapitalize="characters" autocomplete="off" spellcheck="false" aria-describedby="clErr" value="${esc(J.code)}"></label>
         <p class="note danger small" id="clErr" role="alert"${J.err ? "" : " hidden"}>${esc(J.err)}</p>
         <button class="btn cl-go" type="submit">${l.go} ▶</button></form>`; break;
     case "connecting": h = `<div class="card">${kiki(l.connecting)}<div class="cl-spin" aria-hidden="true"></div><span class="pill">🔑 <b class="cl-mono">${J.code}</b></span></div>`; break;
@@ -671,8 +716,8 @@ function renderJoin() {
       h = `<div class="card stack"><div class="cl-big" style="font-size:4rem">${["🥇", "🥈", "🥉"][e.rank - 1] || "🎉"}</div><h2>${l.youCame(e.rank, e.count)}</h2>
         <p class="row"><span class="pill">⭐ ${fmt(e.score)} ${l.pts}</span><span class="pill">✅ ${l.correctOf(e.correct, e.total)}</span></p>
         ${kiki(l.kFinal)}<div class="row"><a class="btn" href="#/badges">🏅 ${l.myBadges}</a><a class="btn alt" href="#/home">${l.home}</a></div></div>`; break; }
-    case "kicked": h = `<div class="card stack"><div class="note warn">${l.kicked}</div><div class="row"><a class="btn alt" href="#/home">${l.home}</a></div></div>`; break;
-    case "notfound": h = `<div class="card stack"><div class="note warn">🔍 ${l.notFound}</div><span class="pill">🔑 <b class="cl-mono">${J.code}</b></span>
+    case "closed": h = `<div class="card stack"><div class="note warn" role="alert">👋 ${esc(J.why || l.closed)}</div><div class="row"><a class="btn" href="#/class/join">${l.change}</a><a class="btn alt" href="#/home">${l.home}</a></div></div>`; break;
+    case "notfound": h = `<div class="card stack"><div class="note warn" role="alert">🔍 ${l.notFound}</div><span class="pill">🔑 <b class="cl-mono">${J.code}</b></span>
         <div class="row"><button class="btn" data-act="jRetry">🔁 ${l.retry}</button><button class="btn alt" data-act="jLeave">${l.change}</button></div></div>`; break;
     case "fail": h = helpBox(J.err) + `<div class="row" style="margin-top:14px"><button class="btn" data-act="jRetry">🔁 ${l.retry}</button><button class="btn alt" data-act="jLeave">${l.change}</button></div>`; break;
   }
@@ -686,7 +731,8 @@ function renderJoin() {
       e.preventDefault();
       const raw = $("#clName").value, c = normCode($("#clCode").value);
       J.err = !raw.trim() ? l.needName : !validCode(c) ? l.badCode : "";
-      if (J.err) { const x = $("#clErr"); x.textContent = J.err; x.hidden = false; WQ.anim(x, "shake"); return; }
+      ["#clName", "#clCode"].forEach(k => $(k).removeAttribute("aria-invalid"));
+      if (J.err) { const x = $("#clErr"), bad = $(!raw.trim() ? "#clName" : "#clCode"); x.textContent = J.err; x.hidden = false; WQ.anim(x, "shake"); bad.setAttribute("aria-invalid", "true"); bad.focus(); return; }
       J.name = cleanName(raw); J.code = c;
       if (location.hash !== "#/class/join/" + c) { sset("wq-class-join", { code: c, name: J.name }); location.hash = "#/class/join/" + c; }
       else joinGo();
@@ -698,11 +744,11 @@ function renderJoin() {
 function initTeam() { TM = { phase: "setup", n: 2, teams: TEAM_DEF.map(([icon, name]) => ({ icon, name, score: 0, got: false })), set: defSet(), qs: [], qi: -1 }; renderTeam(); }
 const teamsIn = () => TM.teams.slice(0, TM.n);
 function teamAsk() {
-  TM.qi++; TM.phase = "question"; TM.dur = TM.set.secs * 1000; TM.end = Date.now() + TM.dur;
+  TM.qi++; TM.phase = "question"; TM.dur = TM.set.secs * 1000; TM.end = Date.now() + TM.dur; say(`${L().qOf(TM.qi + 1, TM.qs.length)}. ${WQ.t(TM.qs[TM.qi].q)}`);
   clearInterval(TM.tick); TM.tick = setInterval(() => { if (!TM) return; paintClock(TM.end, TM.dur); if (Date.now() >= TM.end) teamReveal(); }, 200);
   renderTeam();
 }
-function teamReveal() { if (!TM || TM.phase !== "question") return; clearInterval(TM.tick); TM.teams.forEach(t => t.got = false); TM.phase = "reveal"; renderTeam(); WQ.beep(true); }
+function teamReveal() { if (!TM || TM.phase !== "question") return; clearInterval(TM.tick); TM.teams.forEach(t => t.got = false); TM.phase = "reveal"; renderTeam(); WQ.beep(true); const q = TM.qs[TM.qi]; say(`${L().ansWas} ${WQ.t(q.a[q.c])}`); }
 function renderTeam() {
   if (!TM) return;
   const l = L(), q = TM.qs[TM.qi], N = TM.qs.length, ts = teamsIn();
@@ -745,7 +791,8 @@ function renderTeam() {
 /* ---------------- actions (one delegated click handler) ---------------- */
 const ACT = {
   fs: () => { try { document.fullscreenElement ? document.exitFullscreen().catch(() => {}) : document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {} },
-  kick: b => { const p = H && H.players.get(b.dataset.pid); if (!p) return; H.kicked.add(p.pid); hsend(p, { type: "kick" }); const c = p.conn; setTimeout(() => { try { c && c.close(); } catch (e) {} }, 500); H.players.delete(p.pid); hostBroadcast(); hostPlayersChanged(); },
+  kick: b => { const p = H && H.players.get(b.dataset.pid); if (!p) return; H.kicked.add(p.pid); hsend(p, { type: "kick" }); const c = p.conn; setTimeout(() => { try { c && c.close(); } catch (e) {} }, 500); H.players.delete(p.pid); hostBroadcast(); hostPlayersChanged();
+    if (!document.activeElement || !document.activeElement.isConnected || document.activeElement === document.body) { const f = $("[data-act=kick]") || $("#clStart"); if (f) f.focus(); } },
   hStart: () => {
     if (!H || H.phase !== "lobby" || ![...H.players.values()].some(isOn)) return;
     H.qs = deal(H.set); H.qi = -1; H.players.forEach(p => Object.assign(p, { score: 0, streak: 0, ans: {}, prev: 0, delta: 0 })); hostAsk();
@@ -769,11 +816,12 @@ const ACT = {
   },
   jRetry: () => { if (J) joinGo(); },
   jLeave: () => { sset("wq-class-join", { code: "", name: J ? J.name : "" }); if (location.hash === "#/class/join") { killAll(); initJoin(); } else location.hash = "#/class/join"; },
-  tNum: b => { TM.n = +b.dataset.n; renderTeam(); },
+  tNum: b => { TM.n = +b.dataset.n; renderTeam(); const f = $(`[data-act=tNum][data-n="${TM.n}"]`); if (f) f.focus(); },
   tStart: () => { TM.qs = deal(TM.set); TM.qi = -1; TM.teams.forEach(t => t.score = 0); teamAsk(); },
   tShow: () => teamReveal(),
   tGot: b => { const t = TM.teams[+b.dataset.i]; t.got = !t.got; b.setAttribute("aria-pressed", t.got); b.textContent = `${t.got ? "✔" : "○"} ${t.icon} ${WQ.t(t.name)}`; },
-  tAward: () => { if (TM.phase !== "reveal") return; teamsIn().forEach(t => { if (t.got) t.score += 100; }); TM.phase = "board"; renderTeam(); },
+  tAward: () => { if (TM.phase !== "reveal") return; teamsIn().forEach(t => { if (t.got) t.score += 100; }); TM.phase = "board"; renderTeam();
+    say(L().scores + ": " + [...teamsIn()].sort((a, b) => b.score - a.score).map(t => `${WQ.t(t.name)} ${t.score}`).join(", ")); },
   tNext: () => { if (TM.phase !== "board") return; if (TM.qi + 1 < TM.qs.length) teamAsk(); else ACT.tEnd(); },
   tEnd: () => { TM.phase = "final"; clearInterval(TM.tick); renderTeam(); if (!WQ.award("class")) WQ.confetti(); },
   tAgain: () => ACT.tStart(),
@@ -786,13 +834,15 @@ function onKey(e) {
   if (e.target.closest && e.target.closest("input,select,textarea,button,a")) return;
   const b = root.querySelector("[data-next]"); if (b && !b.disabled) { e.preventDefault(); b.click(); }
 }
+/* tell phones the class is closed, then let the message flush before the peer is destroyed */
+function hostBye() { if (H) H.players.forEach(p => hsend(p, { type: "bye" })); }
 function killAll() {
   clearTimeout(killT); killT = null;
-  if (H) { clearInterval(H.tick); clearInterval(H.pingT); clearTimeout(H.autoT); try { H.peer && H.peer.destroy(); } catch (e) {} H = null; }
+  if (H) { clearInterval(H.tick); clearInterval(H.pingT); clearTimeout(H.autoT); hostBye(); const pr = H.peer; H.peer = null; H = null; setTimeout(() => { try { pr && pr.destroy(); } catch (e) {} }, 300); }
   if (J) { J.dead = true; clearTimeout(J.retryT); clearInterval(J.wd); clearInterval(J.tick); killPeer(J); J = null; }
   if (TM) { clearInterval(TM.tick); TM = null; }
   if (wake) { try { wake.release(); } catch (e) {} wake = null; }
-  window.removeEventListener("beforeunload", onUnload);
+  window.removeEventListener("beforeunload", onUnload); window.removeEventListener("pagehide", hostBye);
   if (document.fullscreenElement) try { document.exitFullscreen().catch(() => {}); } catch (e) {}
 }
 
@@ -802,7 +852,7 @@ WQ.registerPage("class", {
     const mode = ["host", "join", "team"].includes(args[0]) ? args[0] : "";
     if (!relang || mode !== curMode) killAll();
     curMode = mode;
-    el.innerHTML = `<div class="cl-root"><div id="clMain"></div></div>`;
+    el.innerHTML = `<div class="cl-root"><div id="clMain"></div><p class="vh" id="clLive" aria-live="polite" aria-atomic="true"></p></div>`;
     root = el.firstElementChild; root.addEventListener("click", onClick);
     if (mode === "host") H ? renderHost() : startHost();
     else if (mode === "join") J ? renderJoin() : initJoin(args[1]);

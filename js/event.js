@@ -30,8 +30,8 @@ const TOPIC_D = { sorting: "recycle", plastics: "recycle", compost: "compost", e
   economy: "market", malaysia: "academy", circular: "academy", sdg: "academy", energy: "academy" };
 const ROUND_D = ["recycle", "compost", "maker", "market", "academy"];
 const TEAMS = [
-  ["#0098dc", "#fff", { en: "Team Blue Bin", bm: "Pasukan Tong Biru" }], ["#ffa214", "#1a1932", { en: "Team Orange Bin", bm: "Pasukan Tong Oren" }],
-  ["#8a4836", "#fff", { en: "Team Brown Bin", bm: "Pasukan Tong Perang" }], ["#5ac54f", "#1a1932", { en: "Team Green Leaf", bm: "Pasukan Daun Hijau" }],
+  ["#0070a8", "#fff", { en: "Team Blue Bin", bm: "Pasukan Tong Biru" }], ["#ffa214", "#1a1932", { en: "Team Orange Bin", bm: "Pasukan Tong Oren" }],
+  ["#8a4836", "#fff", { en: "Team Brown Bin", bm: "Pasukan Tong Coklat" }], ["#5ac54f", "#1a1932", { en: "Team Green Leaf", bm: "Pasukan Daun Hijau" }],
   ["#f68187", "#1a1932", { en: "Team Pink Lotus", bm: "Pasukan Teratai Merah Jambu" }], ["#ffeb57", "#1a1932", { en: "Team Yellow Sun", bm: "Pasukan Matahari Kuning" }]];
 const ADJ = [["Cheerful", "Ceria"], ["Brave", "Berani"], ["Clever", "Bijak"], ["Speedy", "Pantas"], ["Kind", "Baik Hati"], ["Mighty", "Perkasa"],
   ["Calm", "Tenang"], ["Jolly", "Riang"], ["Smart", "Cerdik"], ["Busy", "Rajin"], ["Gentle", "Lembut"], ["Bold", "Gagah"]];
@@ -59,6 +59,7 @@ const S = {
   help: [
     { en: "Open this page on the laptop connected to the projector. You control the rounds; phones only send answers.", bm: "Buka halaman ini pada komputer riba yang disambungkan ke projektor. Anda mengawal pusingan; telefon hanya menghantar jawapan." },
     { en: "Plan for about 30–40 phones per host (free connection service). For bigger crowds, play in teams or waves: one phone per team, or groups taking turns.", bm: "Rancang untuk kira-kira 30–40 telefon bagi setiap hos (perkhidmatan sambungan percuma). Untuk orang ramai yang lebih besar, main secara pasukan atau berkumpulan: satu telefon setiap pasukan, atau kumpulan bergilir-gilir." },
+    { en: "Team points: each round, a team earns up to 100 points for the share of its players who answer correctly, so small teams can win too.", bm: "Mata pasukan: setiap pusingan, pasukan mendapat sehingga 100 mata mengikut peratusan pemainnya yang menjawab dengan betul, jadi pasukan kecil juga boleh menang." },
     { en: "Players get a fun nickname (no real names) and are put into a team. Nothing is saved online; End event wipes all scores.", bm: "Pemain mendapat nama samaran yang menyeronokkan (bukan nama sebenar) dan dimasukkan ke dalam pasukan. Tiada apa yang disimpan dalam talian; Tamatkan acara memadam semua markah." },
     { en: "No internet or Wi-Fi blocked? Choose Screen only: you click the answer the room (or the team whose turn it is) calls out.", bm: "Tiada internet atau Wi-Fi disekat? Pilih Skrin sahaja: anda klik jawapan yang disebut oleh penonton (atau pasukan yang tiba gilirannya)." },
     { en: "Please rehearse at the venue first: school and hall Wi-Fi sometimes blocks live mode. A phone hotspot usually works.", bm: "Sila buat raptai di tempat acara dahulu: Wi-Fi sekolah dan dewan kadangkala menyekat mod langsung. Hotspot telefon biasanya berfungsi." }],
@@ -70,16 +71,16 @@ const S = {
   local: { en: "This page runs only on this computer (file or localhost), so other phones cannot open the link. Host from the online WasteQuest site.", bm: "Halaman ini hanya berjalan pada komputer ini (fail atau localhost), jadi telefon lain tidak dapat membuka pautan. Anjurkan daripada laman WasteQuest dalam talian." },
   lost: { en: "Lost contact with the connection service. Players already in can keep playing; new players may not join.", bm: "Terputus hubungan dengan perkhidmatan sambungan. Pemain yang sudah masuk boleh terus bermain; pemain baharu mungkin tidak dapat masuk." },
   players: { en: "players", bm: "pemain" }, start: { en: "Start round", bm: "Mula pusingan" },
-  autoIn: { en: "Starting by itself in", bm: "Bermula sendiri dalam" },
+  autoIn: { en: "Starting by itself in", bm: "Bermula secara automatik dalam" },
   roundOf: { en: "Round", bm: "Pusingan" }, of: { en: "of", bm: "daripada" },
   forD: { en: "This round cleans:", bm: "Pusingan ini membersihkan:" },
-  answered: { en: "answered", bm: "sudah jawab" },
+  answered: { en: "answered", bm: "sudah menjawab" },
   turn: { en: "Answering now:", bm: "Giliran menjawab:" },
   clickAns: { en: "Click the answer the room calls out.", bm: "Klik jawapan yang disebut oleh penonton." },
   reveal: { en: "Show answer", bm: "Tunjuk jawapan" }, next: { en: "Next round ▶", bm: "Pusingan seterusnya ▶" },
   finish: { en: "Finish", bm: "Tamat" },
   right: { en: "got it right", bm: "betul" },
-  why: { en: "Why?", bm: "Kenapa?" },
+  why: { en: "Why?", bm: "Mengapa?" },
   gain: { en: "cleaner!", bm: "lebih bersih!" },
   endT: { en: "The town is cleaner because of you all!", bm: "Bandar lebih bersih kerana anda semua!" },
   nextVis: { en: "Next visitor (reset town)", bm: "Pelawat seterusnya (set semula bandar)" },
@@ -109,7 +110,7 @@ const S = {
   no: { en: "Not this time.", bm: "Bukan kali ini." }, noAns: { en: "No answer this round.", bm: "Tiada jawapan pusingan ini." },
   ansWas: { en: "The answer:", bm: "Jawapan:" },
   pEnd: { en: "Thanks for cleaning the town!", bm: "Terima kasih kerana membersihkan bandar!" },
-  rank: { en: "Your team came", bm: "Pasukan anda di tempat" },
+  rank: { en: (r, p) => `Your team came #${r} · ${p} pts`, bm: (r, p) => `Pasukan anda di tempat ke-${r} · ${p} mata` },
   gone: { en: "The event has ended. Thank you!", bm: "Acara telah tamat. Terima kasih!" },
   home: { en: "Home", bm: "Utama" },
 };
@@ -169,12 +170,12 @@ body.ev-play header.top>:not(.logo):not(.seg),body.ev-play footer,body.ev-play .
 body.ev-play header.top{padding-top:4px;padding-bottom:4px;min-height:0}
 body.ev-play .pagehead{padding:4px 10px;margin:0 0 8px} body.ev-play .pagehead h1{font-size:20px;margin:0}
 body.ev-play .ev-p{padding:8px 10px;margin-bottom:8px} body.ev-play .ev-tile{min-height:48px;padding:8px;font-size:17px} body.ev-play .ev-tiles{gap:8px}
-.ev-tile.ok{outline:4px solid #1e6f50;outline-offset:2px} .ev-tile.dim{opacity:.45} .ev-tile.mine{outline:4px dashed var(--o)}
+.ev-tile.ok{outline:4px solid #1e6f50;outline-offset:2px} .ev-tile.dim{background:#e6dccd;color:#55516b;box-shadow:none}.ev-tile.dim .sh{opacity:.5} .ev-tile.mine{outline:4px dashed var(--o)}
 .ev-clock{font-size:36px} .ev-meter{height:14px;border:3px solid var(--o);background:#fff;margin:6px 0} .ev-meter i{display:block;height:100%;background:#5ac54f}
 .ev-big{font-size:24px;font-weight:800}
 .ev-chip{display:inline-block;border:3px solid var(--o);padding:4px 10px;font:600 18px "Pixelify Sans",monospace}
 .ev-warn{background:#ffeb57;border:3px solid var(--o);padding:8px;margin:8px 0}
-.ev-help li{margin:4px 0}
+.ev-help li{margin:4px 0}.ev-h{font-size:20px;margin:0 0 6px}
 @media(prefers-reduced-motion:no-preference){.ev-dl li.up{animation:evpop .6s steps(3) 2}}
 @keyframes evpop{50%{transform:translateY(-4px)}}
 `);
@@ -330,12 +331,14 @@ function reveal(roomPick) {
   let frac, part;
   if (roomPick != null) {   // screen-only (or no phones): host clicked the room's / turn team's answer
     const ok = roomPick === q.c; frac = ok ? 1 : 0; part = 1; H.roomPick = roomPick;
-    if (ok) H.teams[H.turn % H.set.teams] += 10;
+    if (ok) H.teams[H.turn % H.set.teams] += 100;
     H.turn++;
   } else {
     H.roomPick = null;
     const ans = ps.filter(p => p.ans[H.r] != null), okN = ans.filter(p => p.ans[H.r] === q.c);
-    okN.forEach(p => H.teams[p.team] += 10);
+    // team points = 100 × share of the team's players (online or answered) who got it right, so big teams don't win just by size
+    for (let i = 0; i < H.set.teams; i++) { const mem = ps.filter(p => p.team === i && (on(p) || p.ans[H.r] != null)).length;
+      if (mem) H.teams[i] += Math.round(100 * okN.filter(p => p.team === i).length / mem); }
     frac = ans.length ? okN.length / ans.length : 0; part = ps.length ? ans.length / Math.max(1, ps.filter(on).length) : 0;
   }
   const before = stateOf(H.prog);
@@ -371,12 +374,13 @@ function setupHTML() {
     <label><input type="checkbox" name="booth" ${s.booth ? "checked" : ""}> ${t(S.booth)}</label>
     <label><input type="checkbox" name="board" ${s.board ? "checked" : ""}> ${t(S.board)}</label>
     <p><button class="ev-b">${t(S.go)}</button></p></form>
-    <div class="ev-p ev-help"><h3>💡 ${t(S.helpT)}</h3><ul>${S.help.map(x => `<li>${esc(t(x))}</li>`).join("")}</ul></div></div>`;
+    <div class="ev-p ev-help"><h2 class="ev-h"><span aria-hidden="true">💡</span> ${t(S.helpT)}</h2><ul>${S.help.map(x => `<li>${esc(t(x))}</li>`).join("")}</ul></div></div>`;
 }
 function drawQR() {
   const box = $("#evQR"); if (!box || !H || !H.code) return;
   const url = joinURL(H.code); box.innerHTML = "";
-  if (window.QRCode) for (const lv of ["M", "L"]) { try { new window.QRCode(box, { text: url, width: 256, height: 256, correctLevel: window.QRCode.CorrectLevel[lv] }); box.title = url; return; } catch (e) { box.innerHTML = ""; } }
+  if (window.QRCode) for (const lv of ["M", "L"]) { try { new window.QRCode(box, { text: url, width: 256, height: 256, correctLevel: window.QRCode.CorrectLevel[lv] }); box.title = url;
+    box.querySelectorAll("img,canvas").forEach(e => { e.setAttribute("alt", `QR: ${url}`); e.setAttribute("role", "img"); e.setAttribute("aria-label", `QR: ${url}`); }); return; } catch (e) { box.innerHTML = ""; } }
   box.innerHTML = `<a href="${esc(url)}">${esc(url)}</a>`;
 }
 function stageHTML() {
@@ -384,7 +388,7 @@ function stageHTML() {
   const turnT = H.set.mode === "screen" ? `<p class="px">${t(S.turn)} <span class="ev-chip" style="background:${TEAMS[H.turn % H.set.teams][0]};color:${TEAMS[H.turn % H.set.teams][1]}">${esc(tName(H.turn % H.set.teams))}</span></p>` : "";
   const head = q ? `<p class="px">${t(S.roundOf)} ${H.r + 1} ${t(S.of)} ${H.qs.length} · ${t(S.forD)} ${DICON[TOPIC_D[q.topic]] || ""} ${esc(t(DNAME[TOPIC_D[q.topic]] || DNAME.academy))}</p>` : "";
   if (ph === "boot") return `<div class="ev-p"><p class="ev-big">⏳ ${t(S.starting)}</p></div>`;
-  if (ph === "error") return `<div class="ev-p"><p class="ev-big">⚠️ ${t(S.fail)}</p><div class="ev-row"><button class="ev-b" data-act="retry">${t(S.retry)}</button><button class="ev-b l" data-act="screen">${t(S.toScreen)}</button></div></div>`;
+  if (ph === "error") return `<div class="ev-p" role="alert"><p class="ev-big">⚠️ ${t(S.fail)}</p><div class="ev-row"><button class="ev-b" data-act="retry">${t(S.retry)}</button><button class="ev-b l" data-act="screen">${t(S.toScreen)}</button></div></div>`;
   if (ph === "lobby") return `<div class="ev-p">${H.set.mode === "phones" ? `<p class="px">${t(S.codeL)}</p><div class="ev-code">${esc(H.code)}</div>
       <div class="ev-row"><div class="ev-qr" id="evQR"></div><p style="flex:1;min-width:180px">${t(S.how)}</p></div>
       ${isLocal() ? `<p class="ev-warn">${t(S.local)}</p>` : ""}<p class="ev-big" id="evCount" aria-live="polite"></p>` : ""}
@@ -404,18 +408,20 @@ function stageHTML() {
 }
 function hostHTML() {
   const fs = document.fullscreenEnabled ? `<button class="ev-b l" data-act="fs">${t(S.fs)}</button>` : "";
-  return `<div class="ev-grid"><div><div class="ev-p ev-town"><canvas id="evTown" width="400" height="300" role="img" aria-label="${esc(t(S.town))}"></canvas>${distList(H.up)}</div>
+  return `<div class="ev-grid"><div><div class="ev-p ev-town"><h2 class="vh">${t(S.town)}</h2><canvas id="evTown" width="400" height="300" role="img" aria-label="${esc(t(S.town))}"></canvas>${distList(H.up)}</div>
     <div class="ev-row">${fs}${H.phase !== "end" ? `<button class="ev-b l" data-act="end">${t(S.endEv)}</button>` : ""}</div></div>
     <div>${stageHTML()}<p class="ev-warn" id="evLost" ${H.lost ? "" : "hidden"}>${t(S.lost)}</p>
-    <div class="ev-p"><h3>${t(S.teamsT)}</h3><div id="evTeams">${teamsHTML()}</div></div></div></div>`;
+    <div class="ev-p"><h2 class="ev-h">${t(S.teamsT)}</h2><div id="evTeams">${teamsHTML()}</div></div></div></div>`;
 }
 function render() {
   if (!root) return;
-  if (!H) { root.innerHTML = WQ.head("🎪", S.title, S.sub) + setupHTML();
+  if (!H) { root.innerHTML = WQ.head("🎪", S.title, S.sub) + setupHTML() + LIVE;
     $("#evSet", root).onsubmit = e => { e.preventDefault(); const f = new FormData(e.target);
       startHost({ mode: f.get("mode"), teams: +f.get("teams"), track: f.get("track"), rounds: +f.get("rounds"), secs: +f.get("secs"), booth: !!f.get("booth"), board: !!f.get("board") }); };
     return; }
-  root.innerHTML = WQ.head("🎪", S.title, null) + hostHTML();
+  const had = hadFocus();
+  root.innerHTML = WQ.head("🎪", S.title, null) + hostHTML() + LIVE;
+  keepFocus(had);
   root.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => reveal(+b.dataset.pick));
   root.querySelectorAll("[data-act]").forEach(b => b.onclick = () => {
     const a = b.dataset.act;
@@ -423,7 +429,7 @@ function render() {
     else if (a === "retry") { const s = H.set; teardown(); startHost(s); }
     else if (a === "screen") { const s = { ...H.set, mode: "screen" }; teardown(); startHost(s); }
     else if (a === "end") { if (confirm(t(S.endQ))) { teardown(); render(); } }
-    else if (a === "fs") { try { document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen(); } catch (e) {} }
+    else if (a === "fs") { try { (document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen()).catch(() => {}); } catch (e) {} }
   });
   paintCount(); drawQR(); townLoop();
   if (H.phase === "lobby" && H.set.booth && !H.tick) armAuto();
@@ -456,15 +462,41 @@ function jFail(type) {
   else if (!J.lost) { J.lost = true; renderJoin(); }
   J.retryT = setTimeout(() => J && connect(), Math.min(1000 * J.tries, 5000));
 }
-function onJData(d) {
-  if (!J || !d || typeof d !== "object") return;
-  if (d.type === "ping") { send(J.conn, { type: "ping" }); if (J.lost) { J.lost = false; renderJoin(); } return; }
-  if (d.type !== "st") return;
+/* host → phone messages are untrusted: keep only well-formed fields (numbers clamped, text as plain {en,bm} strings) */
+const str = (v, n = 300) => typeof v === "string" ? v.slice(0, n) : "";
+const txt = o => typeof o === "string" ? str(o) : o && typeof o === "object" ? { en: str(o.en), bm: str(o.bm) || str(o.en) } : "";
+const num = (v, lo, hi, d = lo) => v != null && v !== "" && Number.isFinite(+v) ? Math.min(hi, Math.max(lo, Math.round(+v))) : d;
+function cleanSt(d) {
+  const ph = ["boot", "lobby", "question", "reveal", "end", "gone"].includes(d.ph) ? d.ph : null; if (!ph) return null;
+  const a = Array.isArray(d.a) ? d.a.slice(0, 4).map(txt) : [], hi = Math.max(0, a.length - 1);
+  const m = { ph, teams: num(d.teams, 2, TEAMS.length, 2), board: d.board === true, r: num(d.r, 0, 999, 0), q: txt(d.q), a, why: d.why ? txt(d.why) : null,
+    left: num(d.left, 0, 600000, 0), c: num(d.c, 0, hi, null), mine: num(d.mine, 0, hi, null), rank: num(d.rank, 0, 99, 0), pts: num(d.pts, 0, 1e7, 0),
+    nick: Array.isArray(d.nick) ? [num(d.nick[0], 0, ADJ.length - 1, 0), num(d.nick[1], 0, NOUN.length - 1, 0)] : [0, 0] };
+  m.team = num(d.team, 0, m.teams - 1, 0);
+  if ((ph === "question" || ph === "reveal") && (a.length < 2 || (ph === "reveal" && m.c == null))) return null;
+  return m;
+}
+const LIVE = `<p class="vh" id="evLive" aria-live="polite" aria-atomic="true"></p>`;
+const say = msg => setTimeout(() => { const r = root && root.querySelector("#evLive"); if (r) r.textContent = msg; }, 80);
+/* after a re-render, put keyboard/screen-reader focus back on the next sensible control if it was inside the page */
+const keepFocus = had => { if (!had || !root || root.contains(document.activeElement)) return;
+  const f = root.querySelector("[data-ans]:not([disabled]),[data-act=next],[data-act=start],[data-act=reveal],[data-act=reset],[data-pick],.ev-b,.ev-big,h2"); if (!f) return;
+  if (!/^(BUTTON|A|INPUT|SELECT)$/.test(f.tagName)) f.setAttribute("tabindex", "-1"); f.focus({ preventScroll: true }); };
+const hadFocus = () => { const a = document.activeElement; return !!(root && a && a !== document.body && (root.contains(a) || !a.isConnected)); };
+function onJData(raw) {
+  if (!J || !raw || typeof raw !== "object") return;
+  if (raw.type === "ping") { send(J.conn, { type: "ping" }); if (J.lost) { J.lost = false; renderJoin(); } return; }
+  if (raw.type !== "st") return;
+  const d = cleanSt(raw); if (!d) return;
   J.lost = false;
-  if (d.ph === "gone") { J.st = "gone"; killJ(); return renderJoin(); }
+  if (d.ph === "gone") { J.st = "gone"; killJ(); renderJoin(); return say(t(S.gone)); }
+  const prev = J.s;
   if (d.ph === "reveal" && J.lastRev !== d.r) { J.lastRev = d.r;   // silent: no WQ.beep on player screens
-    if (d.mine != null) { WQ.emit("answer", d.mine === d.c, "event"); try { navigator.vibrate && navigator.vibrate(d.mine === d.c ? 60 : [60, 60, 60]); } catch (e) {} } }
-  if (d.ph === "question") J.deadline = Date.now() + (+d.left || 0);
+    if (d.mine != null) { WQ.emit("answer", d.mine === d.c, "event"); try { navigator.vibrate && navigator.vibrate(d.mine === d.c ? 60 : [60, 60, 60]); } catch (e) {} }
+    say(`${d.mine == null ? t(S.noAns) : d.mine === d.c ? t(S.ok) : t(S.no)} ${t(S.ansWas)} ${t(d.a[d.c])}`); }
+  if (d.ph === "question") { J.deadline = Date.now() + d.left; if (!prev || prev.ph !== "question" || prev.r !== d.r) say(`${t(S.roundOf)} ${d.r + 1}. ${t(d.q)}`); }
+  if (d.ph === "lobby" && (!prev || prev.ph !== "lobby")) say(`${t(S.wait)} ${t(S.you)} ${nickTxt(d.nick)}, ${tName(d.team)}`);
+  if (d.ph === "end" && (!prev || prev.ph !== "end")) say(t(S.pEnd));
   J.s = d; J.st = "in"; renderJoin();
 }
 function joinFormHTML(code, err) {
@@ -485,24 +517,26 @@ function renderJoin() {
       <fieldset><legend>${t(S.change)}</legend><div class="ev-row">${[...Array(s.teams).keys()].map(i => `<button class="ev-b" data-team="${i}" aria-pressed="${i === s.team}" style="background:${TEAMS[i][0]};color:${TEAMS[i][1]}">${i === s.team ? "✔ " : ""}${esc(tName(i))}</button>`).join("")}</div></fieldset></div>`;
     else if (s.ph === "question") { const left = Math.max(0, J.deadline - Date.now()), done = s.mine != null;
       h = me + `<div class="ev-p"><p class="px">⏱ <span id="evPClock" role="timer">${Math.ceil(left / 1000)}</span></p><p class="ev-q" style="font-size:20px">${esc(t(s.q))}</p>
-        ${done ? `<p class="ev-big" role="status">📨 ${t(S.sent)}</p>` : !left ? `<p class="ev-big" role="status">${t(S.tUp)}</p>` : ""}
+        ${done ? `<p class="ev-big">📨 ${t(S.sent)}</p>` : !left ? `<p class="ev-big">${t(S.tUp)}</p>` : ""}
         <div class="ev-tiles">${s.a.map((a, i) => `<button class="ev-tile t${i} ${done && i === s.mine ? "mine" : done ? "dim" : ""}" data-ans="${i}" ${done || !left ? "disabled" : ""}><span class="sh" aria-hidden="true">${SHAPES[i]}</span><span>${esc(t(a))}</span></button>`).join("")}</div></div>`; }
     else if (s.ph === "reveal") { const ok = s.mine === s.c;
-      h = me + `<div class="ev-p" role="status"><p class="ev-big">${s.mine == null ? t(S.noAns) : ok ? "✔ " + t(S.ok) : "✖ " + t(S.no)}</p><p><b>${t(S.ansWas)}</b> ${SHAPES[s.c]} ${esc(t(s.a[s.c]))}</p>${s.why ? `<p><b>${t(S.why)}</b> ${esc(t(s.why))}</p>` : ""}</div>`; }
-    else h = me + `<div class="ev-p" role="status"><p class="ev-big">🎉 ${t(S.pEnd)}</p>${s.rank ? `<p class="ev-big">${t(S.rank)} #${s.rank} · ${s.pts} ${t(S.pts)}</p>` : ""}</div>`;
+      h = me + `<div class="ev-p"><p class="ev-big">${s.mine == null ? t(S.noAns) : ok ? "✔ " + t(S.ok) : "✖ " + t(S.no)}</p><p><b>${t(S.ansWas)}</b> ${SHAPES[s.c]} ${esc(t(s.a[s.c]))}</p>${s.why ? `<p><b>${t(S.why)}</b> ${esc(t(s.why))}</p>` : ""}</div>`; }
+    else h = me + `<div class="ev-p"><p class="ev-big">🎉 ${t(S.pEnd)}</p>${s.rank ? `<p class="ev-big">${esc(S.rank[WQ.lang === "bm" ? "bm" : "en"](s.rank, s.pts))}</p>` : ""}</div>`;
     if (J.lost) h = `<p class="ev-warn" role="alert">${t(S.reconn)}</p>` + h;
   }
-  root.innerHTML = WQ.head("🎪", S.title, S.subJoin) + `<div aria-live="polite">${h}</div>`;
+  const had = hadFocus();
+  root.innerHTML = WQ.head("🎪", S.title, S.subJoin) + `<div>${h}</div>` + LIVE;
+  keepFocus(had);
   const f = $("#evJoin", root);
   if (f) f.onsubmit = e => { e.preventDefault(); const c = normCode($("#evCode", root).value);
     if (!validCode(c)) { J = { st: "form", code: c, err: S.badCode }; return renderJoin(); }
     location.hash.endsWith("/" + c) ? startJoin(c) : WQ.go("event/join/" + c); };
-  root.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => { if (!J.s || J.s.mine != null) return; J.s.mine = +b.dataset.ans; send(J.conn, { type: "answer", r: J.s.r, i: +b.dataset.ans }); renderJoin(); });
+  root.querySelectorAll("[data-ans]").forEach(b => b.onclick = () => { if (!J.s || J.s.mine != null) return; J.s.mine = +b.dataset.ans; send(J.conn, { type: "answer", r: J.s.r, i: +b.dataset.ans }); renderJoin(); say(t(S.sent)); });
   root.querySelectorAll("[data-team]").forEach(b => b.onclick = () => send(J.conn, { type: "team", t: +b.dataset.team }));
   root.querySelectorAll("[data-act]").forEach(b => b.onclick = () => b.dataset.act === "nick" ? send(J.conn, { type: "nick" }) : startJoin(J.code));
   clearInterval(J && J.tick);
   if (J && J.s && J.s.ph === "question" && J.s.mine == null) J.tick = setInterval(() => { const c = $("#evPClock"), left = Math.max(0, J.deadline - Date.now());
-    if (c) c.textContent = Math.ceil(left / 1000); if (!left) { clearInterval(J.tick); renderJoin(); } }, 250);
+    if (c) c.textContent = Math.ceil(left / 1000); if (!left) { clearInterval(J.tick); renderJoin(); say(t(S.tUp)); } }, 250);
 }
 
 /* ---------------- routing ---------------- */

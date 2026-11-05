@@ -70,4 +70,6 @@ inlined; they come with the offline zip pack.
   opt out on `#/privacy`; after opting out nothing is queued or sent.
 - Progress, badges and certificates are stored only in the browser (`localStorage`).
 
+Open content, safety and privacy questions from the latest review are in [`docs/OPEN-QUESTIONS.md`](docs/OPEN-QUESTIONS.md).
+
 `index.html` has `<meta name="robots" content="noindex">` until the project lead approves public listing.

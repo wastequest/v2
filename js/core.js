@@ -27,7 +27,7 @@ const WQ = (() => {
 
   /* UI strings used by core */
   const S = {
-    back:{en:"← Back",bm:"← Kembali"}, home:{en:"Home",bm:"Utama"}, learn:{en:"Learn",bm:"Belajar"}, gamesN:{en:"Games",bm:"Permainan"},
+    back:{en:"← Back",bm:"← Kembali"}, skip:{en:"Skip to content",bm:"Langkau ke kandungan"}, langG:{en:"Language",bm:"Bahasa"}, secN:{en:"Sections",bm:"Bahagian"}, home:{en:"Home",bm:"Utama"}, learn:{en:"Learn",bm:"Belajar"}, gamesN:{en:"Games",bm:"Permainan"},
     labsN:{en:"Labs",bm:"Makmal"}, classN:{en:"Class",bm:"Kelas"}, certN:{en:"Certificate",bm:"Sijil"}, teacherN:{en:"Teachers",bm:"Guru"},
     heroT:{en:"Hi! I'm Kiki. Let's turn waste into wealth!",bm:"Hai! Saya Kiki. Jom tukar sisa jadi harta!"},
     heroS:{en:"Follow the quest map. Play, learn, make useful things from trash and earn badges and your own certificate.",bm:"Ikut peta misi. Main, belajar, hasilkan barang berguna daripada sampah dan kumpul lencana serta sijil anda sendiri."},
@@ -78,7 +78,9 @@ const WQ = (() => {
     try { ac = ac || new AudioContext(); const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime; o.type = "triangle";
     (ok ? [660, 880] : [220, 180]).forEach((f, i) => o.frequency.setValueAtTime(f, t + i * .09));
     g.gain.setValueAtTime(.15, t); g.gain.exponentialRampToValueAtTime(.001, t + .25); o.connect(g).connect(ac.destination); o.start(); o.stop(t + .26); } catch (e) {} };
-  W.confetti = () => { for (let i = 0; i < 40; i++) { const c = document.createElement("div"); c.className = "confetti"; c.textContent = ["♻️","⭐","🌱","🎉"][i % 4];
+  const calm = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } };
+  W.calm = calm;
+  W.confetti = () => { if (calm()) return; for (let i = 0; i < 40; i++) { const c = document.createElement("div"); c.className = "confetti"; c.textContent = ["♻️","⭐","🌱","🎉"][i % 4];
     c.style.left = Math.random() * 100 + "vw"; c.style.animationDuration = 2 + Math.random() * 2 + "s"; c.style.animationDelay = Math.random() * .6 + "s";
     document.body.appendChild(c); setTimeout(() => c.remove(), 5000); } };
   W.toast = msg => { const b = $("#toastbox"), t = document.createElement("div"); t.className = "t"; t.textContent = msg; b.appendChild(t); setTimeout(() => t.remove(), 3200); };
@@ -88,12 +90,14 @@ const WQ = (() => {
   W.head = (icon, title, sub) => `<div class="pagehead"><span class="pi" aria-hidden="true">${icon}</span><div><h1>${W.esc(W.t(title))}</h1>${sub ? `<p>${W.esc(W.t(sub))}</p>` : ""}</div></div>`;
 
   /* ---------- router: #/view/arg1/arg2 ---------- */
-  let cleanup = null, lastHash = null;
+  let cleanup = null, lastHash = null, routed = false, relangNext = false;
   W.go = h => { location.hash = "#/" + h; };
   W.route = () => {
     document.documentElement.dataset.aud = W.aud;   // kids mode hides .ad-only (teacher links)
     const parts = (location.hash.replace(/^#\/?/, "") || "home").split("/").map(decodeURIComponent);
-    const [view, ...args] = parts, el = $("#view"), relang = lastHash === location.hash;
+    /* relang: same page re-drawn for a language switch (pages such as the eBook may rewrite the hash in place) */
+    const [view, ...args] = parts, el = $("#view"), relang = relangNext || lastHash === location.hash;
+    relangNext = false;
     lastHash = location.hash;
     if (cleanup) { try { cleanup(); } catch (e) {} cleanup = null; }
     el.innerHTML = "";
@@ -108,8 +112,12 @@ const WQ = (() => {
     $("#backBtn").hidden = view === "home";
     W.$$(".navlinks a").forEach(a => a.classList.toggle("on", a.dataset.v === view || (a.dataset.v === "games" && view === "game") || (a.dataset.v === "labs" && view === "lab")));
     if (!relang) { scrollTo(0, 0); W.track("/" + viewKey(), true); }
-    document.title = "WasteQuest";
     W.emit("route", view, args, relang);
+    /* tab title from the page's h1; on in-app navigation move focus to it so keyboard and screen-reader users land on the new page */
+    const h1 = $("h1", el), name = h1 && h1.textContent.replace(/\s+/g, " ").trim();
+    document.title = name && view !== "home" ? `${name} · WasteQuest` : "WasteQuest";
+    if (routed && !relang && h1 && !el.contains(document.activeElement)) { if (!h1.hasAttribute("tabindex")) h1.setAttribute("tabindex", "-1"); h1.focus({ preventScroll: true }); }
+    routed = true;
   };
   W.back = () => { const v = (location.hash.replace(/^#\/?/, "").split("/")[0]); if (v === "game") W.go("games"); else if (v === "lab") W.go("labs"); else W.go("home"); };
 
@@ -118,8 +126,9 @@ const WQ = (() => {
     document.documentElement.lang = W.lang === "bm" ? "ms" : "en";
     W.$$("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === W.lang));
     W.$$("[data-s]").forEach(e => e.textContent = W.t(S[e.dataset.s]));
+    W.$$("[data-sl]").forEach(e => e.setAttribute("aria-label", W.t(S[e.dataset.sl])));
   };
-  W.setLang = l => { W.lang = l; store.set("lang", l); W.track("lang/" + l); paintChrome(); W.route(); };
+  W.setLang = l => { W.lang = l; store.set("lang", l); W.track("lang/" + l); paintChrome(); relangNext = true; W.route(); };
   W.setAud = a => { W.aud = a; store.set("aud", a); W.route(); };
 
   /* ---------- home ---------- */
@@ -154,6 +163,7 @@ const WQ = (() => {
   W.start = () => {
     W.$$("[data-lang]").forEach(b => b.onclick = () => W.setLang(b.dataset.lang));
     $("#backBtn").onclick = W.back;
+    const skip = $(".skip"); if (skip) skip.onclick = e => { e.preventDefault(); const v = $("#view"), t = $("h1", v) || v; if (!t.hasAttribute("tabindex")) t.setAttribute("tabindex", "-1"); t.focus(); };
     window.addEventListener("hashchange", W.route);
     paintChrome(); W.route(); W.track("lang/" + W.lang);
   };

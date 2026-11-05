@@ -113,3 +113,12 @@ footer.v2foot .flinks{display:flex;justify-content:center;flex-wrap:wrap;gap:6px
 
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 html[data-aud=kids] .ad-only{display:none!important}
+
+/* ---------- skip link + focus targets (js/core.js) ---------- */
+.skip{position:absolute;left:8px;top:-60px;z-index:1000;background:#1a1932;color:#fff;font-family:var(--pix);font-weight:600;padding:8px 14px;border:3px solid #ffeb57;text-decoration:none}
+.skip:focus{top:8px}
+#view:focus,#view h1[tabindex="-1"]:focus{outline:none;box-shadow:none}
+#view h1[tabindex="-1"]:focus-visible{outline:3px dashed #1a1932;outline-offset:4px;box-shadow:none}
+
+/* white on light green was 2.2:1 */
+.stop .num{color:#1a1932}

@@ -7,28 +7,33 @@
 <meta name="robots" content="noindex"><!-- remove once Dr Wan Azlina approves public listing -->
 <meta name="description" content="WasteQuest: an interactive Waste-to-Wealth educational module by Universiti Putra Malaysia. Games, virtual labs, hands-on activities, class quizzes and a micro-credential.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%235cbf4a'/%3E%3Cpath d='M32 14l7 11h-5v8h-4v-8h-5zM18 40l5-11 3 4-4 7h8v4H17zM46 40l-13 0v-4h9l-4-7 4-3z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1a1932">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Pixelify+Sans:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- fonts load without blocking the first paint, so a slow or blocked Google Fonts never leaves a blank screen -->
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Pixelify+Sans:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="css/v2.css">
 </head>
 <body>
+<a class="skip" href="#view" data-s="skip">Skip to content</a>
 <header class="top">
   <a class="logo" href="#/home" aria-label="WasteQuest home">
     <svg width="38" height="38" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#5cbf4a"/><path d="M32 14l7 11h-5v8h-4v-8h-5zM18 40l5-11 3 4-4 7h8v4H17zM46 40l-13 0v-4h9l-4-7 4-3z" fill="#fff"/></svg>
     Waste<b>Quest</b>
   </a>
-  <nav class="navlinks" aria-label="Sections">
+  <nav class="navlinks" aria-label="Sections" data-sl="secN">
     <a href="#/learn" data-v="b-academy" data-b="academy"><span aria-hidden="true">🏫</span> <span class="nl">Academy</span></a><a href="#/games" data-v="b-recycle" data-b="recycle"><span aria-hidden="true">♻️</span> <span class="nl">Recycling Plant</span></a><a href="#/game/compost" data-v="b-compost" data-b="compost"><span aria-hidden="true">🌱</span> <span class="nl">Compost Farm</span></a><a href="#/labs" data-v="b-maker" data-b="maker"><span aria-hidden="true">🛠️</span> <span class="nl">Maker Lab</span></a><a href="#/game/cash" data-v="b-market" data-b="market"><span aria-hidden="true">🏪</span> <span class="nl">Market</span></a><a href="#/class" data-v="b-arena" data-b="arena"><span aria-hidden="true">🏟️</span> <span class="nl">Arena</span></a><a href="#/book" data-v="book"><span aria-hidden="true">📖</span> <span class="nl">eBook</span></a><a href="#/cert" data-v="cert" data-s="certN">Certificate</a><a href="#/teacher" class="ad-only" data-v="teacher" data-s="teacherN">Teachers</a>
   </nav>
   <span class="spacer"></span>
   <button class="back" id="backBtn" hidden data-s="back">← Back</button>
-  <div class="seg" role="group" aria-label="Language">
+  <div class="seg" role="group" aria-label="Language" data-sl="langG">
     <button data-lang="en" aria-pressed="true">EN</button>
     <button data-lang="bm" aria-pressed="false">BM</button>
   </div>
 </header>
-<main id="view" aria-live="polite"></main>
+<main id="view" tabindex="-1"></main>
 <footer class="v2foot"><img src="assets/logos-upm.jpeg" alt="Universiti Putra Malaysia · Putra · Fakulti Kejuruteraan"><p class="fcredit" data-s="foot"></p><p class="flinks"><a href="#/privacy">Privacy / Privasi</a><a href="#/teacher">Teachers / Guru</a><a href="#/book">eBook / eBuku</a><a href="#/share">Share / Kongsi</a></p></footer>
 <div class="toastbox" id="toastbox" aria-live="polite"></div>
 
@@ -65,7 +70,9 @@
 <script src="js/book.js"></script>
 <script src="js/share.js"></script>
 <!-- /build:scripts -->
-<script>WQ.start();</script>
+<script>WQ.start();
+/* offline support on the hosted site (sw.js); skipped for the single-file offline copy opened from disk */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
 <!-- usage counter: private dashboard at https://wastequest.goatcounter.com (no cookies; ignores localhost) -->
 <script>window.goatcounter = { no_onload: true };</script>
 <script data-goatcounter="https://wastequest.goatcounter.com/count" async src="https://gc.zgo.at/count.js" onload="WQ.flushTrack()"></script>

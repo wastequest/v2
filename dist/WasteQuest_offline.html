@@ -1182,7 +1182,7 @@ WQ.css("sort",`
 .sg-toast.good{border-left:8px solid var(--grass)}.sg-toast.bad{border-left:8px solid var(--red)}
 .sg-end{text-align:center;max-width:520px;margin:0 auto}.sg-end h2:focus{outline:none;box-shadow:none}.sg-stars{font-size:3rem;letter-spacing:6px}
 .sg-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (max-width:700px){.sg-bins{gap:8px}.sg-bin{min-height:112px;padding:30px 4px 14px}.sg-bin .bs{display:none}.sg-bin .bl{font-size:.98rem}.sg-item{padding:10px 18px}.sg-item .em{font-size:3.4rem}.sg-stage{min-height:170px}.sg-toast{padding:8px 12px;font-size:.95rem}}
+@media (max-width:700px){.sg-bins{gap:8px;grid-template-columns:repeat(min(var(--n,3),3),minmax(0,1fr))}.sg-bin{min-height:112px;padding:30px 4px 14px}.sg-bin .bs{display:none}.sg-bin .bl{font-size:.98rem}.sg-item{padding:10px 18px}.sg-item .em{font-size:3.4rem}.sg-stage{min-height:170px}.sg-toast{padding:8px 12px;font-size:.95rem}}
 @media (pointer:coarse){.sg-bin .k{display:none}.sg-bin{padding-top:14px}}
 `);
 
@@ -2663,8 +2663,8 @@ function simulate() {
   if (s.m > 0.66 || wetDays > 20) out = "wet";
   else if (anaer >= 18) out = "smelly";
   else if (s.m < 0.4) out = "dry";                       // same limits as the gauges and Kiki's tips (Rynk et al.: 40–65%, C:N 20–40)
-  else if (done < 0.5 || s.cn > 40) out = "slow";
-  else if (s.cn < 20) out = "ammonia";
+  else if (done < 0.5 || Math.round(s.cn) > 40) out = "slow";   // rounded, like the gauge ("40 : 1" is inside 20–40)
+  else if (Math.round(s.cn) < 20) out = "ammonia";
   return { days, out, cn: s.cn, m0: s.m, maxT, d55, done, anaer, wet: s.wet };
 }
 
@@ -2684,7 +2684,7 @@ function tips(s) {
   else if (s.wet < 40) t.push({en:"Tip: a fuller bin (20+ pails) holds heat better and gets hotter.",bm:"Tip: tong yang lebih penuh (20+ baldi) lebih memerangkap haba dan menjadi lebih panas."});
   if (s.wet >= 10) {
     if (s.cn < 20) t.push({en:"Too many greens! Add browns (dry leaves, cardboard) or it will smell of ammonia.",bm:"Terlalu banyak bahan hijau! Tambah bahan perang (daun kering, kadbod) atau ia akan berbau ammonia."});
-    else if (s.cn > 40) t.push({en:"Too many browns! Add greens (food scraps, grass, coffee grounds) to feed the microbes.",bm:"Terlalu banyak bahan perang! Tambah bahan hijau (sisa makanan, rumput, hampas kopi) untuk memberi makan mikrob."});
+    else if (Math.round(s.cn) > 40) t.push({en:"Too many browns! Add greens (food scraps, grass, coffee grounds) to feed the microbes.",bm:"Terlalu banyak bahan perang! Tambah bahan hijau (sisa makanan, rumput, hampas kopi) untuk memberi makan mikrob."});
     else t.push({en:"Nice balance of greens and browns!",bm:"Imbangan bahan hijau dan perang yang bagus!"});
     if (s.m < 0.4) t.push({en:"Too dry. Add water until it feels like a wrung-out sponge.",bm:"Terlalu kering. Tambah air sehingga terasa seperti span yang diperah."});
     else if (s.m > 0.66) t.push({en:"Too wet. Add dry browns instead of water.",bm:"Terlalu basah. Tambah bahan perang kering, bukan air."});
@@ -3112,7 +3112,9 @@ WQ.registerGame("enzyme", { order: 12, kind: "sim", icon: "🍊", ages: "7+",
       $("#ezv-s").textContent = sug + " g"; $("#ezv-p").textContent = peel + " g"; $("#ezv-w").textContent = wat + " mL";
       [["s", sug + " g"], ["p", peel + " g"], ["w", wat + " mL"]].forEach(([k, t]) => $("#ez-" + k).setAttribute("aria-valuetext", t));
       $("#ezMsg").innerHTML = "";
-      if (solved) { solved = harvested = false; day = 0; $("#ezTime").innerHTML = timePanel(); say(tx({en:"Recipe changed: check your mix again.",bm:"Resipi berubah: semak adunan anda semula."})); }
+      if (solved) { solved = harvested = false; day = 0; $("#ezTime").innerHTML = timePanel();
+        const chk = $("#ezCheck"); if (chk && !$("#ezHint")) { chk.insertAdjacentHTML("afterend", ` <button class="btn alt" id="ezHint">💡 ${tx({en:"Hint",bm:"Petunjuk"})}</button>`); $("#ezHint").onclick = () => { hint = !hint; render(); }; }
+        say(tx({en:"Recipe changed: check your mix again.",bm:"Resipi berubah: semak adunan anda semula."})); }
       $("#ezVis").innerHTML = bottleSVG(v / B.V);
       const seg = (n, c, lbl) => `<i style="flex:${n || 0.0001};background:${c}">${n / tot > (lbl === "1" ? 0.04 : 0.08) ? lbl : ""}</i>`;
       $("#ezRatio").innerHTML = tot ? seg(sug, "#8a5a2b", "1") + seg(peel, "#b5560a", (peel / Math.max(1, sug)).toFixed(1)) + seg(wat, "#1f6fd1", (wat / Math.max(1, sug)).toFixed(1)) : "";
@@ -5618,7 +5620,7 @@ const T = {
   badCode: "The class code has 5 letters or numbers, for example K7P2Q.",
   connecting: "Connecting to your class…", inClass: n => `👥 ${n} in the class`,
   waitStart: "You're in! Look at the big screen. Waiting for the teacher to start…",
-  reconn: "Reconnecting…", reconnD: "Connection lost. Trying again. Keep this page open.",
+  reconn: "Reconnecting…", reconnD: "Connection lost. Trying again. Keep this page open.", reconnLong: "Still trying to reach the teacher's screen. If the teacher closed or reloaded the class, ask for the new code.",
   notFound: "Class not found. Check the code with your teacher. The teacher's page must stay open.",
   change: "Change code", leave: "Leave class",
   locked: "Answer sent!", waitOthers: "Waiting for the others…", timeUp: "Time's up!",
@@ -5664,7 +5666,7 @@ const T = {
   badCode: "Kod kelas mempunyai 5 huruf atau nombor, contohnya K7P2Q.",
   connecting: "Menyambung ke kelas anda…", inClass: n => `👥 ${n} orang dalam kelas`,
   waitStart: "Anda sudah masuk! Lihat skrin besar. Tunggu guru memulakan kuiz…",
-  reconn: "Menyambung semula…", reconnD: "Sambungan terputus. Sedang mencuba lagi. Jangan tutup halaman ini.",
+  reconn: "Menyambung semula…", reconnD: "Sambungan terputus. Sedang mencuba lagi. Jangan tutup halaman ini.", reconnLong: "Masih cuba menghubungi skrin guru. Jika guru telah menutup atau memuat semula kelas, minta kod baharu.",
   notFound: "Kelas tidak dijumpai. Semak kod dengan guru anda. Halaman guru mesti kekal terbuka.",
   change: "Tukar kod", leave: "Keluar kelas",
   locked: "Jawapan dihantar!", waitOthers: "Tunggu rakan lain…", timeUp: "Masa tamat!",
@@ -6117,7 +6119,7 @@ function initJoin(code) {
   renderJoin();
 }
 function joinGo() {
-  const j = J; clearTimeout(J.retryT); J.st = "connecting"; J.err = ""; J.tries = 0; J.gone = 0; J.everOpen = false; J.lost = false; J.dead = false;
+  const j = J; clearTimeout(J.retryT); J.st = "connecting"; J.err = ""; J.tries = 0; J.goneSince = 0; J.longGone = false; J.everOpen = false; J.lost = false; J.dead = false;
   sset("wq-class-join", { code: J.code, name: J.name });
   if (navigator.onLine === false) { J.st = "fail"; J.err = "offline"; return renderJoin(); }
   renderJoin(); keepAwake();
@@ -6158,17 +6160,19 @@ function jFail(type) {
     if (type === "peer-unavailable") { J.st = "notfound"; return renderJoin(); }
     if (J.tries >= 3) { J.st = "fail"; return renderJoin(); }
   } else {
-    J.gone = type === "peer-unavailable" ? (J.gone || 0) + 1 : 0;   // the host page is gone (closed or reloaded: a reload makes a new code)
-    if (J.gone >= 6) { J.st = "closed"; J.why = L().closed; J.lost = false; jStop(); say(J.why); return renderJoin(); }
-    if (!J.lost) { J.lost = true; renderJoin(); say(L().reconn); }
+    /* "peer-unavailable" also happens while the teacher's laptop is briefly off Wi-Fi or asleep, so never give up on our
+       own: keep retrying and keep the saved code. After 2 minutes, say the class may have ended (a closed class sends "bye"). */
+    if (type === "peer-unavailable") J.goneSince = J.goneSince || Date.now(); else J.goneSince = 0;
+    const longGone = !!J.goneSince && Date.now() - J.goneSince > 120000;
+    if (!J.lost || longGone !== !!J.longGone) { J.lost = true; J.longGone = longGone; renderJoin(); say(longGone ? L().reconnLong : L().reconn); }
   }
-  J.retryT = setTimeout(connect, Math.min(1000 * J.tries, 5000));
+  J.retryT = setTimeout(connect, Math.min(1000 * J.tries, J.longGone ? 10000 : 5000));
 }
 function onJoinData(raw) {
   if (!J || !raw || typeof raw !== "object" || Array.isArray(raw)) return;
   const d = cleanMsg(raw); if (!d) return;
   J.last = Date.now();
-  const wasLost = J.lost, l = L(), was = J.st; J.lost = false;
+  const wasLost = J.lost, l = L(), was = J.st; J.lost = false; J.goneSince = 0; J.longGone = false;
   switch (d.type) {
     case "ping": try { J.conn.send({ type: "ping" }); } catch (e) {} if (wasLost) renderJoin(); return;
     case "welcome": J.name = d.name || J.name; sset("wq-class-join", { code: J.code, name: J.name }); if (J.st === "connecting") { J.st = "lobby"; say(l.waitStart); } break;
@@ -6227,7 +6231,7 @@ function renderJoin() {
         <div class="row"><button class="btn" data-act="jRetry">🔁 ${l.retry}</button><button class="btn alt" data-act="jLeave">${l.change}</button></div></div>`; break;
     case "fail": h = helpBox(J.err) + `<div class="row" style="margin-top:14px"><button class="btn" data-act="jRetry">🔁 ${l.retry}</button><button class="btn alt" data-act="jLeave">${l.change}</button></div>`; break;
   }
-  const lost = J.lost && J.st !== "end" ? `<div class="cl-lost" role="status">📶 ${l.reconn}<br><span class="small">${l.reconnD}</span></div>` : "";
+  const lost = J.lost && J.st !== "end" ? `<div class="cl-lost" role="status">📶 ${l.reconn}<br><span class="small">${J.longGone ? l.reconnLong : l.reconnD}</span></div>` : "";
   main(lost + `<div class="cl-phone">${h}</div>`, sub);
   const f = $("#clForm");
   if (f) {
@@ -9694,6 +9698,8 @@ addEventListener("beforeunload", e => { if (H && H.players.size && H.phase !== "
     camHttps: L("The camera only works on a secure (https) page. Pick a photo or choose yourself below.",
                 "Kamera hanya berfungsi pada halaman selamat (https). Pilih foto atau pilih sendiri di bawah."),
     badImg: L("That file could not be opened as a picture. Try another photo or choose yourself.", "Fail itu tidak dapat dibuka sebagai gambar. Cuba foto lain atau pilih sendiri."),
+    slow: L("The scanner is still downloading (it is large, and only needed once). Choose yourself below for now, or tap the camera again in a minute.",
+      "Pengimbas masih dimuat turun (saiznya besar, dan hanya sekali). Pilih sendiri di bawah buat masa ini, atau tekan kamera semula sebentar lagi."),
     noAI: L("The scanner could not load (it needs the internet the first time). You can still choose yourself below.",
             "Pengimbas tidak dapat dimuatkan (ia memerlukan internet pada kali pertama). Anda masih boleh pilih sendiri di bawah."),
     guess: L("I think it's", "Saya rasa ia"), maybe: L("or maybe", "atau mungkin"),
@@ -9763,13 +9769,16 @@ addEventListener("beforeunload", e => { if (H && H.players.size && H.phase !== "
 
   let tfP = null;
   const addScript = src => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-  const within = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), ms))]);
-  const model = () => tfP = tfP || within((async () => {
+  /* the model download is ~15 MB: on slow school Wi-Fi it can take minutes, so there is no hard timeout. If it is
+     still loading after 45 s the page says so (slowLoad) and shows the manual picker, but the download carries on and
+     a later tap reuses it. Only a real failure clears tfP so the next tap starts again. */
+  const model = () => tfP = tfP || ((async () => {
     if (navigator.onLine === false && !window.mobilenet) throw new Error("offline");
     if (!window.tf) await addScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js");
     if (!window.mobilenet) await addScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js");
     return window.mobilenet.load({ version: 2, alpha: 1.0 });
-  })(), 45000).catch(e => { tfP = null; throw e; });
+  })()).catch(e => { tfP = null; throw e; });
+  const slowLoad = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("slow")), ms))]);
 
   WQ.registerPage("scan", { mount(el) {
     WQ.css("scan", CSS);
@@ -9792,7 +9801,7 @@ addEventListener("beforeunload", e => { if (H && H.players.size && H.phase !== "
     const stop = () => { camReq++; if (stream) stream.getTracks().forEach(tr => { try { tr.stop(); } catch (er) {} }); stream = null;
       const v = $("#scVid"); if (v) v.srcObject = null; const b = $("#scCamBox"); if (b) b.hidden = true; };
     const showPick = () => { const p = $("#scPick"); if (p && !dead) p.hidden = false; };
-    const loadAI = async () => { if (ai) return ai; msg("⏳ " + e(t(T.load))); try { ai = await model(); if (!dead) msg("", false); return ai; } catch (er) { if (!dead) { msg("⚠️ " + e(t(T.noAI))); showPick(); } return null; } };
+    const loadAI = async () => { if (ai) return ai; msg("⏳ " + e(t(T.load))); try { ai = await slowLoad(model(), 45000); if (!dead) msg("", false); return ai; } catch (er) { if (!dead) { msg(er && er.message === "slow" ? "⏳ " + e(t(T.slow)) : "⚠️ " + e(t(T.noAI))); showPick(); } return null; } };
 
     const classify = async img => {
       const m = await loadAI(); if (!m || dead) return;

@@ -184,7 +184,9 @@ WQ.registerGame("enzyme", { order: 12, kind: "sim", icon: "🍊", ages: "7+",
       $("#ezv-s").textContent = sug + " g"; $("#ezv-p").textContent = peel + " g"; $("#ezv-w").textContent = wat + " mL";
       [["s", sug + " g"], ["p", peel + " g"], ["w", wat + " mL"]].forEach(([k, t]) => $("#ez-" + k).setAttribute("aria-valuetext", t));
       $("#ezMsg").innerHTML = "";
-      if (solved) { solved = harvested = false; day = 0; $("#ezTime").innerHTML = timePanel(); say(tx({en:"Recipe changed: check your mix again.",bm:"Resipi berubah: semak adunan anda semula."})); }
+      if (solved) { solved = harvested = false; day = 0; $("#ezTime").innerHTML = timePanel();
+        const chk = $("#ezCheck"); if (chk && !$("#ezHint")) { chk.insertAdjacentHTML("afterend", ` <button class="btn alt" id="ezHint">💡 ${tx({en:"Hint",bm:"Petunjuk"})}</button>`); $("#ezHint").onclick = () => { hint = !hint; render(); }; }
+        say(tx({en:"Recipe changed: check your mix again.",bm:"Resipi berubah: semak adunan anda semula."})); }
       $("#ezVis").innerHTML = bottleSVG(v / B.V);
       const seg = (n, c, lbl) => `<i style="flex:${n || 0.0001};background:${c}">${n / tot > (lbl === "1" ? 0.04 : 0.08) ? lbl : ""}</i>`;
       $("#ezRatio").innerHTML = tot ? seg(sug, "#8a5a2b", "1") + seg(peel, "#b5560a", (peel / Math.max(1, sug)).toFixed(1)) + seg(wat, "#1f6fd1", (wat / Math.max(1, sug)).toFixed(1)) : "";

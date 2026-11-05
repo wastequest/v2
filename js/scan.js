@@ -32,6 +32,8 @@
     camHttps: L("The camera only works on a secure (https) page. Pick a photo or choose yourself below.",
                 "Kamera hanya berfungsi pada halaman selamat (https). Pilih foto atau pilih sendiri di bawah."),
     badImg: L("That file could not be opened as a picture. Try another photo or choose yourself.", "Fail itu tidak dapat dibuka sebagai gambar. Cuba foto lain atau pilih sendiri."),
+    slow: L("The scanner is still downloading (it is large, and only needed once). Choose yourself below for now, or tap the camera again in a minute.",
+      "Pengimbas masih dimuat turun (saiznya besar, dan hanya sekali). Pilih sendiri di bawah buat masa ini, atau tekan kamera semula sebentar lagi."),
     noAI: L("The scanner could not load (it needs the internet the first time). You can still choose yourself below.",
             "Pengimbas tidak dapat dimuatkan (ia memerlukan internet pada kali pertama). Anda masih boleh pilih sendiri di bawah."),
     guess: L("I think it's", "Saya rasa ia"), maybe: L("or maybe", "atau mungkin"),
@@ -101,13 +103,16 @@
 
   let tfP = null;
   const addScript = src => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-  const within = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), ms))]);
-  const model = () => tfP = tfP || within((async () => {
+  /* the model download is ~15 MB: on slow school Wi-Fi it can take minutes, so there is no hard timeout. If it is
+     still loading after 45 s the page says so (slowLoad) and shows the manual picker, but the download carries on and
+     a later tap reuses it. Only a real failure clears tfP so the next tap starts again. */
+  const model = () => tfP = tfP || ((async () => {
     if (navigator.onLine === false && !window.mobilenet) throw new Error("offline");
     if (!window.tf) await addScript("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js");
     if (!window.mobilenet) await addScript("https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js");
     return window.mobilenet.load({ version: 2, alpha: 1.0 });
-  })(), 45000).catch(e => { tfP = null; throw e; });
+  })()).catch(e => { tfP = null; throw e; });
+  const slowLoad = (p, ms) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error("slow")), ms))]);
 
   WQ.registerPage("scan", { mount(el) {
     WQ.css("scan", CSS);
@@ -130,7 +135,7 @@
     const stop = () => { camReq++; if (stream) stream.getTracks().forEach(tr => { try { tr.stop(); } catch (er) {} }); stream = null;
       const v = $("#scVid"); if (v) v.srcObject = null; const b = $("#scCamBox"); if (b) b.hidden = true; };
     const showPick = () => { const p = $("#scPick"); if (p && !dead) p.hidden = false; };
-    const loadAI = async () => { if (ai) return ai; msg("⏳ " + e(t(T.load))); try { ai = await model(); if (!dead) msg("", false); return ai; } catch (er) { if (!dead) { msg("⚠️ " + e(t(T.noAI))); showPick(); } return null; } };
+    const loadAI = async () => { if (ai) return ai; msg("⏳ " + e(t(T.load))); try { ai = await slowLoad(model(), 45000); if (!dead) msg("", false); return ai; } catch (er) { if (!dead) { msg(er && er.message === "slow" ? "⏳ " + e(t(T.slow)) : "⚠️ " + e(t(T.noAI))); showPick(); } return null; } };
 
     const classify = async img => {
       const m = await loadAI(); if (!m || dead) return;

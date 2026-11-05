@@ -72,7 +72,7 @@ WQ.css("sort",`
 .sg-toast.good{border-left:8px solid var(--grass)}.sg-toast.bad{border-left:8px solid var(--red)}
 .sg-end{text-align:center;max-width:520px;margin:0 auto}.sg-end h2:focus{outline:none;box-shadow:none}.sg-stars{font-size:3rem;letter-spacing:6px}
 .sg-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (max-width:700px){.sg-bins{gap:8px}.sg-bin{min-height:112px;padding:30px 4px 14px}.sg-bin .bs{display:none}.sg-bin .bl{font-size:.98rem}.sg-item{padding:10px 18px}.sg-item .em{font-size:3.4rem}.sg-stage{min-height:170px}.sg-toast{padding:8px 12px;font-size:.95rem}}
+@media (max-width:700px){.sg-bins{gap:8px;grid-template-columns:repeat(min(var(--n,3),3),minmax(0,1fr))}.sg-bin{min-height:112px;padding:30px 4px 14px}.sg-bin .bs{display:none}.sg-bin .bl{font-size:.98rem}.sg-item{padding:10px 18px}.sg-item .em{font-size:3.4rem}.sg-stage{min-height:170px}.sg-toast{padding:8px 12px;font-size:.95rem}}
 @media (pointer:coarse){.sg-bin .k{display:none}.sg-bin{padding-top:14px}}
 `);
 

@@ -112,7 +112,7 @@ const T = {
   badCode: "The class code has 5 letters or numbers, for example K7P2Q.",
   connecting: "Connecting to your class…", inClass: n => `👥 ${n} in the class`,
   waitStart: "You're in! Look at the big screen. Waiting for the teacher to start…",
-  reconn: "Reconnecting…", reconnD: "Connection lost. Trying again. Keep this page open.",
+  reconn: "Reconnecting…", reconnD: "Connection lost. Trying again. Keep this page open.", reconnLong: "Still trying to reach the teacher's screen. If the teacher closed or reloaded the class, ask for the new code.",
   notFound: "Class not found. Check the code with your teacher. The teacher's page must stay open.",
   change: "Change code", leave: "Leave class",
   locked: "Answer sent!", waitOthers: "Waiting for the others…", timeUp: "Time's up!",
@@ -158,7 +158,7 @@ const T = {
   badCode: "Kod kelas mempunyai 5 huruf atau nombor, contohnya K7P2Q.",
   connecting: "Menyambung ke kelas anda…", inClass: n => `👥 ${n} orang dalam kelas`,
   waitStart: "Anda sudah masuk! Lihat skrin besar. Tunggu guru memulakan kuiz…",
-  reconn: "Menyambung semula…", reconnD: "Sambungan terputus. Sedang mencuba lagi. Jangan tutup halaman ini.",
+  reconn: "Menyambung semula…", reconnD: "Sambungan terputus. Sedang mencuba lagi. Jangan tutup halaman ini.", reconnLong: "Masih cuba menghubungi skrin guru. Jika guru telah menutup atau memuat semula kelas, minta kod baharu.",
   notFound: "Kelas tidak dijumpai. Semak kod dengan guru anda. Halaman guru mesti kekal terbuka.",
   change: "Tukar kod", leave: "Keluar kelas",
   locked: "Jawapan dihantar!", waitOthers: "Tunggu rakan lain…", timeUp: "Masa tamat!",
@@ -611,7 +611,7 @@ function initJoin(code) {
   renderJoin();
 }
 function joinGo() {
-  const j = J; clearTimeout(J.retryT); J.st = "connecting"; J.err = ""; J.tries = 0; J.gone = 0; J.everOpen = false; J.lost = false; J.dead = false;
+  const j = J; clearTimeout(J.retryT); J.st = "connecting"; J.err = ""; J.tries = 0; J.goneSince = 0; J.longGone = false; J.everOpen = false; J.lost = false; J.dead = false;
   sset("wq-class-join", { code: J.code, name: J.name });
   if (navigator.onLine === false) { J.st = "fail"; J.err = "offline"; return renderJoin(); }
   renderJoin(); keepAwake();
@@ -652,17 +652,19 @@ function jFail(type) {
     if (type === "peer-unavailable") { J.st = "notfound"; return renderJoin(); }
     if (J.tries >= 3) { J.st = "fail"; return renderJoin(); }
   } else {
-    J.gone = type === "peer-unavailable" ? (J.gone || 0) + 1 : 0;   // the host page is gone (closed or reloaded: a reload makes a new code)
-    if (J.gone >= 6) { J.st = "closed"; J.why = L().closed; J.lost = false; jStop(); say(J.why); return renderJoin(); }
-    if (!J.lost) { J.lost = true; renderJoin(); say(L().reconn); }
+    /* "peer-unavailable" also happens while the teacher's laptop is briefly off Wi-Fi or asleep, so never give up on our
+       own: keep retrying and keep the saved code. After 2 minutes, say the class may have ended (a closed class sends "bye"). */
+    if (type === "peer-unavailable") J.goneSince = J.goneSince || Date.now(); else J.goneSince = 0;
+    const longGone = !!J.goneSince && Date.now() - J.goneSince > 120000;
+    if (!J.lost || longGone !== !!J.longGone) { J.lost = true; J.longGone = longGone; renderJoin(); say(longGone ? L().reconnLong : L().reconn); }
   }
-  J.retryT = setTimeout(connect, Math.min(1000 * J.tries, 5000));
+  J.retryT = setTimeout(connect, Math.min(1000 * J.tries, J.longGone ? 10000 : 5000));
 }
 function onJoinData(raw) {
   if (!J || !raw || typeof raw !== "object" || Array.isArray(raw)) return;
   const d = cleanMsg(raw); if (!d) return;
   J.last = Date.now();
-  const wasLost = J.lost, l = L(), was = J.st; J.lost = false;
+  const wasLost = J.lost, l = L(), was = J.st; J.lost = false; J.goneSince = 0; J.longGone = false;
   switch (d.type) {
     case "ping": try { J.conn.send({ type: "ping" }); } catch (e) {} if (wasLost) renderJoin(); return;
     case "welcome": J.name = d.name || J.name; sset("wq-class-join", { code: J.code, name: J.name }); if (J.st === "connecting") { J.st = "lobby"; say(l.waitStart); } break;
@@ -721,7 +723,7 @@ function renderJoin() {
         <div class="row"><button class="btn" data-act="jRetry">🔁 ${l.retry}</button><button class="btn alt" data-act="jLeave">${l.change}</button></div></div>`; break;
     case "fail": h = helpBox(J.err) + `<div class="row" style="margin-top:14px"><button class="btn" data-act="jRetry">🔁 ${l.retry}</button><button class="btn alt" data-act="jLeave">${l.change}</button></div>`; break;
   }
-  const lost = J.lost && J.st !== "end" ? `<div class="cl-lost" role="status">📶 ${l.reconn}<br><span class="small">${l.reconnD}</span></div>` : "";
+  const lost = J.lost && J.st !== "end" ? `<div class="cl-lost" role="status">📶 ${l.reconn}<br><span class="small">${J.longGone ? l.reconnLong : l.reconnD}</span></div>` : "";
   main(lost + `<div class="cl-phone">${h}</div>`, sub);
   const f = $("#clForm");
   if (f) {

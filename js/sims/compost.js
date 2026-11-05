@@ -64,8 +64,8 @@ function simulate() {
   if (s.m > 0.66 || wetDays > 20) out = "wet";
   else if (anaer >= 18) out = "smelly";
   else if (s.m < 0.4) out = "dry";                       // same limits as the gauges and Kiki's tips (Rynk et al.: 40–65%, C:N 20–40)
-  else if (done < 0.5 || s.cn > 40) out = "slow";
-  else if (s.cn < 20) out = "ammonia";
+  else if (done < 0.5 || Math.round(s.cn) > 40) out = "slow";   // rounded, like the gauge ("40 : 1" is inside 20–40)
+  else if (Math.round(s.cn) < 20) out = "ammonia";
   return { days, out, cn: s.cn, m0: s.m, maxT, d55, done, anaer, wet: s.wet };
 }
 
@@ -85,7 +85,7 @@ function tips(s) {
   else if (s.wet < 40) t.push({en:"Tip: a fuller bin (20+ pails) holds heat better and gets hotter.",bm:"Tip: tong yang lebih penuh (20+ baldi) lebih memerangkap haba dan menjadi lebih panas."});
   if (s.wet >= 10) {
     if (s.cn < 20) t.push({en:"Too many greens! Add browns (dry leaves, cardboard) or it will smell of ammonia.",bm:"Terlalu banyak bahan hijau! Tambah bahan perang (daun kering, kadbod) atau ia akan berbau ammonia."});
-    else if (s.cn > 40) t.push({en:"Too many browns! Add greens (food scraps, grass, coffee grounds) to feed the microbes.",bm:"Terlalu banyak bahan perang! Tambah bahan hijau (sisa makanan, rumput, hampas kopi) untuk memberi makan mikrob."});
+    else if (Math.round(s.cn) > 40) t.push({en:"Too many browns! Add greens (food scraps, grass, coffee grounds) to feed the microbes.",bm:"Terlalu banyak bahan perang! Tambah bahan hijau (sisa makanan, rumput, hampas kopi) untuk memberi makan mikrob."});
     else t.push({en:"Nice balance of greens and browns!",bm:"Imbangan bahan hijau dan perang yang bagus!"});
     if (s.m < 0.4) t.push({en:"Too dry. Add water until it feels like a wrung-out sponge.",bm:"Terlalu kering. Tambah air sehingga terasa seperti span yang diperah."});
     else if (s.m > 0.66) t.push({en:"Too wet. Add dry browns instead of water.",bm:"Terlalu basah. Tambah bahan perang kering, bukan air."});

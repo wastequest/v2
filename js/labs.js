@@ -26,11 +26,14 @@
 (() => {
 const L=(en,bm)=>({en,bm}), H=(en,bm)=>({h:{en,bm}});
 const S=(en,bm,xen,xbm)=>xen?{en,bm,x:{en:xen,bm:xbm}}:{en,bm};
+const SW=(en,bm,xen,xbm)=>({en,bm,x:{en:xen,bm:xbm},w:1});  // step whose note (x) is a SAFETY note: shown to every audience (kids too), with ⚠️
 const D=(en,bm)=>({en,bm,lv:"danger"}), W=(en,bm)=>({en,bm,lv:"warn"});
 const P=(src,en,bm)=>({src,cap:{en,bm}});
 
 // labs with the 2026 narrated video (assets/videos/v2/<id>_<en|bm>.mp4 + <id>.jpg); add ids as new renders land
 const V2=new Set("candle petfood treasure litmus odour watering enzyme ecobrick compost bioplastic vgarden hydro fused lifebuoy sleepbag".split(" "));
+// labs whose videos have caption files assets/videos/v2/<id>_<en|bm>.vtt (none yet: add ids when the WebVTT files land)
+const CAP=new Set([]);
 const LABS=[
 /* ---------------------------------------------------------------- 1 CANDLE */
 {id:"candle",icon:"🕯️",min:10,mins:60,diff:2,sup:"adult",heat:true,sdgs:[6,12,13],video:"1dHTYvQAr7l-fZWAZLZ1TFl_Dmsw00Bt-",
@@ -61,15 +64,16 @@ const LABS=[
   S("Stand a wick in the middle of each mould. Hold it straight with a clothes peg or two chopsticks across the top.","Letakkan sumbu di tengah setiap acuan. Tegakkan dengan penyepit baju atau dua batang penyepit makanan di atas acuan."),
   S("ADULT: put a few cm of water in a pot and heat gently. Stand the jug with the wax and oil in the water. Never put wax straight on the flame.","ORANG DEWASA: isi beberapa cm air dalam periuk dan panaskan perlahan-lahan. Letakkan jag berisi lilin dan minyak di dalam air itu. Jangan sekali-kali letak lilin terus di atas api.","Water cannot get much hotter than 100 °C, so the wax stays far below the temperature at which it could catch fire.","Air tidak boleh menjadi lebih panas daripada kira-kira 100 °C, jadi lilin kekal jauh di bawah suhu yang boleh menyebabkannya terbakar."),
   S("ADULT: stir gently until everything is melted and clear.","ORANG DEWASA: kacau perlahan-lahan sehingga semuanya cair dan jernih."),
-  S("Turn off the heat. Add a little candle dye or crayon shavings and stir.","Tutup api. Masukkan sedikit pewarna lilin atau serutan krayon, kemudian kacau."),
-  S("Wait a minute, then add a few drops of fragrance oil and stir.","Tunggu seminit, kemudian titiskan beberapa titis minyak wangian dan kacau.","Fragrance evaporates from very hot wax; adding it just off the heat keeps more scent in the candle.","Wangian meruap daripada lilin yang terlalu panas; menambahnya selepas api ditutup mengekalkan lebih banyak bau dalam lilin."),
+  S("ADULT: turn off the heat and lift the jug out with oven gloves. Children may drop in a little candle dye or crayon shavings from a spoon while the adult stirs.","ORANG DEWASA: tutup api dan angkat jag dengan sarung tangan ketuhar. Kanak-kanak boleh memasukkan sedikit pewarna lilin atau serutan krayon dengan sudu sementara orang dewasa mengacau."),
+  S("ADULT: wait a minute, then add a few drops of fragrance oil and stir.","ORANG DEWASA: tunggu seminit, kemudian titiskan beberapa titis minyak wangian dan kacau.","Fragrance evaporates from very hot wax; adding it just off the heat keeps more scent in the candle.","Wangian meruap daripada lilin yang terlalu panas; menambahnya selepas api ditutup mengekalkan lebih banyak bau dalam lilin."),
   S("ADULT: pour the wax slowly into the moulds, keeping each wick in the centre.","ORANG DEWASA: tuang lilin perlahan-lahan ke dalam acuan dan pastikan sumbu kekal di tengah."),
-  S("Leave the candles for 2–4 hours until hard. Do not move them while they set.","Biarkan lilin selama 2–4 jam sehingga keras. Jangan alihkan semasa ia mengeras."),
-  S("Trim the wick to about 5 mm. Label your candle with the date and \"made from used oil\".","Potong sumbu tinggal kira-kira 5 mm. Labelkan lilin dengan tarikh dan \"dibuat daripada minyak terpakai\".","Test-burn one candle with an adult, on a heat-proof plate in a ventilated room. Note any smoke or smell.","Uji bakar satu lilin bersama orang dewasa, di atas pinggan tahan panas dalam bilik yang berpengudaraan. Catat jika ada asap atau bau.")],
+  SW("Leave the candles for 2–4 hours until hard. Do not move them while they set.","Biarkan lilin selama 2–4 jam sehingga keras. Jangan alihkan semasa ia mengeras.","The wax stays hot inside long after the top looks solid. Do not touch or poke it until it is hard and cool.","Lilin kekal panas di dalam lama selepas permukaannya nampak keras. Jangan sentuh atau cucuk sehingga ia keras dan sejuk."),
+  SW("Trim the wick to about 5 mm. Label your candle with the date and \"made from used oil\".","Potong sumbu tinggal kira-kira 5 mm. Labelkan lilin dengan tarikh dan \"dibuat daripada minyak terpakai\".","Test-burn one candle with an adult, on a heat-proof plate in a ventilated room. Note any smoke or smell.","Uji bakar satu lilin bersama orang dewasa, di atas pinggan tahan panas dalam bilik yang berpengudaraan. Catat jika ada asap atau bau.")],
  safety:[D("Hot wax and hot oil cause serious burns. Only an adult heats and pours. Children stay an arm's length from the stove.","Lilin dan minyak panas boleh menyebabkan lecur teruk. Hanya orang dewasa memanaskan dan menuang. Kanak-kanak berada sedepa dari dapur."),
   D("Double boiler only. Never heat wax directly over a flame, and never leave melting wax unattended.","Guna kaedah tim sahaja. Jangan panaskan lilin terus di atas api dan jangan tinggalkan lilin yang sedang cair tanpa pengawasan."),
   D("If wax catches fire: turn off the heat and cover it with a pot lid. Never pour water on burning wax or oil.","Jika lilin terbakar: tutup api dan tutup bekas dengan tudung periuk. Jangan sekali-kali curah air pada lilin atau minyak yang terbakar."),
-  W("For a burn: cool it under cool running water for 20 minutes and tell an adult.","Jika melecur: sejukkan di bawah air paip yang sejuk selama 20 minit dan beritahu orang dewasa."),
+  W("For a burn: cool it under cool running water for 20 minutes and tell an adult. Do not peel off wax stuck to the skin, and do not put butter, toothpaste or ice on a burn.","Jika melecur: sejukkan di bawah air paip yang sejuk selama 20 minit dan beritahu orang dewasa. Jangan kopek lilin yang melekat pada kulit, dan jangan sapu mentega, ubat gigi atau ais pada luka lecur."),
+  W("Keep water away from hot wax and oil: even a few drops make hot fat spit and splash.","Jauhkan air daripada lilin dan minyak panas: beberapa titis air pun boleh menyebabkan lemak panas memercik."),
   W("Burn finished candles on a heat-proof plate, away from curtains. Never leave a lit candle alone.","Nyalakan lilin di atas pinggan tahan panas, jauh dari langsir. Jangan tinggalkan lilin yang menyala tanpa pengawasan.")],
  sci:{kids:L("Wax and oil are both fuels made of carbon and hydrogen. When you light the wick, the heat melts the wax. The melted wax climbs up the wick like water up a tissue, turns into a gas and burns. Oil is runny, so we mix it with harder wax to make a candle that stands up by itself.","Lilin dan minyak ialah bahan api yang diperbuat daripada karbon dan hidrogen. Apabila sumbu dinyalakan, haba mencairkan lilin. Lilin cair naik melalui sumbu seperti air naik pada tisu, bertukar menjadi gas dan terbakar. Minyak cair, jadi kita campurkan dengan lilin yang lebih keras supaya lilin boleh berdiri sendiri."),
   teens:L("Paraffin wax is a mixture of long-chain alkanes, solid at room temperature. Cooking oil is mostly triglycerides (glycerol joined to three fatty acids); the C=C \"kinks\" in unsaturated chains stop the molecules packing tightly, so it is liquid. A 1:2 oil-to-wax blend is softer and melts at a lower temperature than pure wax. In the flame, molten fuel rises up the wick by capillary action, vaporises and burns: hydrocarbon + O₂ → CO₂ + H₂O. With too little oxygen, combustion is incomplete and you get soot (carbon). Filtering matters because solid food particles cannot vaporise, so they char on the wick.","Lilin parafin ialah campuran alkana berantai panjang yang pepejal pada suhu bilik. Minyak masak kebanyakannya trigliserida (gliserol yang bergabung dengan tiga asid lemak); \"bengkok\" ikatan C=C dalam rantai tak tepu menghalang molekul tersusun rapat, jadi ia cecair. Campuran minyak dan lilin 1:2 lebih lembut dan melebur pada suhu lebih rendah daripada lilin tulen. Dalam nyalaan, bahan api cair naik melalui sumbu secara tindakan kapilari, mengewap dan terbakar: hidrokarbon + O₂ → CO₂ + H₂O. Jika oksigen tidak cukup, pembakaran tidak lengkap dan jelaga (karbon) terhasil. Penapisan penting kerana zarah makanan pepejal tidak boleh mengewap, jadi ia hangus pada sumbu."),
@@ -108,12 +112,12 @@ const LABS=[
   L("Steamer, oven, blender, kitchen scale, baking tray and baking paper","Pengukus, ketuhar, pengisar, penimbang dapur, dulang pembakar dan kertas pembakar"),
   L("Rolling pin, small cutters or a knife, bowls and spoons","Penggelek, acuan kecil atau pisau, mangkuk dan sudu"),
   L("Gloves, a chopping board used only for raw fish, an airtight container","Sarung tangan, papan pemotong khas untuk ikan mentah, bekas kedap udara")],
- steps:[S("Wash your hands. Wearing gloves, rinse the fish trimmings well. ADULT removes the guts and gills (they spoil fastest).","Basuh tangan. Dengan memakai sarung tangan, bilas sisa ikan sehingga bersih. ORANG DEWASA membuang perut dan insang (bahagian ini paling cepat rosak).","Raw fish can carry bacteria: keep it cold and away from other food.","Ikan mentah boleh membawa bakteria: simpan sejuk dan asingkan daripada makanan lain."),
+ steps:[SW("Wash your hands. Wearing gloves, rinse the fish trimmings well. ADULT removes the guts and gills with a knife (they spoil fastest).","Basuh tangan. Dengan memakai sarung tangan, bilas sisa ikan sehingga bersih. ORANG DEWASA membuang perut dan insang dengan pisau (bahagian ini paling cepat rosak).","Raw fish can carry bacteria: keep it cold and away from other food, and wash your hands with soap afterwards.","Ikan mentah boleh membawa bakteria: simpan sejuk dan asingkan daripada makanan lain, dan basuh tangan dengan sabun selepas itu."),
   S("ADULT: steam the fish for about 1 hour until fully cooked.","ORANG DEWASA: kukus ikan kira-kira 1 jam sehingga masak sepenuhnya.","Cooking kills germs and parasites and destroys thiaminase, an enzyme in some raw fish that breaks down vitamin B1.","Memasak membunuh kuman dan parasit serta memusnahkan tiaminase, enzim dalam sesetengah ikan mentah yang memecahkan vitamin B1."),
-  S("Let it cool. Pick the flesh off and remove EVERY bone. Check twice with your fingers.","Biarkan sejuk. Ambil isinya dan buang SEMUA tulang. Periksa dua kali dengan jari."),
-  S("Blend the boneless fish into a smooth paste (purée).","Kisar isi ikan tanpa tulang sehingga menjadi puri yang halus."),
+  S("Let it cool until it is comfortable to hold. Pick the flesh off and remove EVERY bone. Check twice with your fingers.","Biarkan sejuk sehingga selesa dipegang. Ambil isinya dan buang SEMUA tulang. Periksa dua kali dengan jari."),
+  S("Blend the boneless fish into a smooth paste (purée). An adult fits, empties and washes the blender: the blades are sharp.","Kisar isi ikan tanpa tulang sehingga menjadi puri yang halus. Orang dewasa memasang, mengosongkan dan membasuh pengisar: mata pisaunya tajam."),
   S("ADULT: spread the purée on a lined tray and dry it in the oven at about 117 °C for 15–20 minutes.","ORANG DEWASA: ratakan puri di atas dulang beralas dan keringkan dalam ketuhar pada kira-kira 117 °C selama 15–20 minit."),
-  S("Mix the dried fish with the egg, flour and oil (and taurine only if a vet said so). Knead into a dough. No salt, onion, garlic or spices!","Gaul ikan kering dengan telur, tepung dan minyak (dan taurin hanya jika disarankan doktor haiwan). Uli menjadi doh. Jangan masukkan garam, bawang, bawang putih atau rempah!","Onion and garlic are toxic to cats and dogs, even when cooked.","Bawang dan bawang putih beracun kepada kucing dan anjing, walaupun sudah dimasak."),
+  SW("Mix the dried fish with the egg, flour and oil (and taurine only if a vet said so). Knead into a dough. No salt, onion, garlic or spices!","Gaul ikan kering dengan telur, tepung dan minyak (dan taurin hanya jika disarankan doktor haiwan). Uli menjadi doh. Jangan masukkan garam, bawang, bawang putih atau rempah!","Onion and garlic are toxic to cats and dogs, even when cooked. The dough has raw egg in it: do not taste it, and wash your hands after kneading.","Bawang dan bawang putih beracun kepada kucing dan anjing, walaupun sudah dimasak. Doh ini mengandungi telur mentah: jangan rasa, dan basuh tangan selepas menguli."),
   S("Dust with flour, roll the dough flat and cut tiny shapes (cat-bite size).","Tabur tepung, gelek doh sehingga leper dan potong bentuk kecil (saiz segigit kucing)."),
   S("ADULT: bake at 150 °C for about 20 minutes until firm and dry right through. Thicker pieces need longer.","ORANG DEWASA: bakar pada 150 °C kira-kira 20 minit sehingga keras dan kering sepenuhnya. Kepingan tebal memerlukan masa lebih lama."),
   S("Cool completely. Store in an airtight, labelled container in the fridge and use within about a week. Throw away anything that smells bad or grows mould.","Sejukkan sepenuhnya. Simpan dalam bekas kedap udara berlabel di dalam peti sejuk dan gunakan dalam masa kira-kira seminggu. Buang jika berbau busuk atau berkulat.","The 2025 student group saw no mould after 14 days, but home kitchens vary, so we play safe.","Kumpulan pelajar 2025 tidak menemui kulat selepas 14 hari, tetapi keadaan dapur berbeza, jadi kita berhati-hati."),
@@ -163,7 +167,7 @@ const LABS=[
   L("1 rubber band and some glue","1 getah dan sedikit gam")],
  steps:[H("Activity A: soap","Aktiviti A: sabun"),
   S("CHILDREN: an adult cuts the soap base into cubes and melts it in short bursts in a microwave, or in a double boiler.","KANAK-KANAK: orang dewasa memotong bes sabun menjadi kiub dan mencairkannya sedikit demi sedikit dalam ketuhar gelombang mikro atau dengan kaedah tim."),
-  S("Stir in a pinch of dried coffee grounds and 1–2 drops of essential oil.","Kacau bersama secubit hampas kopi kering dan 1–2 titis minyak pati."),
+  SW("Stir in a pinch of dried coffee grounds and 1–2 drops of essential oil.","Kacau bersama secubit hampas kopi kering dan 1–2 titis minyak pati.","Melted soap base is hot (about 60–70 °C): the adult holds the jug steady while you stir with a long spoon.","Bes sabun cair panas (kira-kira 60–70 °C): orang dewasa memegang jag dengan kukuh sementara anda mengacau dengan sudu panjang."),
   S("ADULT pours it into the moulds. After about 1 hour, pop the soap out. Ready to use!","ORANG DEWASA menuang ke dalam acuan. Selepas kira-kira 1 jam, keluarkan sabun. Sedia untuk digunakan!"),
   S("TEACHER DEMO (adults only, full PPE): weigh 160 g cold distilled water into a heat-proof PP or stainless jug. Outdoors or by an open window, slowly add 65 g NaOH TO the water (never water to lye), stirring. It gets very hot and gives off fumes: stand back.","DEMONSTRASI GURU (orang dewasa sahaja, PPE lengkap): timbang 160 g air suling sejuk dalam jag PP tahan panas atau keluli tahan karat. Di luar atau di tepi tingkap terbuka, masukkan 65 g NaOH KE DALAM air perlahan-lahan (jangan tuang air ke atas alkali) sambil dikacau. Larutan menjadi sangat panas dan mengeluarkan wap: berdiri jauh.","Lye amount: 500 g × SAP value 0.138 (palm olein) ≈ 69 g; minus about 5% \"superfat\" so a little oil stays unreacted ≈ 65 g. Always re-check your actual oil in a lye calculator.","Jumlah alkali: 500 g × nilai SAP 0.138 (olein sawit) ≈ 69 g; tolak kira-kira 5% \"superfat\" supaya sedikit minyak tidak bertindak balas ≈ 65 g. Sentiasa semak semula minyak sebenar anda dengan kalkulator alkali."),
   S("TEACHER DEMO: when the lye solution and the filtered oil have both cooled to warm (about 40 °C), pour the lye into the oil and stick-blend until it thickens like custard (\"trace\"). Pour into the lined mould.","DEMONSTRASI GURU: apabila larutan alkali dan minyak tertapis sudah suam (kira-kira 40 °C), tuang alkali ke dalam minyak dan kisar dengan pengisar tangan sehingga pekat seperti kastard (\"trace\"). Tuang ke dalam acuan beralas."),
@@ -178,11 +182,12 @@ const LABS=[
   H("Activity C: toy car","Aktiviti C: kereta mainan"),
   S("Cut the straw into two pieces, a little wider than an ice-cream stick. Glue them across the stick, one near each end. These hold the axles.","Potong straw kepada dua, sedikit lebih lebar daripada batang aiskrim. Gamkan melintang pada batang, satu di setiap hujung. Ini pemegang gandar."),
   S("ADULT: make a small hole in the centre of each bottle cap with a bradawl or small drill.","ORANG DEWASA: tebuk lubang kecil di tengah setiap penutup botol dengan penebuk atau gerudi kecil."),
-  S("Push a skewer through one straw and fix a cap on each end with a dab of glue. Repeat at the other end. Snip off the sharp tips.","Masukkan lidi melalui satu straw dan lekatkan penutup di setiap hujung dengan sedikit gam. Ulang di hujung satu lagi. Potong hujung lidi yang tajam."),
+  S("Snip the sharp points off the skewers first (ADULT, with strong scissors). Push a skewer through one straw and fix a cap on each end with a dab of glue. Repeat at the other end.","Potong hujung tajam lidi dahulu (ORANG DEWASA, dengan gunting kuat). Masukkan lidi melalui satu straw dan lekatkan penutup di setiap hujung dengan sedikit gam. Ulang di hujung satu lagi."),
   S("Loop the rubber band over the front of the car and hook the other end around the back axle.","Sangkutkan getah pada bahagian depan kereta dan kaitkan hujung satu lagi pada gandar belakang."),
   S("Roll the car backwards to wind the band round the axle, put it down and let go. Vroom!","Gulingkan kereta ke belakang untuk menggulung getah pada gandar, letakkan dan lepaskan. Vroom!","Test, then improve: does it go straight? Do the wheels slip? A thin rubber-band \"tyre\" on the back wheels adds grip.","Uji, kemudian tambah baik: adakah ia bergerak lurus? Adakah roda tergelincir? \"Tayar\" getah nipis pada roda belakang menambah cengkaman.")],
  safety:[D("Lye (sodium hydroxide, NaOH) is corrosive: it burns skin and can blind. Teacher demo only, with goggles, chemical gloves, long sleeves and good ventilation; children watch from at least 2 metres away. Add lye to water, never water to lye. Never use aluminium containers (they react and make hydrogen gas).","Alkali (natrium hidroksida, NaOH) menghakis: ia melecurkan kulit dan boleh membutakan mata. Demonstrasi guru sahaja, dengan gogal, sarung tangan kimia, lengan panjang dan pengudaraan yang baik; kanak-kanak memerhati dari jarak sekurang-kurangnya 2 meter. Masukkan alkali ke dalam air, jangan sebaliknya. Jangan guna bekas aluminium (ia bertindak balas dan menghasilkan gas hidrogen)."),
-  D("If lye touches skin or eyes: rinse with plenty of running water for at least 15 minutes. For eyes, get medical help immediately.","Jika alkali terkena kulit atau mata: bilas dengan banyak air mengalir sekurang-kurangnya 15 minit. Jika terkena mata, dapatkan rawatan perubatan segera."),
+  D("NaOH looks like sugar or salt. Keep it in its original, labelled container, locked away from children, and never in a food or drink container.","NaOH kelihatan seperti gula atau garam. Simpan dalam bekas asalnya yang berlabel, berkunci dan jauh daripada kanak-kanak, dan jangan sekali-kali dalam bekas makanan atau minuman."),
+  D("If lye touches skin or eyes: rinse with plenty of running water for at least 15 minutes (water only: no vinegar). For eyes, get medical help immediately.","Jika alkali terkena kulit atau mata: bilas dengan banyak air mengalir sekurang-kurangnya 15 minit (air sahaja: jangan guna cuka). Jika terkena mata, dapatkan rawatan perubatan segera."),
   D("Melted soap base is hot: an adult melts and pours it.","Bes sabun cair panas: orang dewasa yang mencairkan dan menuang."),
   W("Sharp tools: an adult makes the bottle-cap holes. Cut away from your body.","Alatan tajam: orang dewasa menebuk lubang penutup botol. Gunting menjauhi badan."),
   W("Bottle caps are a choking hazard: keep them away from children under 3.","Penutup botol boleh menyebabkan tercekik: jauhkan daripada kanak-kanak bawah 3 tahun.")],
@@ -218,14 +223,14 @@ const LABS=[
   L("Scrap paper or coffee filters for test strips","Kertas terpakai atau penapis kopi untuk jalur ujian"),
   L("Teacher: a pH meter or universal indicator paper to check","Guru: meter pH atau kertas penunjuk semesta untuk menyemak"),
   L("Safety glasses, if available","Cermin mata keselamatan, jika ada")],
- steps:[S("Tear the cabbage leaves (or flowers) into small bits. Blend or squash them with 1 cup of water for 2 minutes.","Carik daun kubis (atau bunga) kecil-kecil. Kisar atau lenyekkan bersama 1 cawan air selama 2 minit.","Warm water, added by an adult, pulls the colour out faster.","Air suam, dituang oleh orang dewasa, mengeluarkan warna dengan lebih cepat."),
+ steps:[S("Tear the cabbage leaves (or flowers) into small bits. Squash them with 1 cup of water for 2 minutes, or an adult runs the blender.","Carik daun kubis (atau bunga) kecil-kecil. Lenyekkan bersama 1 cawan air selama 2 minit, atau orang dewasa menggunakan pengisar.","Warm water, added by an adult, pulls the colour out faster.","Air suam, dituang oleh orang dewasa, mengeluarkan warna dengan lebih cepat."),
   S("Strain the liquid through a sieve or cloth. You now have a purple (cabbage) or blue (bunga telang) indicator!","Tapis cecair melalui penapis atau kain. Kini anda ada penunjuk berwarna ungu (kubis) atau biru (bunga telang)!"),
   S("Pour a little of each sample into its own labelled cup.","Tuang sedikit setiap sampel ke dalam cawan berlabel masing-masing."),
   S("Guess first! Write \"acid\", \"neutral\" or \"base\" for each cup.","Teka dahulu! Tulis \"asid\", \"neutral\" atau \"bes\" bagi setiap cawan."),
   S("Add 2 spoons of indicator to each cup. Watch the colour change and write it down.","Masukkan 2 sudu penunjuk ke dalam setiap cawan. Perhatikan perubahan warna dan catatkan."),
   S("Line the cups up from red or pink (acid) through purple or blue (neutral) to green or yellow (base). You made a pH rainbow!","Susun cawan daripada merah atau merah jambu (asid), ungu atau biru (neutral), hingga hijau atau kuning (bes). Anda sudah membuat pelangi pH!","Roughly, red cabbage goes red (pH 1–2) → pink (3–4) → purple (5–7) → blue (8) → blue-green (9–10) → green (11–12) → yellow (13+). Bunga telang is pink-purple in acid, blue near neutral and green in base.","Secara kasar, kubis ungu berubah merah (pH 1–2) → merah jambu (3–4) → ungu (5–7) → biru (8) → biru kehijauan (9–10) → hijau (11–12) → kuning (13+). Bunga telang merah jambu keunguan dalam asid, biru hampir neutral dan hijau dalam bes."),
   S("Precision guess (the poster's game): the teacher hides the pH meter's screen. Guess each sample's pH number, then reveal. Who was closest?","Teka tepat (permainan poster): guru menyembunyikan skrin meter pH. Teka nombor pH setiap sampel, kemudian dedahkan. Siapa paling hampir?"),
-  S("Mix it right! Put indicator in a cup of vinegar. Add baking-soda water a few drops at a time, stirring, until the colour turns back to purple or blue (neutral). Count the drops. Watch it fizz!","Campur dengan tepat! Masukkan penunjuk ke dalam secawan cuka. Titiskan air soda penaik sedikit demi sedikit sambil dikacau sehingga warna kembali ungu atau biru (neutral). Kira bilangan titis. Lihat buihnya!","The fizz is carbon dioxide: CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂.","Buih itu karbon dioksida: CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂."),
+  S("Mix it right! Put 1 spoon of vinegar and 2 spoons of indicator in a cup. Add baking-soda water a little at a time (a spoon or 1 mL from a syringe), stirring, until the colour turns back to purple or blue (neutral). Count how much you added. Watch it fizz!","Campur dengan tepat! Masukkan 1 sudu cuka dan 2 sudu penunjuk ke dalam cawan. Tambah air soda penaik sedikit demi sedikit (sesudu, atau 1 mL dengan picagari) sambil dikacau sehingga warna kembali ungu atau biru (neutral). Kira berapa banyak yang ditambah. Lihat buihnya!","The fizz is carbon dioxide: CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂.","Buih itu karbon dioksida: CH₃COOH + NaHCO₃ → CH₃COONa + H₂O + CO₂."),
   S("Bonus: soak strips of scrap paper or coffee filter in the indicator and let them dry. Now you have your own \"litmus\" paper!","Bonus: rendam jalur kertas terpakai atau penapis kopi dalam penunjuk dan biarkan kering. Kini anda ada kertas \"litmus\" sendiri!"),
   S("Clean up: these household samples can go down the sink with plenty of water. Leftover cabbage goes to the compost.","Kemas: sampel dapur ini boleh dibuang ke sinki dengan banyak air. Baki kubis dimasukkan ke dalam kompos.")],
  safety:[W("Never taste or touch the test liquids: we look at the colour instead. (The old poster said acids \"taste sour\" and bases \"feel slippery\"; we never test that way.)","Jangan rasa atau sentuh cecair ujian: kita lihat warnanya. (Poster lama menyebut asid \"rasa masam\" dan bes \"terasa licin\"; kita tidak menguji dengan cara itu.)"),
@@ -237,7 +242,7 @@ const LABS=[
  teach:L("Make one big jug of indicator before class. Use the hidden-meter game with older pupils; for under-9s, stop at the colour rainbow. Link it to other labs: test the eco-enzyme and the cured soap.","Sediakan sejag besar penunjuk sebelum kelas. Guna permainan meter tersembunyi untuk murid lebih tua; untuk bawah 9 tahun, cukup sampai pelangi warna. Kaitkan dengan makmal lain: uji eko-enzim dan sabun yang sudah diperam."),
  ext:[L("Colour chart: measure samples with a pH meter and photograph the indicator colour at each pH value.","Carta warna: ukur sampel dengan meter pH dan ambil gambar warna penunjuk pada setiap nilai pH."),
   L("Cabbage vs bunga telang: which shows more colour steps? Which keeps its colour longer?","Kubis lawan bunga telang: yang mana menunjukkan lebih banyak peringkat warna? Yang mana warnanya tahan lebih lama?"),
-  L("Titration: how many drops of baking-soda solution neutralise 10 mL of vinegar? Repeat 3 times and average. Predict, then test, what happens with 5 mL.","Pentitratan: berapa titis larutan soda penaik meneutralkan 10 mL cuka? Ulang 3 kali dan kira purata. Ramal, kemudian uji, apa berlaku dengan 5 mL.")],
+  L("Titration: how many mL of baking-soda solution (from a syringe) neutralise 5 mL of vinegar? Repeat 3 times and average. Predict, then test, what happens with 10 mL. (Expect a lot: household vinegar is much stronger than the baking-soda water.)","Pentitratan: berapa mL larutan soda penaik (daripada picagari) meneutralkan 5 mL cuka? Ulang 3 kali dan kira purata. Ramal, kemudian uji, apa berlaku dengan 10 mL. (Jangkakan jumlah yang banyak: cuka dapur jauh lebih kuat daripada air soda penaik.)")],
  refl:[L("Which sample surprised you most?","Sampel mana yang paling mengejutkan anda?"),
   L("Are most foods acidic or basic? Look at your results!","Adakah kebanyakan makanan berasid atau bes? Lihat keputusan anda!"),
   L("Why is it dangerous to pour strong acids or bases down the drain?","Mengapa berbahaya menuang asid atau bes kuat ke dalam longkang?"),
@@ -265,7 +270,7 @@ const LABS=[
   L("Silicone moulds (chocolate or ice-cube shapes)","Acuan silikon (bentuk coklat atau ais)"),
   L("A small open container or cloth pouch (an old sock works!)","Bekas kecil terbuka atau uncang kain (stokin lama pun boleh!)")],
  steps:[S("Ask a nearby coffee shop for its used coffee grounds. Bring a clean container.","Minta hampas kopi daripada kedai kopi berdekatan. Bawa bekas yang bersih."),
-  S("Spread the grounds thinly on a tray. Dry them for 1–2 days in the sun or an airy place, stirring sometimes. They must be completely dry.","Ratakan hampas nipis-nipis di atas dulang. Keringkan selama 1–2 hari di bawah matahari atau di tempat berangin, kacau sekali-sekala. Hampas mesti kering sepenuhnya.","Damp grounds go mouldy within a few days.","Hampas yang lembap akan berkulat dalam beberapa hari."),
+  SW("Spread the grounds thinly on a tray. Dry them for 1–2 days in the sun or an airy place, stirring sometimes. They must be completely dry.","Ratakan hampas nipis-nipis di atas dulang. Keringkan selama 1–2 hari di bawah matahari atau di tempat berangin, kacau sekali-sekala. Hampas mesti kering sepenuhnya.","Damp grounds go mouldy within a few days. If you see fuzzy mould, do not sniff it: throw that batch in the compost and wash your hands.","Hampas yang lembap akan berkulat dalam beberapa hari. Jika nampak kulat berbulu, jangan hidu: buang kelompok itu ke dalam kompos dan basuh tangan."),
   S("In a bowl, mix 1 cup dry grounds, ½ cup cornstarch and 1 tsp cinnamon.","Dalam mangkuk, gaul 1 cawan hampas kering, ½ cawan tepung jagung dan 1 sudu kecil kayu manis."),
   S("Add 2 tbsp corn syrup and the drops of fragrance (adult). Mix well with a spoon.","Masukkan 2 sudu besar sirap jagung dan titisan pewangi (orang dewasa). Gaul rata dengan sudu."),
   S("Squeeze a little in your hand. If it crumbles, add water one teaspoon at a time until it holds together.","Genggam sedikit adunan. Jika ia berderai, tambah air satu sudu kecil pada satu masa sehingga adunan melekat."),
@@ -275,7 +280,8 @@ const LABS=[
   S("When the smell fades, dry them in the sun to refresh. Old ones can go into the compost.","Apabila baunya hilang, jemur di bawah matahari untuk menyegarkannya. Yang lama boleh dimasukkan ke dalam kompos.")],
  safety:[W("Keep away from pets and toddlers: coffee (caffeine) and essential oils are harmful to dogs and cats. Label them \"Not food\": they look like chocolate!","Jauhkan daripada haiwan peliharaan dan kanak-kanak kecil: kopi (kafein) dan minyak pati berbahaya kepada anjing dan kucing. Labelkan \"Bukan makanan\": ia nampak seperti coklat!"),
   W("Essential oils can irritate skin: an adult adds the drops. Wash hands afterwards.","Minyak pati boleh merengsakan kulit: orang dewasa yang menitiskannya. Basuh tangan selepas itu."),
-  W("Throw away any shape that grows mould.","Buang mana-mana bentuk yang berkulat.")],
+  W("Throw away any shape that grows mould. The sugary binder can attract ants: keep shapes in a closed container with small holes, not loose on the floor.","Buang mana-mana bentuk yang berkulat. Pengikat bergula boleh menarik semut: simpan bentuk dalam bekas tertutup yang berlubang kecil, bukan di atas lantai."),
+  W("In the fridge, use an unscented shape (no fragrance oil) so the food does not pick up the smell.","Di dalam peti sejuk, guna bentuk tanpa pewangi supaya makanan tidak berbau.")],
  sci:{kids:L("Coffee grounds are full of tiny holes, like a sponge. Smelly bits in the air get stuck in the holes. The coffee and cinnamon also smell nice, so the bad smell is harder to notice.","Hampas kopi penuh dengan lubang halus seperti span. Zarah berbau di udara tersangkut dalam lubang itu. Kopi dan kayu manis juga berbau wangi, jadi bau busuk kurang dihidu."),
   teens:L("Odour molecules are small, volatile compounds. Porous solids trap them by adsorption: molecules stick to a surface (unlike absorption, where something soaks into the bulk). Dried spent grounds have a large internal surface, but far less than activated carbon, which is made at high temperature to open a huge network of pores. So coffee shapes reduce and mask odours rather than neutralise all of them. Cornstarch and corn syrup are the glue: as they dry, sugar and starch molecules form hydrogen bonds and lock the grounds into shape.","Molekul bau ialah sebatian kecil yang mudah meruap. Pepejal berliang memerangkapnya secara penjerapan: molekul melekat pada permukaan (berbeza daripada penyerapan, apabila bahan meresap ke dalam). Hampas kopi kering mempunyai permukaan dalaman yang luas, tetapi jauh kurang daripada karbon teraktif yang dihasilkan pada suhu tinggi untuk membuka rangkaian liang yang sangat besar. Jadi bentuk kopi mengurangkan dan menutup bau, bukan meneutralkan semuanya. Tepung jagung dan sirap jagung ialah gamnya: apabila kering, molekul gula dan kanji membentuk ikatan hidrogen dan mengunci hampas dalam bentuknya."),
   adults:L("Spent coffee grounds are a steady, clean, single-source waste stream from cafés, ideal for small W2W products. Other proven uses are compost, mushroom-growing substrate and fuel pellets. Keep product claims precise: \"helps reduce and mask odours\" is honest; \"neutralises odours\" or \"antibacterial\" would need testing.","Hampas kopi ialah aliran sisa yang tetap, bersih dan dari satu sumber (kedai kopi), sesuai untuk produk W2W kecil. Kegunaan lain yang terbukti ialah kompos, media tanaman cendawan dan pelet bahan api. Pastikan dakwaan produk tepat: \"membantu mengurangkan dan menutup bau\" adalah jujur; \"meneutralkan bau\" atau \"antibakteria\" memerlukan ujian.")},
@@ -376,19 +382,20 @@ void loop() {
  mats:[L("100 g brown sugar, gula merah or molasses (1 part)","100 g gula perang, gula merah atau molases (1 bahagian)"),
   L("300 g fresh fruit and vegetable peels, cut small (3 parts): pineapple, orange, papaya, banana…","300 g kulit buah dan sayur yang segar, dipotong kecil (3 bahagian): nanas, oren, betik, pisang…"),
   L("1 litre (1,000 g) clean water (10 parts)","1 liter (1,000 g) air bersih (10 bahagian)"),
-  L("A 1.5–2 L plastic bottle or container with a screw lid (not glass)","Botol atau bekas plastik 1.5–2 L dengan penutup berulir (bukan kaca)"),
+  L("A 2 L plastic bottle or container with a screw lid (not glass). The mix fills about 1.4 L, so a 1.5 L bottle is too full.","Botol atau bekas plastik 2 L dengan penutup berulir (bukan kaca). Campuran mengisi kira-kira 1.4 L, jadi botol 1.5 L terlalu penuh."),
   L("Kitchen scale, knife, chopping board and funnel","Penimbang dapur, pisau, papan pemotong dan corong"),
   L("Label and marker","Label dan pen penanda")],
- steps:[S("Wash and chop the peels into small pieces. No meat, oily food or mouldy fruit.","Basuh dan potong kulit buah kecil-kecil. Jangan masukkan daging, makanan berminyak atau buah berkulat."),
+ steps:[S("Wash and chop the peels into small pieces (children use kitchen scissors; an adult cuts hard peels such as pineapple with a knife). No meat, oily food or mouldy fruit.","Basuh dan potong kulit buah kecil-kecil (kanak-kanak guna gunting dapur; orang dewasa memotong kulit keras seperti nanas dengan pisau). Jangan masukkan daging, makanan berminyak atau buah berkulat."),
   S("Weigh 1 part sugar, 3 parts peels and 10 parts water: 100 g sugar, 300 g peels, 1,000 g (1 L) water.","Timbang 1 bahagian gula, 3 bahagian kulit buah dan 10 bahagian air: 100 g gula, 300 g kulit buah, 1,000 g (1 L) air.","The ratio is by weight. The 2025 poster scaled it up to 1 kg : 3 kg : 10 kg.","Nisbah ini mengikut berat. Poster 2025 menggandakannya kepada 1 kg : 3 kg : 10 kg."),
   S("Pour the water into the bottle, add the sugar and shake until it dissolves.","Tuang air ke dalam botol, masukkan gula dan goncang sehingga larut."),
   S("Add the peels. Leave at least a quarter of the bottle empty for the gas.","Masukkan kulit buah. Biarkan sekurang-kurangnya suku botol kosong untuk gas."),
   S("Close the lid. Label it with today's date and the ready date (3 months later).","Tutup penutup. Labelkan dengan tarikh hari ini dan tarikh siap (3 bulan kemudian)."),
   S("Keep it in a cool, shady place, out of direct sun.","Simpan di tempat yang sejuk dan teduh, jauh dari cahaya matahari terus."),
-  S("For the first 2 weeks, open the lid a little every day to let the gas out, then close it. After that, once a week.","Dalam 2 minggu pertama, buka penutup sedikit setiap hari untuk melepaskan gas, kemudian tutup semula. Selepas itu, seminggu sekali.","The 2025 student group built a pressure-relief valve and an Arduino-driven stirrer to do this automatically.","Kumpulan pelajar 2025 membina injap pelega tekanan dan pengacau berkuasa Arduino untuk melakukannya secara automatik."),
+  S("For the first 2 weeks, open the lid a little every day to let the gas out, then close it. After that, once a week. Children: ask an adult to open it, slowly, pointing away from faces.","Dalam 2 minggu pertama, buka penutup sedikit setiap hari untuk melepaskan gas, kemudian tutup semula. Selepas itu, seminggu sekali. Kanak-kanak: minta orang dewasa membukanya perlahan-lahan, menghala jauh dari muka.","The 2025 student group built a pressure-relief valve and an Arduino-driven stirrer to do this automatically.","Kumpulan pelajar 2025 membina injap pelega tekanan dan pengacau berkuasa Arduino untuk melakukannya secara automatik."),
   S("After 3 months, strain it. The brown liquid is eco-enzyme! Put the leftover pulp in compost or in your next batch.","Selepas 3 bulan, tapis. Cecair perang itu ialah eko-enzim! Masukkan hampas ke dalam kompos atau kelompok seterusnya."),
   S("Always dilute before use. Commonly used: about 1 part eco-enzyme to 10–20 parts water for wiping floors and tables, and much weaker (about 1 : 500–1,000) for watering plants.","Sentiasa cairkan sebelum digunakan. Lazimnya: kira-kira 1 bahagian eko-enzim kepada 10–20 bahagian air untuk mengelap lantai dan meja, dan jauh lebih cair (kira-kira 1 : 500–1,000) untuk menyiram tanaman.")],
- safety:[W("Gas builds up inside: release it daily at first or the bottle can bulge or burst. Never use glass bottles.","Gas terkumpul di dalam: lepaskan setiap hari pada awalnya atau botol boleh mengembung atau pecah. Jangan guna botol kaca."),
+ safety:[W("Gas builds up inside: release it daily at first or the bottle can bulge or burst. Never use glass bottles. If the bottle feels hard, open it very slowly over a sink, pointing away from faces: it can spray.","Gas terkumpul di dalam: lepaskan setiap hari pada awalnya atau botol boleh mengembung atau pecah. Jangan guna botol kaca. Jika botol terasa keras, buka dengan sangat perlahan di atas sinki, menghala jauh dari muka: ia boleh memancut."),
+  W("Keep it out of hot places such as a car or a sunny window: heat makes the gas build up faster.","Jauhkan daripada tempat panas seperti kereta atau tingkap yang terkena matahari: haba menyebabkan gas terkumpul lebih cepat."),
   W("Not for drinking. Keep it labelled and away from small children. It is acidic: rinse eyes with water if splashed.","Bukan untuk diminum. Labelkan dan jauhkan daripada kanak-kanak kecil. Ia berasid: bilas mata dengan air jika terpercik."),
   W("A thin white film on top is normal. If you see black mould or it smells rotten, add a little more sugar, close it and check again in a week; if it is still bad, compost it and start again.","Lapisan putih nipis di atas adalah normal. Jika ada kulat hitam atau berbau busuk, tambah sedikit gula, tutup dan periksa semula seminggu kemudian; jika masih teruk, jadikan kompos dan mula semula.")],
  sci:{kids:L("Tiny living things called yeast and bacteria live on the peels. They eat the sugar and make gas (the fizz) and a sour liquid. After 3 months the liquid is sour enough to help with cleaning.","Hidupan halus yang dipanggil yis dan bakteria hidup pada kulit buah. Mereka makan gula dan menghasilkan gas (buih) serta cecair masam. Selepas 3 bulan, cecair itu cukup masam untuk membantu membersih."),
@@ -495,7 +502,8 @@ void loop() {
   S("Do not feed worms meat, fish, dairy, oily or salty food, or much citrus, onion, garlic or chilli.","Jangan beri cacing daging, ikan, tenusu, makanan berminyak atau masin, atau terlalu banyak limau, bawang, bawang putih atau cili."),
   S("After 1–2 months the bottom is dark, crumbly vermicast. Push everything to one side and put fresh bedding and food on the other. In 1–2 weeks the worms move across; scoop out the castings.","Selepas 1–2 bulan, bahagian bawah menjadi vermikas yang gelap dan rapuh. Tolak semuanya ke satu sisi dan letak alas serta makanan baharu di sisi lain. Dalam 1–2 minggu cacing akan berpindah; cedok keluar tahi cacing."),
   S("Mix a little vermicast into potting soil or sprinkle it around your plants.","Gaulkan sedikit vermikas ke dalam tanah pasu atau taburkan di sekeliling tanaman.")],
- safety:[W("Wear gloves or wash your hands well after touching compost, worms or bokashi. Cover any cuts.","Pakai sarung tangan atau basuh tangan dengan baik selepas menyentuh kompos, cacing atau bokashi. Tutup sebarang luka."),
+ safety:[W("Wear gloves or wash your hands well after touching compost, worms or bokashi. Cover any cuts. Open bags of compost, potting mix or bokashi bran away from your face, and do not breathe in the dust.","Pakai sarung tangan atau basuh tangan dengan baik selepas menyentuh kompos, cacing atau bokashi. Tutup sebarang luka. Buka beg kompos, tanah pasu atau dedak bokashi jauh dari muka, dan jangan hidu habuknya."),
+  W("Mould: do not put your face close to a mouldy bin or sniff it. People with asthma or allergies should let someone else open the bin.","Kulat: jangan dekatkan muka atau hidu tong yang berkulat. Orang yang menghidap asma atau alahan patut membiarkan orang lain membuka tong.",),
   W("Bokashi liquid is sour and strong: always dilute it, never drink it, and keep lids shut so flies stay away.","Cecair bokashi masam dan pekat: sentiasa cairkan, jangan diminum, dan pastikan penutup rapat supaya lalat tidak datang."),
   W("Empty the worm-bin tray regularly: standing water breeds Aedes mosquitoes. An adult drills the holes.","Kosongkan dulang tong cacing selalu: air bertakung membiakkan nyamuk Aedes. Orang dewasa yang menggerudi lubang."),
   W("No pet poo, diseased plants or \"compostable\" plastic bags: most need hot industrial composting.","Jangan masukkan najis haiwan, tumbuhan berpenyakit atau beg plastik \"boleh kompos\": kebanyakannya memerlukan pengkomposan industri yang panas.")],
@@ -535,7 +543,7 @@ void loop() {
   S("ADULT: heat on low, stirring all the time.","ORANG DEWASA: panaskan dengan api perlahan sambil dikacau tanpa henti."),
   S("Watch it change: milky white, then thick, clear and gel-like (about 5–15 minutes). Turn off the heat.","Perhatikan perubahannya: putih susu, kemudian pekat, jernih dan seperti gel (kira-kira 5–15 minit). Tutup api.","This change is gelatinisation: the starch grains swell, burst and release their long chains.","Perubahan ini ialah pengelatinan: butir kanji mengembang, pecah dan membebaskan rantai panjangnya."),
   S("ADULT: spread the hot gel on baking paper about 3–5 mm thick, or press it around the outside of a small cup to make a pot. It is very hot and sticky.","ORANG DEWASA: ratakan gel panas di atas kertas pembakar setebal kira-kira 3–5 mm, atau tekan di sekeliling bahagian luar cawan kecil untuk membuat pasu. Ia sangat panas dan melekit."),
-  S("Pop any air bubbles with a spoon and smooth the top.","Pecahkan gelembung udara dengan sudu dan licinkan permukaannya."),
+  S("When it has cooled to warm (not hot: check with the back of a spoon first), pop any air bubbles with a spoon and smooth the top.","Apabila ia sudah suam (bukan panas: periksa dengan belakang sudu dahulu), pecahkan gelembung udara dengan sudu dan licinkan permukaannya."),
   S("Leave it to dry for at least 2 days in an airy place. Turn sheets over after the first day.","Biarkan kering sekurang-kurangnya 2 hari di tempat berangin. Terbalikkan kepingan selepas hari pertama."),
   S("Peel it off and test it: bend it, stretch it, and put a small piece in water for an hour. What happens?","Tanggalkan dan uji: lentur, regang, dan rendam secebis dalam air selama sejam. Apa yang berlaku?","Label each sample with its glycerin amount so you can compare.","Labelkan setiap sampel dengan jumlah gliserinnya supaya boleh dibandingkan.")],
  safety:[D("Hot starch gel sticks to skin and burns like hot porridge. Only an adult heats, spreads and moulds it; children mix the cold ingredients and do the testing.","Gel kanji panas melekat pada kulit dan melecurkan seperti bubur panas. Hanya orang dewasa memanaskan, meratakan dan membentuknya; kanak-kanak mencampur bahan sejuk dan membuat ujian."),
@@ -581,7 +589,8 @@ void loop() {
   S("Water the top bottle slowly and watch it trickle down. Place the garden where it gets a few hours of sun.","Siram botol paling atas perlahan-lahan dan perhatikan air mengalir ke bawah. Letakkan taman di tempat yang mendapat cahaya matahari beberapa jam."),
   S("Mini pots: cut the bottom 8 cm off spare bottles, poke holes, fill and plant. Tie a ribbon on for a gift.","Pasu mini: potong 8 cm bahagian bawah botol lebihan, tebuk lubang, isi dan tanam. Ikat reben untuk dijadikan hadiah.","The student team also built an Arduino soil sensor and pump to water the garden automatically: see the Smart Watering lab.","Pasukan pelajar itu juga membina sensor tanah Arduino dan pam untuk menyiram taman secara automatik: lihat makmal Penyiraman Pintar.")],
  safety:[W("Cut plastic edges are sharp: an adult cuts, then tape the edges.","Tepi plastik yang dipotong tajam: orang dewasa memotong, kemudian lekatkan pita pada tepinya."),
-  W("Wet soil is heavy. Tie the bottles to a strong frame, not above where people walk or sit.","Tanah basah berat. Ikat botol pada rangka yang kuat, bukan di atas laluan atau tempat orang duduk."),
+  W("Wet soil is heavy. Tie the bottles to a strong frame, not above where people walk or sit. An adult hangs anything above head height: never climb on chairs or railings.","Tanah basah berat. Ikat botol pada rangka yang kuat, bukan di atas laluan atau tempat orang duduk. Orang dewasa menggantung apa-apa yang lebih tinggi daripada kepala: jangan sekali-kali memanjat kerusi atau pagar."),
+  W("Water drips down the column: hang the garden away from plugs, sockets and extension cords.","Air menitis ke bawah turus: gantung taman jauh daripada palam, soket dan wayar sambungan."),
   W("No standing water: Aedes mosquitoes can breed in a cap or tray in about a week. Check and empty them weekly.","Tiada air bertakung: nyamuk Aedes boleh membiak dalam penutup botol atau dulang dalam kira-kira seminggu. Periksa dan kosongkan setiap minggu."),
   W("Money plant is for looking at only: it is poisonous to eat and harmful to cats and dogs. Wash hands after gardening.","Pokok duit-duit hanya untuk hiasan: ia beracun jika dimakan dan berbahaya kepada kucing dan anjing. Basuh tangan selepas berkebun.")],
  sci:{kids:L("Plants need light, water, air and food from the soil. Water always flows down, so one watering at the top feeds every bottle below.","Tumbuhan memerlukan cahaya, air, udara dan makanan daripada tanah. Air sentiasa mengalir ke bawah, jadi sekali siram di atas memberi air kepada setiap botol di bawah."),
@@ -662,7 +671,7 @@ void loop() {
  steps:[H("Make the fabric (ADULT irons)","Hasilkan fabrik (ORANG DEWASA menyeterika)"),
   S("Cut off the handles and the bottom seam of each bag, then cut down one side so it opens into a flat sheet.","Potong pemegang dan jahitan bawah setiap beg, kemudian gunting satu sisi supaya terbuka menjadi kepingan rata."),
   S("Stack 4–6 layers of bag on baking paper and cover with another sheet of baking paper. Plastic must never touch the iron.","Susun 4–6 lapisan beg di atas kertas pembakar dan tutup dengan sehelai lagi kertas pembakar. Plastik tidak boleh menyentuh seterika."),
-  S("ADULT: iron on a low-medium setting with no steam, keeping the iron moving for 15–20 seconds. Turn over and repeat.","ORANG DEWASA: seterika pada suhu rendah-sederhana tanpa wap, gerakkan seterika selama 15–20 saat. Terbalikkan dan ulang.","Too cool and the layers will not join (as one student team found); too hot and it shrinks, gets holes and smells. Stop if it smokes.","Terlalu sejuk, lapisan tidak bercantum (seperti yang didapati satu pasukan pelajar); terlalu panas, ia mengecut, berlubang dan berbau. Berhenti jika berasap."),
+  SW("ADULT: iron on a low-medium setting with no steam, keeping the iron moving for 15–20 seconds. Turn over and repeat.","ORANG DEWASA: seterika pada suhu rendah-sederhana tanpa wap, gerakkan seterika selama 15–20 saat. Terbalikkan dan ulang.","Too cool and the layers will not join (as one student team found); too hot and it shrinks, gets holes and smells. Stop if it smokes.","Terlalu sejuk, lapisan tidak bercantum (seperti yang didapati satu pasukan pelajar); terlalu panas, ia mengecut, berlubang dan berbau. Berhenti jika berasap."),
   S("Let it cool, then peel off the paper. The bags have shrunk into one stiff, waterproof sheet.","Biarkan sejuk, kemudian tanggalkan kertas. Beg-beg itu telah mengecut menjadi satu kepingan yang keras dan kalis air."),
   H("Drawstring bag","Beg serut"),
   S("Measure, mark and trim the fabric to two equal rectangles.","Ukur, tanda dan potong fabrik menjadi dua segi empat tepat yang sama besar."),
@@ -671,13 +680,13 @@ void loop() {
   H("Tote bag","Beg tote"),
   S("Cut fabric pieces to the size you want (front, back, base, two handles). Sew them together by hand or machine and add a button.","Potong kepingan fabrik mengikut saiz yang dikehendaki (depan, belakang, dasar, dua pemegang). Jahit dengan tangan atau mesin dan pasang butang."),
   H("Mini umbrella","Payung mini"),
-  S("ADULT irons straws flat between baking paper to make stiff strips. Cut each strip in half for 2 ribs, or in quarters for 4 stretchers.","ORANG DEWASA menyeterika straw sehingga leper di antara kertas pembakar untuk menghasilkan jalur keras. Potong setiap jalur dua untuk 2 rusuk, atau empat untuk 4 penyokong."),
+  S("ADULT irons straws flat between baking paper to make stiff strips. Cut each strip in half for 2 ribs, or in quarters for 4 stretchers.","ORANG DEWASA menyeterika straw sehingga leper di antara kertas pembakar untuk menghasilkan jalur keras. Potong setiap jalur dua untuk 2 rusuk, atau empat untuk 4 penyokong.","Most straws are polypropylene (code 5), which softens at a higher temperature than bag plastic. Raise the heat a little at a time, keep the window open and stop if it smokes.","Kebanyakan straw ialah polipropilena (kod 5) yang melembut pada suhu lebih tinggi daripada plastik beg. Naikkan suhu sedikit demi sedikit, buka tingkap dan berhenti jika berasap."),
   S("Bundle 4 straws as the shaft. Make 2 small holes at the ends of each rib and stretcher.","Ikat 4 straw sebagai batang. Buat 2 lubang kecil di hujung setiap rusuk dan penyokong."),
   S("Sew the stretchers to a short straw sleeve (the runner) with needle and thread, and the ribs to the top of the shaft. Add a stopper so the runner locks open.","Jahit penyokong pada lengan straw pendek (peluncur) dengan jarum dan benang, dan rusuk pada bahagian atas batang. Tambah penahan supaya peluncur terkunci apabila dibuka."),
   S("Open and close it to test, then cut a circle of fused fabric as the canopy and stitch it to the rib tips.","Buka dan tutup untuk menguji, kemudian gunting bulatan fabrik cantum sebagai kanopi dan jahit pada hujung rusuk.")],
  safety:[D("ADULT ONLY for all ironing. Open windows or use a fan, keep the iron on low-medium, always use baking paper on both sides, and stop at once if there is smoke or a sharp smell.","ORANG DEWASA SAHAJA untuk semua kerja menyeterika. Buka tingkap atau guna kipas, kekalkan seterika pada suhu rendah-sederhana, sentiasa guna kertas pembakar di kedua-dua belah, dan berhenti serta-merta jika berasap atau berbau tajam."),
   D("Use only bags marked 2 (HDPE) or 4 (LDPE). Never heat PVC (3), foil-lined wrappers or bags with metal print: they can give off toxic fumes.","Guna beg bertanda 2 (HDPE) atau 4 (LDPE) sahaja. Jangan panaskan PVC (3), pembalut berlapik kerajang atau beg bercetak logam: ia boleh membebaskan wasap toksik."),
-  W("Hot plastic sticks to skin and burns. Let it cool before touching.","Plastik panas melekat pada kulit dan melecurkan. Biarkan sejuk sebelum disentuh."),
+  W("Hot plastic sticks to skin and burns. Let it cool before touching. Stand the hot iron upright, out of reach, and switch it off when you finish.","Plastik panas melekat pada kulit dan melecurkan. Biarkan sejuk sebelum disentuh. Dirikan seterika panas di tempat yang jauh daripada capaian, dan matikan suisnya selepas selesai."),
   W("Needles and scissors: count needles before and after, and keep fingers clear of the sewing-machine needle.","Jarum dan gunting: kira jarum sebelum dan selepas, dan jauhkan jari daripada jarum mesin jahit.")],
  sci:{kids:L("Some plastics go soft when they get warm. When the soft layers press together and cool down, they stick and become one strong sheet.","Sesetengah plastik menjadi lembut apabila panas. Apabila lapisan yang lembut ditekan bersama dan disejukkan, ia melekat dan menjadi satu kepingan yang kuat."),
   teens:L("Polyethylene is a thermoplastic: long chain molecules that slide past each other when warm. Under the iron, chains at the surfaces mix across the layers, and on cooling they lock together. LDPE softens and melts at a lower temperature than HDPE, which is why a low-medium iron is enough and a hot iron burns holes.","Polietilena ialah termoplastik: molekul rantai panjang yang boleh menggelongsor apabila panas. Di bawah seterika, rantai di permukaan bercampur merentasi lapisan, dan apabila sejuk ia terkunci bersama. LDPE melembut dan melebur pada suhu lebih rendah berbanding HDPE, sebab itu seterika rendah-sederhana sudah memadai dan seterika panas membakar lubang."),
@@ -780,11 +789,13 @@ const T={
  a79:L("7–9","7–9"),a1012:L("10–12","10–12"),a13:L("13+","13+"),t45:L("≤ 45 min","≤ 45 min"),t90:L("≤ 90 min","≤ 90 min"),
  noHeat:L("No heat","Tanpa haba"),heat:L("Needs heat","Perlu haba"),none:L("No lab matches these filters.","Tiada makmal sepadan dengan penapis ini."),
  ages:L("Ages","Umur"),diff:L("Difficulty","Kesukaran"),of3:L("of 3","daripada 3"),
- sup:{light:L("Light supervision","Pengawasan ringan"),close:L("Close supervision","Pengawasan rapi"),adult:L("Adult does hot or sharp steps","Orang dewasa buat langkah panas atau tajam")},
+ sup:{light:L("Light supervision","Pengawasan ringan"),close:L("Close supervision","Pengawasan rapi"),adult:L("Adult does hot or sharp steps","Orang dewasa melakukan langkah panas atau tajam")},
  cost:L("Cost","Kos"),waste:L("Waste used","Sisa digunakan"),product:L("Product","Produk"),
  why:L("Why it matters","Mengapa ia penting"),env:L("Environment","Alam sekitar"),econ:L("Economy","Ekonomi"),soc:L("Society","Masyarakat"),
  video:L("Watch the demo","Tonton demonstrasi"),
 soon:L("Video coming soon","Video akan datang"),
+ vidTxt:L("No captions yet: the written steps and safety notes below cover everything shown in the video.","Belum ada sari kata: langkah bertulis dan nota keselamatan di bawah merangkumi semua yang ditunjukkan dalam video."),
+ showing:L("Showing {n} of {t} labs","Menunjukkan {n} daripada {t} makmal"),cleared:L("Ticks cleared.","Tanda dikosongkan."),
  vidLocal:L("Plays from this website, no Google Drive needed. In the offline pack it plays without internet.","Dimainkan dari laman web ini, tanpa Google Drive. Dalam pek luar talian ia dimainkan tanpa internet."),
 vidLitmus:L("A 2025 student group built this digital pH meter (Arduino, pH probe and LCD screen) for their guessing game. The kitchen-waste indicator in this lab needs no electronics.","Kumpulan pelajar 2025 membina meter pH digital ini (Arduino, prob pH dan skrin LCD) untuk permainan meneka mereka. Penunjuk daripada sisa dapur dalam makmal ini tidak memerlukan elektronik."),
  vidMissing:L("This copy has no video file. Open the website or the offline pack to watch it.","Salinan ini tiada fail video. Buka laman web atau pek luar talian untuk menontonnya."),
@@ -797,7 +808,7 @@ vidLitmus:L("A 2025 student group built this digital pH meter (Arduino, pH probe
  code:L("Arduino sketch","Lakaran Arduino"),
  madeIt:L("I made it!","Saya berjaya buat!"),earned:L("Badge earned","Lencana diperoleh"),madeOn:L("You made this on","Anda membuatnya pada"),
  print:L("Print worksheet","Cetak lembaran kerja"),reset:L("Clear ticks","Kosongkan tanda"),
- prev:L("Previous lab","Makmal sebelum"),next:L("Next lab","Makmal seterusnya"),allLabs:L("All labs","Semua makmal"),
+ prev:L("Previous lab","Makmal sebelumnya"),next:L("Next lab","Makmal seterusnya"),allLabs:L("All labs","Semua makmal"),
  close:L("Close","Tutup"),pImg:L("Previous poster","Poster sebelum"),nImg:L("Next poster","Poster seterusnya"),open:L("Open poster","Buka poster"),
  nf:L("Lab not found.","Makmal tidak dijumpai."),
  wsT:L("Worksheet","Lembaran Kerja"),name:L("Name","Nama"),cls:L("Class","Kelas"),date:L("Date","Tarikh"),
@@ -825,7 +836,7 @@ const stars=n=>"★".repeat(n)+"☆".repeat(3-n);
 const supCls={light:"go",close:"warn",adult:"red"};
 const tagList=(l,cls="tag")=>[
  `<span class="${cls}">${X(T.ages)} ${l.min}+</span>`,`<span class="${cls}">⏱ ${X(l.time)}</span>`,
- `<span class="${cls}" aria-label="${X(T.diff)} ${l.diff} ${X(T.of3)}">${X(T.diff)} ${stars(l.diff)}</span>`,
+ `<span class="${cls}">${X(T.diff)} <span aria-hidden="true">${stars(l.diff)}</span><span class="vh">${l.diff} ${X(T.of3)}</span></span>`,
  `<span class="${cls} ${supCls[l.sup]}">${X(T.sup[l.sup])}</span>`,l.heat?`<span class="${cls} red">🔥 ${X(T.heat)}</span>`:"",
  ...l.sdgs.map(n=>`<span class="${cls} lb-sdg">SDG ${n}</span>`)].join(" ");
 const costH=l=>X(l.cost);
@@ -834,53 +845,62 @@ const credit=()=>X(T.credit);
 const gateH=l=>GATE[l.id]?`<p class="note warn lb-gate"><b>🧒 ${X(T.gate)}:</b> ${X(GATE[l.id])}</p>`:"";
 /* pixel cover from WQ.labCovers (art agent); returns false when unavailable so the emoji stays */
 const cover=(slot,id)=>{try{const c=document.createElement("canvas");if(!(WQ.labCovers&&WQ.labCovers.draw(c,id)))return;c.className="lb-cov";c.setAttribute("aria-hidden","true");slot.replaceWith(c);}catch(e){}};
+/* who-does-it labels (ADULT, TEACHER DEMO, CHILDREN) become pills; safety notes (it.w) show for every audience */
+const WHO=/\b(ADULT|ORANG DEWASA|TEACHER DEMO|DEMONSTRASI GURU|CHILDREN|KANAK-KANAK)\b/g;
+const stepH=it=>X(it).replace(WHO,m=>`<b class="lb-who${/CHILD|KANAK/.test(m)?" kid":""}">${m}</b>`);
+const notesH=(it,x,c="lb")=>!it.x?"":it.w?`<span class="${c}-xw">${X(it.x)}</span>`:x?`<span class="${c}-x">${X(it.x)}</span>`:"";
 const tbl=l=>l.table?`<div class="tablewrap lb-tbl"><table class="tbl"><thead><tr>${l.table.head.map(h=>`<th>${X(h)}</th>`).join("")}</tr></thead><tbody>${l.table.rows.map(r=>`<tr>${r.map(c=>`<td>${X(c)}</td>`).join("")}</tr>`).join("")}</tbody></table><p class="small muted">${X(l.table.note)}</p></div>`:"";
 
 LABS.forEach(l=>{ l.ages=l.min+"+"; WQ.labs.push(l);
  WQ.addBadge("lab-"+l.id,{icon:l.badge.icon,name:l.badge.name,desc:{en:"Made: "+l.title.en,bm:"Siap: "+l.title.bm}}); });
 
-/* ---------- gallery: #/labs */
+/* ---------- gallery: #/labs (filters stay put; only the grid redraws, and a status line announces the count) */
 const AGE={all:99,"79":9,"1012":12,"13":99};
 WQ.registerPage("labs",{mount(el){
  const f=Object.assign({a:"all",t:"any",h:"any"},WQ.store.getJSON("labs-f",{}));
- const seg=(k,label,opts)=>`<div class="lb-seg" role="group" aria-label="${X(label)}"><b>${X(label)}</b>${opts.map(([v,o])=>`<button data-f="${k}" data-v="${v}" aria-pressed="${f[k]===v}">${X(o)}</button>`).join("")}</div>`;
- const render=focus=>{
-  const show=LABS.filter(l=>l.min<=AGE[f.a]&&(f.t==="any"||l.mins<=+f.t)&&(f.h==="any"||(f.h==="yes")===l.heat));
-  const got=LABS.filter(l=>WQ.has("lab-"+l.id)).length;
-  el.innerHTML=WQ.head("🧪",T.labsT,T.labsS)+
-   `<div class="progress lb-prog"><span class="pill">🏅 ${got}/${LABS.length} ${X(T.made)}</span><div class="meter"><i style="width:${got/LABS.length*100}%"></i></div></div>
-   <p class="note warn small">${X(T.safeHint)}</p>
-   <div class="lb-filters">${seg("a",T.fAge,[["all",T.all],["79",T.a79],["1012",T.a1012],["13",T.a13]])}${seg("t",T.fTime,[["any",T.any],["45",T.t45],["90",T.t90]])}${seg("h",T.fHeat,[["any",T.any],["no",T.noHeat],["yes",T.heat]])}</div>
-   <h2 class="vh">${X(T.allLabs)}</h2><div class="grid">${show.map(l=>{const has=WQ.has("lab-"+l.id);return `<a class="card tile lb-card" href="#/lab/${l.id}">${has?`<span class="done" title="${X(T.earned)}">✅</span>`:""}<span class="ti" aria-hidden="true" data-cov="${l.id}">${l.icon}</span><h3>${X(l.title)}</h3><p>${X(l.hook)}</p>
-    <span class="lb-tags"><span class="tag">${X(T.ages)} ${l.min}+</span><span class="tag">⏱ ${l.mins} min</span>${l.heat?`<span class="tag red">🔥 ${X(T.heat)}</span>`:""}<span class="tag ${has?"go":""}">${has?"✅":"🏅"} ${X(l.badge.name)}</span></span></a>`;}).join("")||`<p class="card">${X(T.none)}</p>`}</div>`;
-  WQ.$$("[data-cov]",el).forEach(s=>cover(s,s.dataset.cov));
-  WQ.$$("[data-f]",el).forEach(b=>b.onclick=()=>{f[b.dataset.f]=b.dataset.v;WQ.store.setJSON("labs-f",f);render(b.dataset.f+b.dataset.v);});
-  if(focus){const b=WQ.$$("[data-f]",el).find(x=>x.dataset.f+x.dataset.v===focus);b&&b.focus();}
- };
- render();
+ const seg=(k,label,opts)=>`<div class="lb-seg" role="group" aria-label="${X(label)}"><b aria-hidden="true">${X(label)}</b>${opts.map(([v,o])=>`<button data-f="${k}" data-v="${v}" aria-pressed="${f[k]===v}">${X(o)}</button>`).join("")}</div>`;
+ const pick=()=>LABS.filter(l=>l.min<=AGE[f.a]&&(f.t==="any"||l.mins<=+f.t)&&(f.h==="any"||(f.h==="yes")===l.heat));
+ const say=n=>X(T.showing).replace("{n}",n).replace("{t}",LABS.length);
+ const got=LABS.filter(l=>WQ.has("lab-"+l.id)).length;
+ el.innerHTML=WQ.head("🧪",T.labsT,T.labsS)+
+  `<div class="progress lb-prog"><span class="pill">🏅 ${got}/${LABS.length} ${X(T.made)}</span><div class="meter"><i style="width:${got/LABS.length*100}%"></i></div></div>
+  <p class="note warn small">${stepH(T.safeHint)}</p>
+  <div class="lb-filters">${seg("a",T.fAge,[["all",T.all],["79",T.a79],["1012",T.a1012],["13",T.a13]])}${seg("t",T.fTime,[["any",T.any],["45",T.t45],["90",T.t90]])}${seg("h",T.fHeat,[["any",T.any],["no",T.noHeat],["yes",T.heat]])}</div>
+  <h2 class="vh">${X(T.allLabs)}</h2><p class="vh" role="status" id="lbCount">${say(pick().length)}</p><div class="grid" id="lbGrid"></div>`;
+ const grid=WQ.$("#lbGrid",el),cnt=WQ.$("#lbCount",el);
+ const draw=()=>{const show=pick();
+  grid.innerHTML=show.map(l=>{const has=WQ.has("lab-"+l.id);return `<a class="card tile lb-card" href="#/lab/${l.id}">${has?`<span class="done" title="${X(T.earned)}">✅</span>`:""}<span class="ti" aria-hidden="true" data-cov="${l.id}">${l.icon}</span><h3>${X(l.title)}</h3><p>${X(l.hook)}</p>
+   <span class="lb-tags"><span class="tag">${X(T.ages)} ${l.min}+</span><span class="tag">⏱ ${l.mins} min</span>${l.heat?`<span class="tag red">🔥 ${X(T.heat)}</span>`:""}<span class="tag ${has?"go":""}">${has?"✅":"🏅"} ${X(l.badge.name)}</span></span></a>`;}).join("")||`<p class="card">${X(T.none)}</p>`;
+  WQ.$$("[data-cov]",grid).forEach(s=>cover(s,s.dataset.cov));
+  return show.length;};
+ draw();
+ WQ.$$("[data-f]",el).forEach(b=>b.onclick=()=>{f[b.dataset.f]=b.dataset.v;WQ.store.setJSON("labs-f",f);
+  WQ.$$(`[data-f="${b.dataset.f}"]`,el).forEach(x=>x.setAttribute("aria-pressed",x===b));cnt.textContent=say(draw());});
 }});
 
 /* ---------- single lab: #/lab/<id>  and  #/lab/<id>/print */
 let autoPrint=false;
 const listH=(items,key,done,x)=>{let n=0;return `<ul class="lb-list">${items.map((it,i)=>it.h?`<li class="lb-h">${X(it.h)}</li>`:
- `<li><label class="lb-tick"><input type="checkbox" data-k="${key}" data-i="${i}"${done.includes(i)?" checked":""}>${key==="s"?`<span class="lb-n">${++n}</span>`:""}<span>${X(it)}${x&&it.x?`<span class="lb-x">${X(it.x)}</span>`:""}</span></label></li>`).join("")}</ul>`;};
+ `<li><label class="lb-tick"><input type="checkbox" data-k="${key}" data-i="${i}"${done.includes(i)?" checked":""}>${key==="s"?`<span class="lb-n" aria-hidden="true">${++n}</span>`:""}<span>${key==="s"?stepH(it):X(it)}${notesH(it,x)}</span></label></li>`).join("")}</ul>`;};
 const count=items=>items.filter(i=>!i.h).length;
 
 WQ.registerPage("lab",{mount(el,{args}){
  const l=get(args[0]);
- if(!l){el.innerHTML=`<div class="card">${X(T.nf)} <a href="#/labs">${X(T.allLabs)}</a></div>`;return;}
+ if(!l){el.innerHTML=WQ.head("🧪",T.nf)+`<div class="card"><a class="btn" href="#/labs">🧪 ${X(T.allLabs)}</a></div>`;return;}
  if(args[1]==="print") return worksheet(el,l);
- const key="lab-"+l.id, st=Object.assign({m:[],s:[]},WQ.store.getJSON(key,{})), x=WQ.aud!=="kids";
+ const key="lab-"+l.id, st0=WQ.store.getJSON(key,{}), x=WQ.aud!=="kids";
+ const ok=a=>Array.isArray(a)?a.filter(n=>Number.isInteger(n)&&n>=0):[];
+ const st={m:ok(st0.m).filter(n=>l.mats[n]&&!l.mats[n].h),s:ok(st0.s).filter(n=>l.steps[n]&&!l.steps[n].h)};  // drop stale or bad ticks
  const lvl=WQ.aud==="kids"?"kids":WQ.aud==="teens"?"teens":"adults";
  const i=LABS.indexOf(l), prev=LABS[i-1], next=LABS[i+1];
- const render=()=>{
+ const render=focusSel=>{
   const when=WQ.earned()[key];
   el.innerHTML=WQ.head(l.icon,l.title,l.hook)+`<span data-cov="${l.id}" hidden></span><div class="lb-chips">${tagList(l)}</div>${gateH(l)}
-  ${when?`<p class="note ok">🏅 ${X(T.madeOn)} ${E(new Date(when).toLocaleDateString(WQ.lang==="bm"?"ms-MY":"en-GB",{day:"numeric",month:"long",year:"numeric"}))}. ${l.badge.icon} ${X(l.badge.name)}</p>`:""}
+  ${when?`<p class="note ok" id="lbWhen" tabindex="-1">🏅 ${X(T.madeOn)} ${E(new Date(when).toLocaleDateString(WQ.lang==="bm"?"ms-MY":"en-GB",{day:"numeric",month:"long",year:"numeric"}))}. ${l.badge.icon} ${X(l.badge.name)}</p>`:""}
   <section class="card"><dl class="lb-meta"><div><dt>${X(T.waste)}</dt><dd>${X(l.waste)}</dd></div><div><dt>${X(T.product)}</dt><dd>${X(l.product)}</dd></div><div><dt>${X(T.cost)}</dt><dd>${costH(l)}</dd></div></dl></section>
   <section class="card lb-sec"><h2>🌏 ${X(T.why)}</h2><div class="lb-why"><div><h3>🌍 ${X(T.env)}</h3><p>${X(l.why.env)}</p></div><div><h3>💰 ${X(T.econ)}</h3><p>${X(l.why.econ)}</p></div><div><h3>🤝 ${X(T.soc)}</h3><p>${X(l.why.soc)}</p></div></div></section>
-  <section class="card lb-sec noprint"><h2>🎬 ${X(T.video)}</h2>${V2.has(l.id)?`<div class="lb-vid" id="lbVid"><video controls preload="none" playsinline poster="assets/videos/v2/${l.id}.jpg" src="assets/videos/v2/${l.id}_${WQ.lang==="bm"?"bm":"en"}.mp4" title="${X(l.title)}"></video></div>
-   <p class="small muted">${X(T.vidLocal)}</p>`:l.video?`<div class="lb-vid" id="lbVid"><video controls preload="none" playsinline poster="assets/videos/${l.id}.jpg" src="assets/videos/${l.id}.mp4" title="${X(l.title)}"></video></div>
+  <section class="card lb-sec noprint"><h2>🎬 ${X(T.video)}</h2>${V2.has(l.id)?`<div class="lb-vid" id="lbVid"><video controls preload="metadata" playsinline poster="assets/videos/v2/${l.id}.jpg" src="assets/videos/v2/${l.id}_${WQ.lang==="bm"?"bm":"en"}.mp4" aria-label="${X(T.video)}: ${X(l.title)}">${CAP.has(l.id)?`<track kind="captions" default srclang="${WQ.lang==="bm"?"ms":"en"}" label="${WQ.lang==="bm"?"Bahasa Melayu":"English"}" src="assets/videos/v2/${l.id}_${WQ.lang==="bm"?"bm":"en"}.vtt">`:""}</video></div>
+   <p class="small muted">${X(T.vidLocal)}${CAP.has(l.id)?"":" "+X(T.vidTxt)}</p>`:l.video?`<div class="lb-vid" id="lbVid"><video controls preload="none" playsinline poster="assets/videos/${l.id}.jpg" src="assets/videos/${l.id}.mp4" title="${X(l.title)}"></video></div>
    <p class="small muted">${l.id==="litmus"?X(T.vidLitmus)+" ":""}${X(T.vidLocal)}</p>`:`<p>🎬 <b>${X(T.soon)}</b></p><p class="small muted">${X(T.soonN)}</p>`}</section>
   <section class="card lb-sec"><h2>🧺 ${X(T.mats)} <span class="lb-cnt muted" id="lbMc"></span></h2>${listH(l.mats,"m",st.m,x)}${tbl(l)}</section>
   <section class="card lb-sec"><h2>🪜 ${X(T.steps)} <span class="lb-cnt muted" id="lbSc"></span></h2>${listH(l.steps,"s",st.s,x)}
@@ -891,8 +911,8 @@ WQ.registerPage("lab",{mount(el,{args}){
   <section class="card lb-sec"><h2>🚀 ${X(T.ext)}</h2><ol>${l.ext.map(e=>`<li>${X(e)}</li>`).join("")}</ol></section>
   <section class="card lb-sec"><h2>💭 ${X(T.refl)}</h2><ul>${l.refl.map(e=>`<li>${X(e)}</li>`).join("")}</ul></section>
   <section class="card lb-sec"><h2>🖼️ ${X(T.posters)}</h2>${l.posters.length?`<div class="lb-posters">${l.posters.map((p,j)=>`<button class="lb-thumb" data-p="${j}" aria-label="${X(T.open)}: ${X(p.cap)}"><img src="${p.src}" alt="" loading="lazy"><span>${X(p.cap)}</span></button>`).join("")}</div>`:""}<p class="small muted">${credit(l)}</p></section>
-  <div class="row noprint lb-actions"><button class="btn" id="lbMade"${when?" disabled":""}>${when?"✅ "+X(T.earned):"🎉 "+X(T.madeIt)}</button><button class="btn blue" id="lbPrint">🖨️ ${X(T.print)}</button><button class="btn alt" id="lbReset">↺ ${X(T.reset)}</button></div>
-  <nav class="lb-nav noprint" aria-label="${X(T.allLabs)}">${prev?`<a class="btn alt" href="#/lab/${prev.id}">← ${X(T.prev)}: ${prev.icon}</a>`:"<span></span>"}<a class="btn alt" href="#/labs">🧪 ${X(T.allLabs)}</a>${next?`<a class="btn alt" href="#/lab/${next.id}">${X(T.next)}: ${next.icon} →</a>`:"<span></span>"}</nav>
+  <div class="row noprint lb-actions"><button class="btn" id="lbMade"${when?" disabled":""}>${when?"✅ "+X(T.earned):"🎉 "+X(T.madeIt)}</button><button class="btn blue" id="lbPrint">🖨️ ${X(T.print)}</button><button class="btn alt" id="lbReset">↺ ${X(T.reset)}</button><span class="vh" role="status" id="lbSay"></span></div>
+  <nav class="lb-nav noprint" aria-label="${X(T.allLabs)}">${prev?`<a class="btn alt" href="#/lab/${prev.id}" aria-label="${X(T.prev)}: ${X(prev.title)}">← ${X(T.prev)}: <span aria-hidden="true">${prev.icon}</span></a>`:"<span></span>"}<a class="btn alt" href="#/labs">🧪 ${X(T.allLabs)}</a>${next?`<a class="btn alt" href="#/lab/${next.id}" aria-label="${X(T.next)}: ${X(next.title)}">${X(T.next)}: <span aria-hidden="true">${next.icon}</span> →</a>`:"<span></span>"}</nav>
   <dialog class="lb-dlg" id="lbDlg" aria-label="${X(T.posters)}"><figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
    <div class="row lb-dlgbar"><button class="btn alt" data-d="-1" aria-label="${X(T.pImg)}">←</button><button class="btn alt" data-d="1" aria-label="${X(T.nImg)}">→</button><button class="btn" data-d="0">${X(T.close)}</button></div></dialog>`;
   const cs=WQ.$("[data-cov]",el);if(cs)cover(cs,l.id);
@@ -902,10 +922,11 @@ WQ.registerPage("lab",{mount(el,{args}){
    if(c.checked&&j<0)a.push(n);else if(!c.checked&&j>=0)a.splice(j,1);WQ.store.setJSON(key,st);counts();});
   const vid=WQ.$("#lbVid video",el);
   if(vid)vid.addEventListener("play",()=>WQ.track("video/"+l.id),{once:true});
-  if(vid)vid.addEventListener("error",()=>{WQ.$("#lbVid",el).outerHTML=`<p class="note warn">🎬 ${X(T.vidMissing)}</p>`;});
-  WQ.$("#lbMade",el).onclick=()=>{if(WQ.award(key)){WQ.beep(true);render();}};
+  if(vid)vid.addEventListener("error",()=>{const w=vid.isConnected&&vid.getAttribute("src")&&vid.closest(".lb-vid");if(w)w.outerHTML=`<p class="note warn">🎬 ${X(T.vidMissing)}</p>`;});
+  WQ.$("#lbMade",el).onclick=()=>{if(WQ.award(key)){WQ.beep(true);if(vid)vid.pause();render("#lbWhen");}};
   WQ.$("#lbPrint",el).onclick=()=>{autoPrint=true;WQ.go(`lab/${l.id}/print`);};
-  WQ.$("#lbReset",el).onclick=()=>{st.m=[];st.s=[];WQ.store.setJSON(key,st);render();};
+  WQ.$("#lbReset",el).onclick=()=>{st.m=[];st.s=[];WQ.store.setJSON(key,st);WQ.$$("input[data-k]",el).forEach(c=>c.checked=false);counts();WQ.$("#lbSay",el).textContent=t(T.cleared);};
+  if(focusSel){const fe=WQ.$(focusSel,el);if(fe)fe.focus();}
   const dlg=WQ.$("#lbDlg",el);let cur=0;
   const show=j=>{cur=(j+l.posters.length)%l.posters.length;const p=l.posters[cur];WQ.$("#lbImg",el).src=p.src;WQ.$("#lbImg",el).alt=t(p.cap);WQ.$("#lbCap",el).textContent=`${t(p.cap)} (${cur+1}/${l.posters.length})`;};
   WQ.$$("[data-p]",el).forEach(b=>b.onclick=()=>{show(+b.dataset.p);dlg.showModal();});
@@ -914,6 +935,7 @@ WQ.registerPage("lab",{mount(el,{args}){
   dlg.onkeydown=e=>{if(e.key==="ArrowRight")show(cur+1);else if(e.key==="ArrowLeft")show(cur-1);};
  };
  render();
+ return()=>{const v=WQ.$("#lbVid video",el),d=WQ.$("#lbDlg",el);if(v){v.pause();v.removeAttribute("src");v.load();}if(d&&d.open)d.close();};  // stop the video and free the stream when leaving
 }});
 
 /* printable worksheet for children (route #/lab/<id>/print) */
@@ -925,7 +947,7 @@ function worksheet(el,l){
   ${blank([T.name,T.cls,T.date])}
   <p class="small">${X(T.ages)} ${l.min}+ · ⏱ ${X(l.time)} · ${X(T.sup[l.sup])}${l.heat?" · 🔥 "+X(T.heat):""}</p>${gateH(l)}
   <h2>🧺 ${X(T.mats)}</h2><ul class="lb-wsl">${l.mats.map(m=>m.h?`<li class="lb-h">${X(m.h)}</li>`:`<li>☐ ${X(m)}</li>`).join("")}</ul>
-  <h2>🪜 ${X(T.steps)}</h2><ul class="lb-wsl">${l.steps.map(s=>s.h?`<li class="lb-h">${X(s.h)}</li>`:`<li>☐ <b>${++n}.</b> ${X(s)}${x&&s.x?`<span class="lb-x">${X(s.x)}</span>`:""}</li>`).join("")}</ul>
+  <h2>🪜 ${X(T.steps)}</h2><ul class="lb-wsl">${l.steps.map(s=>s.h?`<li class="lb-h">${X(s.h)}</li>`:`<li>☐ <b>${++n}.</b> ${stepH(s)}${notesH(s,x)}</li>`).join("")}</ul>
   <h2>🦺 ${X(T.safety)}</h2><div class="lb-stack">${l.safety.map(noteH).join("")}</div>
   <h2>💭 ${X(T.refl)}</h2>${l.refl.map(q=>`<div class="lb-q"><b>${X(q)}</b><div class="lb-ln"></div><div class="lb-ln"></div></div>`).join("")}
   <h2>✏️ ${X(T.result)}</h2><div class="lb-box"></div>
@@ -948,7 +970,7 @@ WQ.renderLabPrint=(el,id)=>{
   ${p?`<figure class="lbp-fig"><img src="${p.src}" alt="${X(p.cap)}"><figcaption>${X(p.cap)}. ${credit(l)}</figcaption></figure>`:""}
   <h3>${X(T.why)}</h3><p><b>🌍 ${X(T.env)}:</b> ${X(l.why.env)}</p><p><b>💰 ${X(T.econ)}:</b> ${X(l.why.econ)}</p><p><b>🤝 ${X(T.soc)}:</b> ${X(l.why.soc)}</p>
   <h3>${X(T.mats)}</h3><ul>${l.mats.map(m=>m.h?`<li class="lbp-h">${X(m.h)}</li>`:`<li>${X(m)}</li>`).join("")}</ul>${tbl(l)}
-  <h3>${X(T.steps)}</h3><ol class="lbp-steps">${l.steps.map(s=>s.h?`<li class="lbp-h">${X(s.h)}</li>`:`<li><span class="lbp-n">${++n}.</span><span>${X(s)}${s.x?`<span class="lbp-x">${X(s.x)}</span>`:""}</span></li>`).join("")}</ol>
+  <h3>${X(T.steps)}</h3><ol class="lbp-steps">${l.steps.map(s=>s.h?`<li class="lbp-h">${X(s.h)}</li>`:`<li><span class="lbp-n">${++n}.</span><span>${stepH(s)}${notesH(s,true,"lbp")}</span></li>`).join("")}</ol>
   ${l.code?`<p><b>${X(T.code)} (${X(T.teenL)})</b></p><pre>${E(l.code)}</pre>`:""}
   <h3>${X(T.safety)}</h3>${l.safety.map(noteH).join("")}
   <h3>${X(T.sci)}</h3><p><b>${X(T.teenL)}:</b> ${X(l.sci.teens)}</p><p><b>${X(T.adultL)}:</b> ${X(l.sci.adults)}</p>
@@ -992,6 +1014,11 @@ WQ.css("labs",`
 .lb-n{flex:none;width:26px;height:26px;border-radius:50%;background:#1e6f50;color:#fff;font-weight:800;display:grid;place-items:center;font-size:.9rem}
 .lb-x{display:block;color:var(--muted);font-size:.9rem;margin-top:3px}
 .lb-x:before{content:"🔬 "}
+.lb-xw{display:block;font-size:.9rem;font-weight:700;color:#7a2a00;margin-top:4px}.lb-xw:before{content:"⚠️ "}
+.lbp-xw{display:block;font-size:8.8pt;font-weight:700;color:#7a2a00}.lbp-xw:before{content:"⚠ "}
+.lb-who{display:inline-block;background:#b4202a;color:#fff;font-family:"Pixelify Sans",Nunito,sans-serif;font-weight:600;font-size:.82em;letter-spacing:.03em;padding:0 6px;border:2px solid #1a1932;margin-right:2px;line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lb-who.kid{background:#1e6f50}
+.lb-seg button{min-height:40px}
 .lb-stack>*+*{margin-top:8px}
 .lb-tbl{margin-top:12px}
 .lb-code{margin-top:12px}

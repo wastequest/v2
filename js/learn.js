@@ -15,6 +15,10 @@
 (() => {
 const t = o => WQ.t(o), P = o => WQ.t(WQ.pick(o)), E = s => WQ.esc(s);
 const A = () => WQ.aud, SCI = () => A() !== "kids", BIZ = () => A() === "adults" || A() === "teacher", TCH = () => A() === "teacher";
+/* text colour on a coloured fill: white if it meets WCAG contrast (4.5, or 3 for large text), otherwise dark ink */
+const lum = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, n >> 8 & 255, n & 255].map(v => (v /= 255) <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((s, v, i) => s + v * [.2126, .7152, .0722][i], 0); };
+const fg = (h, min = 4.5) => 1.05 / (lum(h) + .05) >= min ? "#fff" : "#1a1932";
+const ink = (h, min) => fg(h, min) === "#fff" ? `color:#fff` : `color:#1a1932;text-shadow:none`;
 const fmt = (n, d = 0) => Number(n).toLocaleString(WQ.lang === "bm" ? "ms-MY" : "en-MY", { maximumFractionDigits: d, minimumFractionDigits: d });
 
 const U = {
@@ -40,7 +44,7 @@ const bizBox = body => BIZ() ? box("ok", U.biz, body) : "";
 const LABS = {
   candle: { i: "🕯️", w: { en: "Used cooking oil", bm: "Minyak masak terpakai" }, p: { en: "Scented candle", bm: "Lilin wangi" } },
   petfood: { i: "🐟", w: { en: "Fish waste", bm: "Sisa ikan" }, p: { en: "Pet food", bm: "Makanan haiwan" } },
-  treasure: { i: "👜", w: { en: "Old clothes and plastic bags", bm: "Pakaian lama dan beg plastik" }, p: { en: "Tote bag", bm: "Beg tote" } },
+  treasure: { i: "🎁", w: { en: "Used oil, old T-shirts and bottle caps", bm: "Minyak terpakai, baju-T lama dan penutup botol" }, p: { en: "Soap, tote bag and toy car", bm: "Sabun, beg tote dan kereta mainan" } },
   litmus: { i: "🧪", w: { en: "Coloured plant scraps", bm: "Sisa tumbuhan berwarna" }, p: { en: "Natural pH indicator paper", bm: "Kertas penunjuk pH semula jadi" } },
   odour: { i: "☕", w: { en: "Used coffee grounds", bm: "Hampas kopi" }, p: { en: "Odour absorber", bm: "Penyerap bau" } },
   watering: { i: "🪴", w: { en: "Plastic bottles", bm: "Botol plastik" }, p: { en: "Self-watering planter", bm: "Pasu siram sendiri" } },
@@ -54,8 +58,10 @@ const LABS = {
   lifebuoy: { i: "🛟", w: { en: "Bubble wrap", bm: "Balutan gelembung" }, p: { en: "Float ring model", bm: "Model gelang pelampung" } },
   sleepbag: { i: "🛌", w: { en: "Bubble wrap and old cloth", bm: "Balutan gelembung dan kain lama" }, p: { en: "3-in-1 sleeping bag", bm: "Beg tidur 3-dalam-1" } }
 };
-const labName = id => { const L = (WQ.labs || []).find(l => l.id === id); return L && (L.title || L.name) ? t(L.title || L.name) : t(LABS[id].p); };
-const labChip = id => `<a class="ln-chip" href="#/lab/${id}">${LABS[id].i} ${E(labName(id))}</a>`;
+const labOf = id => (WQ.labs || []).find(l => l.id === id);
+const labName = id => { const L = labOf(id); return L && (L.title || L.name) ? t(L.title || L.name) : t(LABS[id].p); };
+const labIcon = id => { const L = labOf(id); return (L && L.icon) || LABS[id].i; };
+const labChip = id => `<a class="ln-chip" href="#/lab/${id}"><span aria-hidden="true">${labIcon(id)}</span> ${E(labName(id))}</a>`;
 const GAMES = { sort: ["🗑️", { en: "Sort It Out!", bm: "Asingkan Sampah!" }], quiz: ["❓", { en: "Quiz", bm: "Kuiz" }], myth: ["🤔", { en: "Myth or Fact", bm: "Mitos atau Fakta" }], match: ["🃏", { en: "Memory Match", bm: "Padanan Memori" }],
   footprint: ["👣", { en: "Footprint", bm: "Jejak Karbon" }], cash: ["💰", { en: "Waste to Cash", bm: "Sisa jadi Wang" }], compost: ["🌱", { en: "Compost sim", bm: "Simulasi kompos" }], enzyme: ["🍊", { en: "Eco-enzyme sim", bm: "Simulasi eko-enzim" }], ph: ["🧪", { en: "pH lab", bm: "Makmal pH" }] };
 const gameChip = id => { const g = WQ.games[id], d = GAMES[id] || ["🎮", { en: id, bm: id }]; return `<a class="ln-chip g" href="#/game/${id}">${g ? g.icon : d[0]} ${E(t(g ? g.title : d[1]))}</a>`; };
@@ -76,11 +82,12 @@ function stackSVG(anim) { // 1.17 kg split by the household mix
   const parts = [[COMP[0], 358], [COMP[1], 256], [COMP[2], 179], [COMP[3], 96], [["➕", 0, "Everything else", "Lain-lain"], 281]];
   let y = 300; const sc = 0.22, out = [];
   parts.forEach(([c, g], i) => { const hh = g * sc; y -= hh; out.push(`<g class="ln-layer" style="animation-delay:${i * 180}ms"><rect x="60" y="${y}" width="120" height="${hh - 2}" rx="8" fill="${i < 4 ? COLORS[i] : "#9aa5b1"}"/><text x="120" y="${y + hh / 2 + 5}" text-anchor="middle" class="ln-svgw">${c[0]} ${g} g</text><text x="190" y="${y + hh / 2 + 5}" class="ln-svgt">${E(WQ.lang === "bm" ? c[3] : c[2])}</text></g>`); });
-  return `<svg class="ln-svg ln-stack ${anim ? "anim" : ""}" viewBox="0 0 330 310" role="img" aria-label="1.17 kg">${out.join("")}<line x1="40" y1="300" x2="200" y2="300" stroke="#1d3557" stroke-width="3"/><text x="120" y="${y - 10}" text-anchor="middle" class="ln-svgb">1.17 kg</text></svg>`;
+  const lbl = `${t({ en: "1.17 kg of waste per person per day", bm: "1.17 kg sisa seorang sehari" })}: ${parts.map(([c, g]) => `${WQ.lang === "bm" ? c[3] : c[2]} ${g} g`).join(", ")}`;
+  return `<svg class="ln-svg ln-stack ${anim ? "anim" : ""}" viewBox="0 0 330 310" role="img" aria-label="${E(lbl)}">${out.join("")}<line x1="40" y1="300" x2="200" y2="300" stroke="#1d3557" stroke-width="3"/><text x="120" y="${y - 10}" text-anchor="middle" class="ln-svgb">1.17 kg</text></svg>`;
 }
 function growthSVG(anim) {
   const H = 200, s = H / 40000, b1 = 19000 * s, b2 = 39078 * s;
-  return `<svg class="ln-svg ln-grow ${anim ? "anim" : ""}" viewBox="0 0 300 260" role="img" aria-label="2005: 19,000 t; 2024: 39,078 t">
+  return `<svg class="ln-svg ln-grow ${anim ? "anim" : ""}" viewBox="0 0 300 260" role="img" aria-label="${E(t({ en: "Daily waste in Malaysia: about 19,000 tonnes in 2005, 39,078 tonnes in 2024", bm: "Sisa harian di Malaysia: kira-kira 19,000 tan pada 2005, 39,078 tan pada 2024" }))}">
     <rect class="ln-col" x="50" y="${220 - b1}" width="70" height="${b1}" rx="8" fill="#9aa5b1"/><rect class="ln-col" style="animation-delay:300ms" x="180" y="${220 - b2}" width="70" height="${b2}" rx="8" fill="#d62839"/>
     <text x="85" y="${212 - b1}" text-anchor="middle" class="ln-svgb">~19,000 t</text><text x="215" y="${212 - b2}" text-anchor="middle" class="ln-svgb">39,078 t</text>
     <line x1="30" y1="220" x2="280" y2="220" stroke="#1d3557" stroke-width="3"/><text x="85" y="245" text-anchor="middle" class="ln-svgt">2005</text><text x="215" y="245" text-anchor="middle" class="ln-svgt">2024</text></svg>`;
@@ -190,9 +197,9 @@ const CH = [
  { id: "hierarchy", icon: "🔺", title: { en: "The waste hierarchy", bm: "Hierarki sisa" },
    body: pr => `<p class="ln-lead">${P({ kids: { en: "Some choices are better than others. The top of the pyramid is the best. Tap each layer!", bm: "Ada pilihan yang lebih baik daripada yang lain. Bahagian atas piramid ialah yang terbaik. Tekan setiap lapisan!" },
        teens: { en: "The waste hierarchy ranks options from most to least preferred. The higher the step, the more value we keep and the less energy and raw material we use.", bm: "Hierarki sisa menyusun pilihan daripada yang paling diutamakan kepada yang paling kurang. Lebih tinggi langkahnya, lebih banyak nilai disimpan dan lebih kurang tenaga serta bahan mentah digunakan." } })}</p>
-     ${pr ? `<div class="ln-pyr">${HIER.map((h, i) => `<div class="ln-layer-s" style="--w:${100 - i * 11}%;background:${h.c}">${h.i} ${E(t(h.n))}</div>`).join("")}</div>
+     ${pr ? `<div class="ln-pyr">${HIER.map((h, i) => `<div class="ln-layer-s" style="--w:${100 - i * 11}%;background:${h.c};${ink(h.c)}">${h.i} ${E(t(h.n))}</div>`).join("")}</div>
        <ol class="ln-hl">${HIER.map(h => `<li><b>${h.i} ${E(t(h.n))}:</b> ${E(P(h.d))} <i>${E(t(h.ex))}</i></li>`).join("")}</ol>`
-     : `<div class="ln-two"><div class="ln-pyr" role="group" aria-label="${E(t(CH[1].title))}">${HIER.map((h, i) => `<button class="ln-layer-b" data-h="${i}" aria-pressed="${i === hSel}" style="--w:${100 - i * 11}%;background:${h.c}">${h.i} ${E(t(h.n))}</button>`).join("")}
+     : `<div class="ln-two"><div class="ln-pyr" role="group" aria-label="${E(t(CH[1].title))}">${HIER.map((h, i) => `<button class="ln-layer-b" data-h="${i}" aria-pressed="${i === hSel}" style="--w:${100 - i * 11}%;background:${h.c};${ink(h.c)}">${h.i} ${E(t(h.n))}</button>`).join("")}
        <p class="small muted ln-pyrlab"><span>⬆️ ${t({ en: "Best", bm: "Terbaik" })}</span><span>⬇️ ${t({ en: "Last choice", bm: "Pilihan terakhir" })}</span></p></div>
        <div class="card ln-hpanel" id="lnH" aria-live="polite"></div></div>`}
      ${sciBox(t({ en: "<p>Why is higher better? Each step down loses more of the energy and materials already invested. Example: recycling aluminium cans saves more than 90% of the energy needed to make new aluminium from bauxite ore (The Aluminum Association), but refusing the can saves 100%.</p><p>“Refuse” comes from the zero-waste movement (Bea Johnson, 2013); official hierarchies such as the EU Waste Framework Directive start at prevention.</p>",
@@ -218,8 +225,8 @@ const CH = [
    body: pr => `<p class="ln-lead">${P({ kids: { en: "In a straight line, things end up as rubbish. In a circle, things come back again and again!", bm: "Dalam garis lurus, barang berakhir sebagai sampah. Dalam bulatan, barang kembali digunakan berulang kali!" },
        teens: { en: "A linear economy follows “take, make, use, throw away”. A circular economy designs waste out, keeps products and materials in use at their highest value, and regenerates nature (Ellen MacArthur Foundation).", bm: "Ekonomi linear mengikut “ambil, buat, guna, buang”. Ekonomi kitaran mereka bentuk supaya tiada sisa, mengekalkan produk dan bahan digunakan pada nilai tertinggi, dan memulihkan alam semula jadi (Ellen MacArthur Foundation)." } })}</p>
      ${pr ? `<div class="ln-two"><div><h3>${t({ en: "Linear", bm: "Linear" })}</h3>${linearSVG()}</div><div><h3>${t({ en: "Circular", bm: "Kitaran" })}</h3>${circularSVG()}</div></div>`
-     : `<div class="ln-tog" role="group"><button data-c="0" aria-pressed="${!circ}">➡️ ${t({ en: "Linear", bm: "Linear" })}</button><button data-c="1" aria-pressed="${circ}">🔄 ${t({ en: "Circular", bm: "Kitaran" })}</button></div><div class="ln-diag" id="lnDiag" aria-live="polite"></div>`}
-     <div class="tablewrap"><table class="tbl"><tr><th></th><th>➡️ ${t({ en: "Linear", bm: "Linear" })}</th><th>🔄 ${t({ en: "Circular", bm: "Kitaran" })}</th></tr>
+     : `<div class="ln-tog" role="group" aria-label="${E(t({ en: "Choose a diagram", bm: "Pilih rajah" }))}"><button data-c="0" aria-pressed="${!circ}">➡️ ${t({ en: "Linear", bm: "Linear" })}</button><button data-c="1" aria-pressed="${circ}">🔄 ${t({ en: "Circular", bm: "Kitaran" })}</button></div><div class="ln-diag" id="lnDiag" aria-live="polite"></div>`}
+     <div class="tablewrap"><table class="tbl"><tr><th><span class="vh">${t({ en: "Feature", bm: "Ciri" })}</span></th><th>➡️ ${t({ en: "Linear", bm: "Linear" })}</th><th>🔄 ${t({ en: "Circular", bm: "Kitaran" })}</th></tr>
        <tr><td><b>${t({ en: "Design", bm: "Reka bentuk" })}</b></td><td>${t({ en: "Cheap, single-use, hard to repair", bm: "Murah, guna sekali, sukar dibaiki" })}</td><td>${t({ en: "Durable, repairable, easy to take apart and recycle", bm: "Tahan lama, boleh dibaiki, mudah dileraikan dan dikitar" })}</td></tr>
        <tr><td><b>${t({ en: "End of life", bm: "Akhir hayat" })}</b></td><td>${t({ en: "Landfill or open burning", bm: "Tapak pelupusan atau pembakaran terbuka" })}</td><td>${t({ en: "Becomes a resource for a new product, or compost", bm: "Menjadi sumber untuk produk baharu, atau kompos" })}</td></tr>
        <tr><td><b>${t({ en: "Example", bm: "Contoh" })}</b></td><td>${t({ en: "Used cooking oil poured down the sink", bm: "Minyak masak terpakai dituang ke sinki" })}</td><td>${t({ en: "Used cooking oil made into candles", bm: "Minyak masak terpakai dijadikan lilin" })} (${labChip("candle")})</td></tr></table></div>
@@ -246,9 +253,9 @@ const CH = [
        teens: { en: "Waste-to-Wealth (W2W) turns waste into products, materials or energy with value. It is the circular economy in action: it reduces, reuses, recycles and recovers, and extends the life of products.", bm: "Sisa kepada Kekayaan (W2W) menukar sisa menjadi produk, bahan atau tenaga yang bernilai. Ia ialah ekonomi kitaran dalam tindakan: mengurangkan, mengguna semula, mengitar semula dan memulih guna, serta memanjangkan hayat produk." } })}</p>
      <h3>${t({ en: "Three kinds of benefit", bm: "Tiga jenis manfaat" })} ${pr ? "" : `<span class="small muted">(${t({ en: "tap a card to flip it", bm: "tekan kad untuk terbalikkan" })})</span>`}</h3>
      <div class="ln-flips">${PILLARS.map((p, i) => pr ? `<div class="ln-pcard" style="border-color:${p.c}"><h4>${p.i} ${E(t(p.n))}</h4><ul>${p.b.map(b => `<li>${E(t(b))}</li>`).join("")}</ul></div>`
-       : `<button class="ln-flip ${flips[i] ? "on" : ""}" data-f="${i}" aria-pressed="${!!flips[i]}"><span class="in"><span class="f" style="background:${p.c}"><span class="big">${p.i}</span>${E(t(p.n))}</span><span class="b" style="border-color:${p.c}"><b>${p.i} ${E(t(p.n))}</b>${p.b.map(b => `<span class="li">${E(t(b))}</span>`).join("")}</span></span></button>`).join("")}</div>
+       : `<button class="ln-flip ${flips[i] ? "on" : ""}" data-f="${i}" aria-pressed="${!!flips[i]}"><span class="in"><span class="f" style="background:${p.c};${ink(p.c, 3)}"><span class="big">${p.i}</span>${E(t(p.n))}</span><span class="b" style="border-color:${p.c}"><b>${p.i} ${E(t(p.n))}</b>${p.b.map(b => `<span class="li">${E(t(b))}</span>`).join("")}</span></span></button>`).join("")}</div>
      <h3>${t({ en: `From waste to wealth: our ${Object.keys(LABS).length} labs`, bm: `Daripada sisa kepada kekayaan: ${Object.keys(LABS).length} makmal kami` })}</h3>
-     <div class="ln-labs">${Object.keys(LABS).map(id => `<a class="ln-lab" href="#/lab/${id}"><span class="w">${E(t(LABS[id].w))}</span><span class="ar" aria-hidden="true">➜</span><span class="p">${LABS[id].i} ${E(labName(id))}</span></a>`).join("")}</div>
+     <div class="ln-labs">${Object.keys(LABS).map(id => `<a class="ln-lab" href="#/lab/${id}"><span class="w">${E(t(LABS[id].w))}</span><span class="ar" aria-hidden="true">➜</span><span class="p"><span aria-hidden="true">${labIcon(id)}</span> ${E(labName(id))}</span></a>`).join("")}</div>
      ${sciBox(t({ en: "<p>Behind each product is real science: microbes turn food waste into compost (<a href='#/game/compost'>compost sim</a>); fermentation makes eco-enzyme acidic (<a href='#/game/enzyme'>eco-enzyme sim</a>); plant pigments called anthocyanins change colour with pH (<a href='#/game/ph'>pH lab</a>); glycerol acts as a plasticiser to make starch bioplastic flexible.</p>",
        bm: "<p>Di sebalik setiap produk ada sains sebenar: mikrob menukar sisa makanan menjadi kompos (<a href='#/game/compost'>simulasi kompos</a>); penapaian menjadikan eko-enzim berasid (<a href='#/game/enzyme'>simulasi eko-enzim</a>); pigmen tumbuhan yang dipanggil antosianin berubah warna mengikut pH (<a href='#/game/ph'>makmal pH</a>); gliserol bertindak sebagai pemplastik untuk menjadikan bioplastik kanji lentur.</p>" }))}
      ${bizBox(t({ en: "<p>Green entrepreneurship starts with cheap inputs. UPM ENG3104 student teams (2024) estimated a starch bioplastic pot at about RM0.84 in materials and a tote bag from used plastic bags at about RM4.66 (student estimates, not market prices). Test your own pricing in <a href='#/game/cash'>Waste to Cash</a>. A credible W2W business also needs a safe process, a steady waste supply, quality control and honest environmental claims.</p>",
@@ -265,8 +272,8 @@ const CH = [
        teens: { en: "Under the Solid Waste and Public Cleansing Management Act 2007 (Act 672), separation at source is mandatory in the states and territories that adopted the Act. Recyclables are separated from other household waste for collection.", bm: "Di bawah Akta Pengurusan Sisa Pepejal dan Pembersihan Awam 2007 (Akta 672), pengasingan di punca adalah wajib di negeri dan wilayah yang menerima pakai Akta ini. Bahan kitar semula diasingkan daripada sisa isi rumah lain untuk dikutip." } })}</p>
      <p><b>${t({ en: "Where separation at source is mandatory (Act 672):", bm: "Kawasan pengasingan di punca adalah wajib (Akta 672):" })}</b></p><div class="ln-chips">${STATES.map(s => `<span class="tag go">${s[WQ.lang === "bm" ? 1 : 0]}</span>`).join(" ")}</div>
      <p class="small muted">${t({ en: "Other states run their own programmes. Selangor is working towards adopting the Act in phases; the start date is not yet confirmed, so check your council's rules.", bm: "Negeri lain mempunyai program sendiri. Selangor sedang berusaha menerima pakai Akta ini secara berperingkat; tarikh mula belum disahkan, jadi semak peraturan pihak berkuasa tempatan anda." })}</p>
-     ${pr ? `<div class="ln-bins">${Object.values(BINS).map(b => `<div class="ln-binp" style="border-color:${b.c}"><h4 style="color:${b.c}">${b.i} ${E(t(b.n))}</h4><p>✅ ${E(t(b.y))}</p><p>❌ ${E(t(b.n2))}</p></div>`).join("")}</div>`
-     : `<div class="ln-bins" role="group">${Object.entries(BINS).map(([k, b]) => `<button class="ln-bin" data-b="${k}" aria-pressed="${k === binSel}" style="background:${b.c}"><span class="bi">${b.i}</span>${E(t(b.n))}</button>`).join("")}</div><div class="card ln-binpanel" id="lnBin" aria-live="polite"></div>`}
+     ${pr ? `<div class="ln-bins">${Object.values(BINS).map(b => `<div class="ln-binp" style="border-color:${b.c}"><h4>${b.i} ${E(t(b.n))}</h4><p>✅ ${E(t(b.y))}</p><p>❌ ${E(t(b.n2))}</p></div>`).join("")}</div>`
+     : `<div class="ln-bins" role="group" aria-label="${E(t({ en: "Recycling bins", bm: "Tong kitar semula" }))}">${Object.entries(BINS).map(([k, b]) => `<button class="ln-bin" data-b="${k}" aria-pressed="${k === binSel}" style="background:${b.c};${ink(b.c)}"><span class="bi">${b.i}</span>${E(t(b.n))}</button>`).join("")}</div><div class="card ln-binpanel" id="lnBin" aria-live="polite"></div>`}
      <div class="note ok ln-box"><b>${t({ en: "3 easy steps", bm: "3 langkah mudah" })}</b><div>1️⃣ ${t({ en: "Rinse", bm: "Bilas" })} · 2️⃣ ${t({ en: "Dry", bm: "Keringkan" })} · 3️⃣ ${t({ en: "Separate into the right bin", bm: "Asingkan ke tong yang betul" })}. ${t({ en: "Food waste and dirty items go with general waste, or better, into compost. Batteries, e-waste and medicine go to special collection points.", bm: "Sisa makanan dan barang kotor dimasukkan bersama sisa am, atau lebih baik, dijadikan kompos. Bateri, e-sisa dan ubat dihantar ke pusat kutipan khas." })}</div></div>
      <p class="row"><a class="btn" href="#/game/sort">🗑️ ${t(U.play)}: ${E(t(WQ.games.sort ? WQ.games.sort.title : GAMES.sort[1]))}</a></p>
      ${sciBox(t({ en: "<p>Why rinse? Food and oil left on packaging contaminate other recyclables: wet, greasy paper fibres cannot be pulped well, and dirty plastic lowers the quality of recycled pellets. Clean, dry, separated materials are worth more to recyclers.</p>",
@@ -276,7 +283,7 @@ const CH = [
    wire(root) {
      const pan = root.querySelector("#lnBin"); if (!pan) return;
      const show = () => { const b = BINS[binSel]; root.querySelectorAll("[data-b]").forEach(x => x.setAttribute("aria-pressed", x.dataset.b === binSel));
-       pan.style.borderTop = `8px solid ${b.c}`; pan.innerHTML = `<h3 style="color:${b.c}">${b.i} ${E(t(b.n))}</h3><p>✅ <b>${t({ en: "Yes:", bm: "Ya:" })}</b> ${E(t(b.y))}</p><p>❌ <b>${t({ en: "No:", bm: "Tidak:" })}</b> ${E(t(b.n2))}</p>`; };
+       pan.style.borderTop = `8px solid ${b.c}`; pan.innerHTML = `<h3>${b.i} ${E(t(b.n))}</h3><p>✅ <b>${t({ en: "Yes:", bm: "Ya:" })}</b> ${E(t(b.y))}</p><p>❌ <b>${t({ en: "No:", bm: "Tidak:" })}</b> ${E(t(b.n2))}</p>`; };
      root.querySelectorAll("[data-b]").forEach(x => x.onclick = () => { binSel = x.dataset.b; show(); WQ.anim(pan, "pop"); });
      show();
    },
@@ -289,8 +296,8 @@ const CH = [
  { id: "sdg", icon: "🎯", title: { en: "The Sustainable Development Goals", bm: "Matlamat Pembangunan Mampan" },
    body: pr => `<p class="ln-lead">${P({ kids: { en: "The whole world has 17 goals for a better planet by 2030. WasteQuest helps with five of them!", bm: "Seluruh dunia mempunyai 17 matlamat untuk planet yang lebih baik menjelang 2030. WasteQuest membantu lima daripadanya!" },
        teens: { en: "In 2015, all UN member states, including Malaysia, adopted 17 Sustainable Development Goals (SDGs) for 2030. Waste-to-Wealth links most directly to SDGs 12, 13 and 15, and also to 11 and 14.", bm: "Pada 2015, semua negara anggota PBB termasuk Malaysia menerima pakai 17 Matlamat Pembangunan Mampan (SDG) untuk 2030. Sisa kepada Kekayaan paling berkait dengan SDG 12, 13 dan 15, serta juga 11 dan 14." } })}</p>
-     <img class="ln-sdgimg" src="assets/sdg-strip.jpeg" alt="SDG 13 Climate Action, SDG 12 Responsible Consumption and Production, SDG 15 Life on Land">
-     <div class="ln-sdgs">${SDGS.map(s => `<div class="ln-sdg" style="--c:${s.c}"><div class="num">${s.n}</div><div><h4>${E(t(s.t))}</h4><p>${E(P(s.d))}</p><div class="ln-chips">${s.labs.map(labChip).join("")}</div></div></div>`).join("")}</div>
+     <img class="ln-sdgimg" src="assets/sdg-strip.jpeg" alt="${E(t({ en: "SDG 13 Climate Action, SDG 12 Responsible Consumption and Production, SDG 15 Life on Land", bm: "SDG 13 Tindakan Iklim, SDG 12 Penggunaan dan Pengeluaran Bertanggungjawab, SDG 15 Kehidupan di Darat" }))}">
+     <div class="ln-sdgs">${SDGS.map(s => `<div class="ln-sdg" style="--c:${s.c}"><div class="num" style="${ink(s.c, 3)}"><span class="vh">SDG </span>${s.n}</div><div><h3>${E(t(s.t))}</h3><p>${E(P(s.d))}</p><div class="ln-chips">${s.labs.map(labChip).join("")}</div></div></div>`).join("")}</div>
      ${bizBox(t({ en: "<p>Organisations often map their ESG reports to the SDGs. A W2W project can report outputs (kg of waste diverted, products made) and link them to Target 12.5 (waste reduction) and Target 12.3 (food waste).</p>",
        bm: "<p>Organisasi sering memetakan laporan ESG mereka kepada SDG. Projek W2W boleh melaporkan output (kg sisa dilencongkan, produk dihasilkan) dan mengaitkannya dengan Sasaran 12.5 (pengurangan sisa) dan Sasaran 12.3 (sisa makanan).</p>" }))}`,
    qc: { kids: [{ q: { en: "Which SDG is about using things responsibly and wasting less?", bm: "SDG manakah tentang menggunakan barang secara bertanggungjawab dan kurang membazir?" }, a: [{ en: "SDG 12", bm: "SDG 12" }, { en: "SDG 3", bm: "SDG 3" }, { en: "SDG 7", bm: "SDG 7" }], c: 0, why: { en: "SDG 12: Responsible consumption and production.", bm: "SDG 12: Penggunaan dan pengeluaran bertanggungjawab." } },
@@ -337,7 +344,7 @@ WQ.css("learn", `
 .ln-nav .n{width:24px;height:24px;border:2px solid #1a1932;border-radius:0;background:#c9d3dd;color:#1a1932;display:grid;place-items:center;font-size:.8rem;flex:none}
 .ln-nav a.done .n{background:#5ac54f}
 .ln-check{margin-top:14px;background:#f9e6cf;border:3px solid #1a1932;border-radius:0;box-shadow:4px 4px 0 rgba(26,25,50,.35)}.ln-check h3{font-family:"Pixelify Sans",Nunito,sans-serif;margin:0 0 8px}
-@media (prefers-reduced-motion:reduce){.ln-nav a:hover{transform:none}}
+@media (prefers-reduced-motion:reduce){.ln-nav a:hover,.ln-lab:hover{transform:none}.ln-flow,.ln-svg.anim .ln-bar,.ln-svg.anim .ln-col,.ln-svg.anim .ln-layer{animation:none}.ln-flip .in,.ln-layer-b{transition:none}}
 .ln-prog{display:flex;align-items:center;gap:10px;margin:0 0 14px}.ln-prog .meter{flex:1;max-width:340px}
 .ln-chap h2{font-size:clamp(1.4rem,3.4vw,2rem);display:flex;gap:10px;align-items:center}
 .ln-chap h3{font-size:1.15rem;margin:14px 0 6px}.ln-chap h4{margin:0 0 4px}
@@ -390,10 +397,11 @@ WQ.css("learn", `
 .ln-sdgimg{display:block;width:100%;max-width:520px;border-radius:12px;margin:8px 0 12px}
 .ln-sdgs{display:grid;gap:12px}
 .ln-sdg{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start;border-left:8px solid var(--c);background:var(--soft);border-radius:14px;padding:10px 12px}
+.ln-sdg h3{margin:0 0 4px;font-size:1.05rem}
 .ln-sdg .num{background:var(--c);color:#fff;font-family:"Baloo 2";font-weight:800;font-size:1.8rem;border-radius:12px;display:grid;place-items:center;height:64px}
 .ln-plan fieldset{border:2px solid var(--line);border-radius:14px;margin:10px 0;padding:6px 12px}
 .ln-plan legend{font-weight:800;padding:0 6px}
-.ln-chk{display:flex;gap:8px;align-items:flex-start;padding:4px 0}.ln-chk input{width:20px;height:20px;flex:none;margin-top:2px}
+.ln-chk{display:flex;gap:8px;align-items:flex-start;padding:4px 0}.ln-chk input{width:24px;height:24px;flex:none;margin:0}
 .ln-f{display:flex;flex-direction:column;font-weight:700;margin:8px 0;gap:4px}
 .ln-line{display:block;border-bottom:1.5px solid #9aa5b1;height:26px}
 .ln-qc{margin-top:18px;border-top:3px dashed var(--line);padding-top:12px}
@@ -424,11 +432,12 @@ function qcHTML(ch) {
 }
 
 let cur = 0;
+const navLbl = (c, i, done) => `${t(U.chap)} ${i + 1}: ${t(c.title)}${done ? ` (${t({ en: "complete", bm: "selesai" })})` : ""}`;
 WQ.registerPage("learn", { mount(el, { args }) {
   if (args && args[0] && +args[0] >= 1 && +args[0] <= CH.length) cur = +args[0] - 1;
   const ch = CH[cur], s = st(), nDone = CH.filter(c => s.done[c.id]).length;
   el.innerHTML = `<div class="ln-wrap">${WQ.head("📘", U.title, U.sub)}
-    <nav class="ln-nav" aria-label="${E(t(U.chap))}">${CH.map((c, i) => `<a href="#/learn/${i + 1}" class="${s.done[c.id] ? "done" : ""}" ${i === cur ? 'aria-current="page"' : ""}><span class="n">${s.done[c.id] ? "✓" : i + 1}</span><span aria-hidden="true">${c.icon}</span><span class="tt">${E(t(c.title))}</span></a>`).join("")}</nav>
+    <nav class="ln-nav" aria-label="${E(t(U.chap))}">${CH.map((c, i) => `<a href="#/learn/${i + 1}" class="${s.done[c.id] ? "done" : ""}" aria-label="${E(navLbl(c, i, s.done[c.id]))}" ${i === cur ? 'aria-current="page"' : ""}><span class="n">${s.done[c.id] ? "✓" : i + 1}</span><span aria-hidden="true">${c.icon}</span><span class="tt">${E(t(c.title))}</span></a>`).join("")}</nav>
     <div class="ln-prog"><span class="pill">📘 ${nDone}/${CH.length}</span><div class="meter"><i style="width:${nDone / CH.length * 100}%"></i></div><span class="small muted">${t(U.done)}</span></div>
     <article class="card ln-chap"><div class="ln-k">${t(U.chap)} ${cur + 1} ${t(U.of)} ${CH.length}</div><h2><span aria-hidden="true">${ch.icon}</span> ${E(t(ch.title))}</h2>
       ${ch.body(false)}
@@ -449,7 +458,7 @@ WQ.registerPage("learn", { mount(el, { args }) {
         if (qs.every((_, k) => s2.ok[`${ch.id}-${A()}-${k}`]) && !s2.done[ch.id]) {
           s2.done[ch.id] = new Date().toISOString(); save(s2);
           el.querySelector(".ln-chdone").innerHTML = `<div class="note ok pop">${t(U.chDone)}</div>`;
-          const link = el.querySelector(`.ln-nav a[href="#/learn/${cur + 1}"]`); if (link) { link.classList.add("done"); link.querySelector(".n").textContent = "✓"; }
+          const link = el.querySelector(`.ln-nav a[href="#/learn/${cur + 1}"]`); if (link) { link.classList.add("done"); link.querySelector(".n").textContent = "✓"; link.setAttribute("aria-label", navLbl(ch, cur, true)); }
           const n = CH.filter(c => s2.done[c.id]).length; el.querySelector(".ln-prog .pill").textContent = `📘 ${n}/${CH.length}`; el.querySelector(".ln-prog .meter i").style.width = n / CH.length * 100 + "%";
           if (n === CH.length) WQ.award("learn"); else WQ.confetti();
         } else save(s2);

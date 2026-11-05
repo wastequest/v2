@@ -52,6 +52,15 @@ python3 tools/build_offline.py
 It inlines the stylesheets and scripts and turns quoted local image paths into `data:` URIs. Lab videos are not
 inlined; they come with the offline zip pack.
 
+## Printed booklets
+
+`dist/WasteQuest_Booklet_EN.pdf` and `_BM.pdf` are printed from `booklet.html`, which draws on the same lab, lesson,
+game and teacher content as the site. Reprint them after content changes (needs internet for the fonts):
+
+```sh
+npm i --no-save playwright@1.63.0 && npx playwright install chromium && node tools/print_booklets.mjs
+```
+
 ## Checks
 
 | Check | Command |

@@ -70,6 +70,9 @@ error; these are the points that need a decision from the WasteQuest team. Tick 
 25. **Captions.** None of the 30 narrated lab videos has captions. If the narration scripts exist, they can be
     turned into `assets/videos/v2/<lab>_<en|bm>.vtt` files; list the lab ids in `CAP` in `js/labs.js` and the
     player shows them automatically.
-26. **Offline zip link.** The share page links to
+26. **eBook PDFs.** The facilitator booklets were reprinted with the new safety labels and warnings
+    (`tools/print_booklets.mjs`), but `dist/WasteQuest_eBook_EN.pdf` / `_BM.pdf` were made another way and still
+    show the old lab text. Please reprint them the same way as before, or tell us how they were made.
+27. **Offline zip link.** The share page links to
     `github.com/wastequest/wastequest.github.io/releases/download/v2026.1/WasteQuest_offline_pack.zip`, which we
     could not check from here. Please confirm the release exists and includes the current offline copy.

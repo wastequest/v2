@@ -1,13 +1,13 @@
 /* Eco Quiz Blast — Kahoot-style solo quiz on the shared question bank (WQ.questions).
    Setup (track / topic / length) → 20 s timed questions with speed points + streak bonus → results and review. */
 (() => {
-const COLORS = ["#e21b3c", "#1368ce", "#b7791f", "#26890c"], SHAPES = ["▲", "◆", "●", "■"], LIMIT = 20;
+const COLORS = ["#d01937", "#1368ce", "#946010", "#1f7a0a"] /* all ≥ 4.5:1 with white text */, SHAPES = ["▲", "◆", "●", "■"], LIMIT = 20;
 WQ.quizUI = { tileColors: COLORS, shapes: SHAPES };
 const T = {
  en:{track:"Who is playing?",topic:"Topic",all:"All topics",len:"Questions",start:"Start quiz ▶",best:"Best score",
   only:n=>`Only ${n} questions in this topic for this level, so the quiz will use all ${n}.`,
   badgeHint:"Score 80% or more on at least 10 questions to earn the Quiz Whiz badge.",
-  q:"Question",pts:"points",streak:"streak",right:["Correct!","Brilliant!","Spot on!","Yes!"],wrong:"Not quite.",timeout:"Time’s up!",
+  q:"Question",pts:"points",streak:"streak",five:"5 seconds left!",right:["Correct!","Brilliant!","Spot on!","Yes!"],wrong:"Not quite.",timeout:"Time’s up!",
   ans:"Answer:",bonus:n=>`+${n} streak bonus 🔥`,next:"Next ▶",results:"See results ▶",secs:"seconds left",
   endT:"Quiz complete!",acc:"Accuracy",score:"Score",bestStreak:"Best streak",newBest:"New best score!",
   review:"Review the ones you missed",perfect:"Perfect! You got every question right. 🎉",yours:"Your answer",none:"No answer (time ran out)",correct:"Correct answer",
@@ -15,7 +15,7 @@ const T = {
  bm:{track:"Siapa yang bermain?",topic:"Topik",all:"Semua topik",len:"Soalan",start:"Mula kuiz ▶",best:"Skor terbaik",
   only:n=>`Hanya ${n} soalan dalam topik ini untuk tahap ini, jadi kuiz akan menggunakan kesemua ${n}.`,
   badgeHint:"Dapatkan 80% atau lebih bagi sekurang-kurangnya 10 soalan untuk lencana Pakar Kuiz.",
-  q:"Soalan",pts:"mata",streak:"berturut",right:["Betul!","Hebat!","Tepat sekali!","Ya!"],wrong:"Belum tepat.",timeout:"Masa tamat!",
+  q:"Soalan",pts:"mata",streak:"berturut-turut",five:"5 saat lagi!",right:["Betul!","Hebat!","Tepat sekali!","Ya!"],wrong:"Belum tepat.",timeout:"Masa tamat!",
   ans:"Jawapan:",bonus:n=>`+${n} bonus berturut-turut 🔥`,next:"Seterusnya ▶",results:"Lihat keputusan ▶",secs:"saat lagi",
   endT:"Kuiz tamat!",acc:"Ketepatan",score:"Skor",bestStreak:"Rentetan terbaik",newBest:"Skor terbaik baharu!",
   review:"Semak soalan yang tersilap",perfect:"Sempurna! Anda menjawab semua soalan dengan betul. 🎉",yours:"Jawapan anda",none:"Tiada jawapan (masa tamat)",correct:"Jawapan betul",
@@ -31,20 +31,20 @@ let ph = "setup", cfg = { track: null, topic: "all", len: 10 }, deck = [], idx =
 
 WQ.css("quiz", `
 .qz-set{max-width:760px;margin:0 auto}
-.qz-set h3{margin:14px 0 8px}
+.qz-set h2{margin:14px 0 8px;font-size:1.17rem}
 .qz-opts{display:flex;flex-wrap:wrap;gap:8px}
-.qz-opts button{background:#fff;border:3px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:800}
-.qz-opts button[aria-pressed=true]{border-color:var(--grass);background:#eafbe4}
-.qz-set select{width:100%;max-width:420px;padding:10px 12px;border-radius:14px;border:3px solid var(--line);background:#fff;font-weight:700}
+.qz-opts button{background:#fffaf2;color:#1a1932;border:3px solid #1a1932;padding:8px 16px;min-height:44px;font-weight:800;box-shadow:3px 3px 0 rgba(26,25,50,.3)}
+.qz-opts button:hover{background:#ffeb57}.qz-opts button[aria-pressed=true]{border-color:#1e6f50;background:#d9f5cf;outline:3px solid #5ac54f;outline-offset:-6px}
+.qz-set select{width:100%;max-width:420px;padding:10px 12px;border:3px solid #1a1932;background:#fffaf2;color:#1a1932;font-weight:700;font-size:1rem}
 .qz-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
 .qz-qcard{display:flex;gap:16px;align-items:center;justify-content:space-between}
-.qz-q{font-family:"Baloo 2";font-weight:800;font-size:clamp(1.3rem,3.2vw,2rem);line-height:1.2;margin:4px 0 0}
+.qz-q{font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;font-size:clamp(1.3rem,3.2vw,2rem);line-height:1.2;margin:4px 0 0}
 .qz-ring{flex:none;position:relative;width:76px;height:76px}
 .qz-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .qz-ring circle{fill:none;stroke-width:8}
 .qz-ring .bg{stroke:#e8eef4}.qz-ring .fg{stroke:var(--grass);stroke-linecap:round;transition:stroke-dashoffset .1s linear}
 .qz-ring.low .fg{stroke:var(--red)}
-.qz-ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:"Baloo 2";font-size:1.6rem}
+.qz-ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-size:1.6rem}
 .qz-tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .qz-tile{display:flex;align-items:center;gap:12px;min-height:84px;border-radius:16px;padding:12px 16px;color:#fff;font-weight:800;font-size:clamp(1rem,2vw,1.2rem);text-align:left;box-shadow:inset 0 -6px 0 rgba(0,0,0,.18);transition:transform .1s,opacity .2s}
 .qz-tile:hover:not([disabled]){transform:translateY(-2px)}
@@ -55,12 +55,13 @@ WQ.css("quiz", `
 .qz-tile.ok{outline:5px solid var(--gold);outline-offset:2px}
 .qz-fb{margin-top:14px}
 .qz-fb .row{justify-content:space-between}
-.qz-fb h3{font-size:1.4rem}
-.qz-end{max-width:760px;margin:0 auto;text-align:center}
-.qz-big{font-family:"Baloo 2";font-weight:800;font-size:3rem;line-height:1}
+.qz-fb h2{font-size:1.4rem}.qz-q:focus{outline:none}
+.qz-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.qz-end{max-width:760px;margin:0 auto;text-align:center}.qz-end h2:focus{outline:none;box-shadow:none}
+.qz-big{font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;font-size:3rem;line-height:1}
 .qz-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
 .qz-stats div{background:var(--soft);border-radius:16px;padding:10px}
-.qz-stats b{display:block;font-family:"Baloo 2";font-size:1.6rem}
+.qz-stats b{display:block;font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-size:1.6rem}
 .qz-rev{text-align:left;margin-top:16px}
 .qz-rev li{margin:0 0 12px}
 @media (max-width:600px){.qz-tiles{grid-template-columns:1fr}.qz-tile{min-height:64px}.qz-ring{width:62px;height:62px}.qz-stats b{font-size:1.25rem}}
@@ -68,7 +69,7 @@ WQ.css("quiz", `
 
 WQ.registerGame("quiz", { order: 6, kind: "game", icon: "⚡", ages: "7+",
   title: { en: "Eco Quiz Blast", bm: "Kuiz Kilat Eko" },
-  desc: { en: "Beat the 20-second clock! Fast answers score more points.", bm: "Kalahkan jam 20 saat! Jawapan pantas dapat lebih mata." },
+  desc: { en: "Beat the 20-second clock! Fast answers score more points.", bm: "Lawan masa 20 saat! Jawapan pantas dapat lebih banyak mata." },
   badge: { icon: "🧠", name: { en: "Quiz Whiz", bm: "Pakar Kuiz" }, desc: { en: "80% or more in Eco Quiz Blast", bm: "80% atau lebih dalam Kuiz Kilat Eko" } },
   mount(el, { relang }) {
     const L = () => T[WQ.lang], $ = s => el.querySelector(s);
@@ -77,7 +78,9 @@ WQ.registerGame("quiz", { order: 6, kind: "game", icon: "⚡", ages: "7+",
     if (!relang && ph === "play") ph = "setup";      // leaving mid-quiz abandons it (the clock cannot pause fairly)
     const pool = (track, topic) => WQ.questions.filter(q => q.tracks.includes(track) && (topic === "all" || q.topic === topic));
 
-    el.innerHTML = WQ.head("⚡", this.title, this.desc) + `<div id="qzBody"></div>`;
+    el.innerHTML = WQ.head("⚡", this.title, this.desc) + `<p class="qz-vh" id="qzSay" role="status"></p><div id="qzBody"></div>`;
+    const say = m => { const s = $("#qzSay"); if (s) s.textContent = m; };
+    let focusQ = false;
     const body = $("#qzBody");
 
     function setup() {
@@ -86,11 +89,11 @@ WQ.registerGame("quiz", { order: 6, kind: "game", icon: "⚡", ages: "7+",
       if (cfg.topic !== "all" && !counts[cfg.topic]) cfg.topic = "all";
       const n = pool(cfg.track, cfg.topic).length;
       body.innerHTML = `<div class="card qz-set">
-        <h3>${l.track}</h3><div class="qz-opts" role="group" aria-label="${WQ.esc(l.track)}">${["kids","teens","adults"].map(t =>
+        <h2>${l.track}</h2><div class="qz-opts" role="group" aria-label="${WQ.esc(l.track)}">${["kids","teens","adults"].map(t =>
           `<button data-t="${t}" aria-pressed="${cfg.track === t}">${TRACK_ICON[t]} ${WQ.esc(WQ.t(WQ.S.aud[t]))}</button>`).join("")}</div>
-        <h3><label for="qzTopic">${l.topic}</label></h3><select id="qzTopic"><option value="all">${l.all} (${pool(cfg.track, "all").length})</option>${
+        <h2><label for="qzTopic">${l.topic}</label></h2><select id="qzTopic"><option value="all">${l.all} (${pool(cfg.track, "all").length})</option>${
           Object.keys(counts).map(id => `<option value="${id}" ${cfg.topic === id ? "selected" : ""}>${WQ.esc(WQ.t(topicName(id)))} (${counts[id]})</option>`).join("")}</select>
-        <h3>${l.len}</h3><div class="qz-opts" role="group" aria-label="${WQ.esc(l.len)}">${[10, 15, 20].map(k =>
+        <h2>${l.len}</h2><div class="qz-opts" role="group" aria-label="${WQ.esc(l.len)}">${[10, 15, 20].map(k =>
           `<button data-n="${k}" aria-pressed="${cfg.len === k}">${k}</button>`).join("")}</div>
         ${n < cfg.len ? `<p class="note warn small" style="margin-top:12px">${l.only(n)}</p>` : ""}
         <p class="small muted" style="margin-top:12px">🧠 ${l.badgeHint} · ${l.best}: <b>${WQ.best("quiz-" + cfg.track)}</b></p>
@@ -106,27 +109,30 @@ WQ.registerGame("quiz", { order: 6, kind: "game", icon: "⚡", ages: "7+",
       idx = score = streak = topStreak = right = 0; log = []; isNewBest = false;
       ph = "play"; ask();
     }
-    function ask() { chosen = null; gain = bonus = 0; deadline = Date.now() + LIMIT * 1000; play(); }
+    function ask() { chosen = null; gain = bonus = 0; deadline = Date.now() + LIMIT * 1000; focusQ = true; play(); }
 
     function play() {
       const l = L(), d = deck[idx], q = d.q, C = 2 * Math.PI * 32, shown = chosen !== null, correctTile = d.order.indexOf(q.c);
       body.innerHTML = `<div class="qz-bar"><span class="pill">${l.q} ${idx + 1}/${deck.length}</span><span class="tag">${WQ.esc(WQ.t(topicName(q.topic)))}</span>
         <span class="spacer" style="flex:1"></span><span class="pill">⭐ ${score}</span><span class="pill" title="${l.streak}">🔥 ${streak}</span></div>
-        <div class="card qz-qcard"><p class="qz-q" id="qzQ">${WQ.esc(WQ.t(q.q))}</p>
+        <div class="card qz-qcard"><p class="qz-q" id="qzQ" tabindex="-1">${WQ.esc(WQ.t(q.q))}</p>
         <div class="qz-ring" id="qzRing" role="timer" aria-label="${l.secs}"><svg viewBox="0 0 76 76"><circle class="bg" cx="38" cy="38" r="32"/><circle class="fg" id="qzArc" cx="38" cy="38" r="32" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg><b id="qzSec">${LIMIT}</b></div></div>
         <div class="qz-tiles" role="group" aria-labelledby="qzQ">${d.order.map((ai, i) => {
           const cls = !shown ? "" : i === correctTile ? "ok" : i === chosen ? "" : "dim";
           const mk = !shown ? "" : i === correctTile ? "✔" : i === chosen ? "✖" : "";
           return `<button class="qz-tile ${cls}" data-i="${i}" style="background:${COLORS[i]}" ${shown ? "disabled" : ""} aria-label="${i + 1}. ${WQ.esc(WQ.t(q.a[ai]))}"><span class="sh" aria-hidden="true">${SHAPES[i]}</span><span>${WQ.esc(WQ.t(q.a[ai]))}</span><span class="mk" aria-hidden="true">${mk}</span></button>`;
         }).join("")}</div>
-        <div id="qzFb" class="qz-fb" aria-live="polite"></div>`;
+        <div id="qzFb" class="qz-fb"></div>`;
       body.querySelectorAll(".qz-tile").forEach(b => b.onclick = () => answer(+b.dataset.i));
       if (shown) return reveal();
+      if (focusQ) { focusQ = false; $("#qzQ").focus({ preventScroll: true }); }
       const arc = $("#qzArc"), sec = $("#qzSec"), ring = $("#qzRing");
       clearInterval(tick);
+      let warned = deadline - Date.now() <= 5000;
       const upd = () => {
-        if (!el.isConnected) return clearInterval(tick);
+        if (!$("#qzArc")) return clearInterval(tick);
         const left = Math.max(0, deadline - Date.now()) / 1000;
+        if (!warned && left <= 5) { warned = true; say(L().five); }
         arc.setAttribute("stroke-dashoffset", C * (1 - left / LIMIT)); sec.textContent = Math.ceil(left); ring.classList.toggle("low", left <= 5);
         if (left <= 0) answer(-1);
       };
@@ -142,32 +148,34 @@ WQ.registerGame("quiz", { order: 6, kind: "game", icon: "⚡", ages: "7+",
       else streak = 0;
       log.push({ q: d.q, pick: i >= 0 ? d.order[i] : -1, ok });
       WQ.beep(ok);
+      if (idx >= deck.length - 1) record();   // save best + badge now, even if the player never opens the results
+      const l = L();
+      say(`${ok ? l.right[idx % l.right.length] + ` +${gain + bonus} ${l.pts}.` : (i < 0 ? l.timeout : l.wrong) + ` ${l.ans} ${WQ.t(d.q.a[d.q.c])}.`} ${WQ.t(d.q.why)}`);
       play();
     }
 
     function reveal() {
       const l = L(), d = deck[idx], ok = chosen >= 0 && d.order[chosen] === d.q.c, last = idx >= deck.length - 1, fb = $("#qzFb");
       const head = ok ? l.right[idx % l.right.length] + ` +${gain} ${l.pts}` : chosen < 0 ? l.timeout : l.wrong;
-      fb.innerHTML = `<div class="note ${ok ? "ok" : "danger"}"><div class="row"><h3>${ok ? "✅" : chosen < 0 ? "⏰" : "❌"} ${head}</h3>${ok && bonus ? `<span class="tag go">${l.bonus(bonus)}</span>` : ""}</div>
+      fb.innerHTML = `<div class="note ${ok ? "ok" : "danger"}"><div class="row"><h2>${ok ? "✅" : chosen < 0 ? "⏰" : "❌"} ${head}</h2>${ok && bonus ? `<span class="tag go">${l.bonus(bonus)}</span>` : ""}</div>
         ${ok ? "" : `<p><b>${l.ans}</b> ${WQ.esc(WQ.t(d.q.a[d.q.c]))}</p>`}<p>💡 ${WQ.esc(WQ.t(d.q.why))}</p>
         <div class="row" style="justify-content:flex-end"><button class="btn ${last ? "blue" : ""}" id="qzNext">${last ? l.results : l.next}</button></div></div>`;
       $("#qzRing").hidden = true;
       if (!ok) WQ.anim($("#qzQ").parentNode, "shake");
-      const nx = $("#qzNext"); nx.focus({ preventScroll: true });
+      const nx = $("#qzNext"); nx.focus({ preventScroll: true }); nx.scrollIntoView({ block: "nearest" });
       nx.onclick = () => { if (last) finish(); else { idx++; ask(); } };
     }
 
-    function finish() {
-      ph = "end";
+    function record() {
       const prev = WQ.best("quiz-" + cfg.track);
       WQ.best("quiz-" + cfg.track, score); isNewBest = score > prev;
       if (deck.length >= 10 && right / deck.length >= 0.8) WQ.award("quiz");
-      end();
     }
+    function finish() { ph = "end"; end(); const h = $("#qzEndH"); if (h) h.focus({ preventScroll: true }); }
 
     function end() {
       const l = L(), n = deck.length, pct = n ? Math.round(right / n * 100) : 0, missed = log.filter(r => !r.ok);
-      body.innerHTML = `<div class="card qz-end"><h2>${l.endT}</h2><div class="qz-big" aria-label="${l.score}">⭐ ${score}</div>
+      body.innerHTML = `<div class="card qz-end"><h2 tabindex="-1" id="qzEndH">${l.endT}</h2><div class="qz-big"><span aria-hidden="true">⭐</span><span class="qz-vh">${l.score}:</span> ${score}</div>
         ${isNewBest ? `<p><span class="tag go">🏆 ${l.newBest}</span></p>` : ""}
         <div class="qz-stats"><div>${l.acc}<b>${right}/${n} · ${pct}%</b></div><div>${l.bestStreak}<b>🔥 ${topStreak}</b></div><div>${l.best}<b>${WQ.best("quiz-" + cfg.track)}</b></div></div>
         <div class="meter" aria-hidden="true"><i style="width:${pct}%"></i></div>
@@ -182,7 +190,7 @@ WQ.registerGame("quiz", { order: 6, kind: "game", icon: "⚡", ages: "7+",
     }
 
     const key = e => {
-      if (ph !== "play" || chosen !== null || e.target.closest?.("input,select,textarea")) return;
+      if (ph !== "play" || chosen !== null || e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.("input,select,textarea")) return;
       const n = +e.key; if (n >= 1 && n <= deck[idx].order.length) answer(n - 1);
     };
     document.addEventListener("keydown", key);

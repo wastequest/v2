@@ -59,7 +59,7 @@ Q("s10","kt","sorting",["Where does a banana peel belong?","Ke manakah kulit pis
 Q("s11","kt","sorting",["A mirror breaks. What is the right way to throw it away?","Cermin pecah. Apakah cara yang betul untuk membuangnya?"],
  [["Wrap it safely and put it in general waste","Balut dengan selamat dan buang sebagai sisa am"],["Put it in the brown bin with glass bottles","Masukkan ke dalam tong coklat bersama botol kaca"],["Put it in the compost","Masukkan ke dalam kompos"]],
  ["Mirror glass has a coating, so it is not recycled with bottles and jars. Wrap it so nobody gets cut.","Kaca cermin bersalut, jadi ia tidak dikitar bersama botol dan balang. Balutlah supaya tiada sesiapa terluka."]);
-Q("s12","ta","sorting",["Why must lithium-ion batteries (phones, power banks) never go into general waste?","Mengapakah bateri litium-ion (telefon, power bank) tidak boleh dibuang sebagai sisa am?"],
+Q("s12","ta","sorting",["Why must lithium-ion batteries (phones, power banks) never go into general waste?","Mengapakah bateri litium-ion (telefon, bank kuasa) tidak boleh dibuang sebagai sisa am?"],
  [["They can catch fire when crushed in lorries","Ia boleh terbakar apabila dihimpit dalam lori"],["They are too light for lorries to collect","Ia terlalu ringan untuk dikutip oleh lori"],["They melt harmlessly when it rains","Ia cair tanpa bahaya apabila hujan"]],
  ["Damaged lithium-ion cells can short-circuit and start fires. Take them to an e-waste collection point.","Sel litium-ion yang rosak boleh litar pintas dan mencetuskan kebakaran. Hantar ke pusat kutipan e-sisa."]);
 Q("s13","ta","sorting",["Fluorescent lamps need special disposal because they contain…","Lampu kalimantang perlu dilupuskan secara khas kerana mengandungi…"],
@@ -204,7 +204,7 @@ Q("k12","k","compost",["Which animal helps make vermicompost?","Haiwan manakah y
  [["Earthworms","Cacing tanah"],["Ants","Semut"],["Cats","Kucing"]],
  ["Worms eat food scraps and leave behind rich castings that plants love.","Cacing memakan sisa makanan dan meninggalkan najis cacing yang kaya untuk tanaman."]);
 Q("k13","ta","compost",["Vermicomposting usually uses…","Vermikompos biasanya menggunakan…"],
- [["Composting worms (red wigglers)","Cacing kompos (cacing merah)"],["Garden snails and slugs","Siput dan siput babi kebun"],["Soil ants and termites","Semut tanah dan anai-anai"]],
+ [["Composting worms (red wigglers)","Cacing kompos (cacing merah)"],["Garden snails and slugs","Siput dan siput bogel di kebun"],["Soil ants and termites","Semut tanah dan anai-anai"]],
  ["Red wigglers live near the surface and eat large amounts of organic waste; their castings are a rich fertiliser.","Cacing merah hidup dekat permukaan dan memakan banyak sisa organik; najisnya ialah baja yang kaya."]);
 Q("k14","ta","compost",["Why do we turn (mix) a compost pile?","Mengapakah kita membalikkan (menggaul) timbunan kompos?"],
  [["To add oxygen for the microbes","Untuk menambah oksigen bagi mikrob"],["To cool it down to freezing","Untuk menyejukkannya hingga beku"],["To remove all the nitrogen","Untuk membuang semua nitrogen"]],
@@ -252,7 +252,7 @@ Q("e10","ta","enzyme",["Using the 1 : 3 : 10 ratio, how much peel and water go w
 Q("p01","kt","ph",["A pH of 7 means the liquid is…","pH 7 bermaksud cecair itu…"],
  [["Neutral","Neutral"],["Very acidic","Sangat berasid"],["Very alkaline","Sangat beralkali"]],
  ["pH 7 is neutral, like pure water. Below 7 is acidic; above 7 is alkaline.","pH 7 adalah neutral, seperti air tulen. Bawah 7 berasid; atas 7 beralkali."]);
-Q("p02","kt","ph",["Red (purple) cabbage juice turns pink-red when you add…","Jus kubis ungu bertukar merah jambu-merah apabila ditambah…"],
+Q("p02","kt","ph",["Red (purple) cabbage juice turns pink-red when you add…","Jus kubis ungu bertukar merah jambu atau merah apabila ditambah…"],
  [["Vinegar","Cuka"],["Soapy water","Air sabun"],["Plain water","Air biasa"]],
  ["Vinegar is an acid. Cabbage juice goes pink or red in acids.","Cuka ialah asid. Jus kubis menjadi merah jambu atau merah dalam asid."]);
 Q("p03","kt","ph",["Blue bunga telang (butterfly pea) tea turns purple-pink when you add…","Teh bunga telang yang biru bertukar ungu-merah jambu apabila ditambah…"],
@@ -290,12 +290,12 @@ Q("l02","ta","plastics",["Which resin code is HDPE (e.g. shampoo and detergent b
 Q("l03","ta","plastics",["Resin code 4 is LDPE. Which product is typically LDPE?","Kod resin 4 ialah LDPE. Produk manakah yang lazimnya LDPE?"],
  [["Plastic bags and cling film","Beg plastik dan pembalut plastik"],["Polystyrene food boxes","Kotak makanan polistirena"],["PVC water pipes","Paip air PVC"]],
  ["Low-density polyethylene is soft and flexible, so it is used for bags and films.","Polietilena berketumpatan rendah lembut dan fleksibel, jadi ia digunakan untuk beg dan filem."]);
-Q("l04","ta","plastics",["Polystyrene (foam food boxes) has which resin code?","Polistirena (kotak makanan polistirena) mempunyai kod resin…"],
+Q("l04","ta","plastics",["Polystyrene (foam food boxes) has which resin code?","Polistirena (kotak makanan busa) mempunyai kod resin…"],
  [["6","6"],["1","1"],["2","2"],["5","5"]],
  ["Code 6 is PS. Foamed PS is bulky and light, so it is rarely worth collecting for recycling.","Kod 6 ialah PS. PS berbusa besar dan ringan, jadi ia jarang berbaloi dikutip untuk kitar semula."]);
 Q("l05","ta","plastics",["Resin code 5 (PP) is commonly used for…","Kod resin 5 (PP) lazimnya digunakan untuk…"],
  [["Microwave-safe tubs and bottle caps","Bekas tahan ketuhar mikro dan penutup botol"],["Clear fizzy-drink and water bottles","Botol minuman berkarbonat dan air yang jernih"],["Foam takeaway boxes and cups","Kotak dan cawan polistirena bawa pulang"]],
- ["Polypropylene resists heat and chemicals, so it is used for microwaveable containers and caps.","Polipropilena tahan haba dan bahan kimia, jadi ia digunakan untuk bekas boleh-microwave dan penutup."]);
+ ["Polypropylene resists heat and chemicals, so it is used for microwaveable containers and caps.","Polipropilena tahan haba dan bahan kimia, jadi ia digunakan untuk bekas yang boleh dipanaskan dalam ketuhar gelombang mikro dan penutup botol."]);
 Q("l06","a","plastics",["Resin code 7 means…","Kod resin 7 bermaksud…"],
  [["“Other” plastics or mixtures, hard to recycle","Plastik “lain-lain” atau campuran, sukar dikitar"],["The easiest plastic of all to recycle","Plastik yang paling mudah dikitar semula"],["Clear PET drink bottles","Botol minuman PET yang jernih"]],
  ["Code 7 is a catch-all (e.g. polycarbonate, multilayer, some bioplastics). It is not a sign of recyclability.","Kod 7 ialah kategori umum (cth. polikarbonat, berbilang lapisan, sesetengah bioplastik). Ia bukan tanda boleh dikitar."]);

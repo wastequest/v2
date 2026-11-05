@@ -64,7 +64,7 @@ const WORDS={
   ["SAMPAH","Barang yang dibuang; juga dipanggil sisa."],
   ["CACING","Haiwan kecil yang membantu menghasilkan kompos."],
   ["LILIN","Minyak masak terpakai boleh dijadikan ____ wangi."],
-  ["TANAH","Tumbuhan hidup di dalam ____."],
+  ["TANAH","Tumbuhan tumbuh di dalam ____."],
   ["POKOK","Kertas dibuat daripada kayu ____."],
   ["BUMI","Planet yang perlu kita jaga."],
   ["BATERI","Jangan buang ____ lama ke dalam tong biasa. Hantar ke pusat kutipan e-sisa."],
@@ -75,7 +75,7 @@ const WORDS={
   ["TIN","Bekas logam untuk makanan. Ia masuk ke tong oren."],
   ["LOGAM","Tin minuman aluminium diperbuat daripada ____."],
   ["BOTOL","____ plastik boleh dijadikan pasu siram sendiri."],
-  ["GUNA","____ semula: gunakan barang sekali lagi."],
+  ["GUNA","____ semula: pakai barang sekali lagi, jangan terus buang."],
   ["BEG","Bawa ____ sendiri apabila membeli-belah."]],
  o:[
   ["PELUPUSAN","Tapak ____ ialah tempat sisa ditanam di dalam tanah."],
@@ -106,7 +106,7 @@ const T={
   ok:"All correct so far!",full:"Almost! Some letters are wrong. Press Check.",solved:"Solved!",solvedS:(t,r)=>`Time: ${t} · Letters revealed: ${r}`,
   shown:"Here are all the answers. Try a new puzzle to earn the badge!",raQ:"Show all the answers? You won't get the badge for this puzzle.",
   inLang:l=>`This puzzle is in ${l}.`,newIn:"New puzzle in English",map:"All games",
-  find:"Find these words",hint:"💡 Hint",how:"Drag from the first letter to the last. Or tap the first letter, then the last.",
+  find:"Find these words",hint:"💡 Hint",how:"Drag from the first letter to the last. Or tap the first letter, then the last. Keyboard: arrow keys, then Enter on the first and last letter.",grid:"Letter grid",row:"row",col:"column",got:(w,a,b)=>`Found ${w}! ${a} of ${b}.`,nope:"That is not one of the words. Try again.",startAt:ch=>`First letter ${ch} chosen. Now choose the last letter.`,cancel:"Cancelled.",hintAt:(r,c)=>`A hidden word starts at row ${r}, column ${c}.`,blank:"blank",type:"Type the answer here",
   dK:"Words go → ↓ ↘ ↗",dO:"Words can go in all 8 directions, even backwards!",foundN:(a,b)=>`${a}/${b} found`,wsDone:"You found them all! 🎉",wsDoneS:t=>`Time: ${t}`,
   cwTip:"Teaching tip: let pairs solve together, then use the answers to introduce key terms before the hands-on labs.",
   wsTip:"Teaching tip: a calm starter or early-finisher task. Ask students to explain each word they find."},
@@ -115,7 +115,7 @@ const T={
   ok:"Semua betul setakat ini!",full:"Hampir! Ada huruf yang salah. Tekan Semak.",solved:"Selesai!",solvedS:(t,r)=>`Masa: ${t} · Huruf didedahkan: ${r}`,
   shown:"Ini semua jawapannya. Cuba teka-teki baharu untuk mendapatkan lencana!",raQ:"Tunjukkan semua jawapan? Anda tidak akan mendapat lencana untuk teka-teki ini.",
   inLang:l=>`Teka-teki ini dalam ${l}.`,newIn:"Teka-teki baharu dalam Bahasa Melayu",map:"Semua permainan",
-  find:"Cari perkataan ini",hint:"💡 Petunjuk",how:"Seret dari huruf pertama ke huruf terakhir. Atau tekan huruf pertama, kemudian huruf terakhir.",
+  find:"Cari perkataan ini",hint:"💡 Petunjuk",how:"Seret dari huruf pertama ke huruf terakhir. Atau tekan huruf pertama, kemudian huruf terakhir. Papan kekunci: guna kekunci anak panah, kemudian Enter pada huruf pertama dan terakhir.",grid:"Grid huruf",row:"baris",col:"lajur",got:(w,a,b)=>`Jumpa ${w}! ${a} daripada ${b}.`,nope:"Itu bukan salah satu perkataan. Cuba lagi.",startAt:ch=>`Huruf pertama ${ch} dipilih. Sekarang pilih huruf terakhir.`,cancel:"Dibatalkan.",hintAt:(r,c)=>`Satu perkataan tersembunyi bermula di baris ${r}, lajur ${c}.`,blank:"kosong",type:"Taip jawapan di sini",
   dK:"Perkataan ke arah → ↓ ↘ ↗",dO:"Perkataan boleh ke semua 8 arah, malah terbalik!",foundN:(a,b)=>`${a}/${b} dijumpai`,wsDone:"Anda menjumpai semuanya! 🎉",wsDoneS:t=>`Masa: ${t}`,
   cwTip:"Tip pengajaran: biar murid menyelesaikan secara berpasangan, kemudian guna jawapan untuk memperkenalkan istilah penting sebelum makmal amali.",
   wsTip:"Tip pengajaran: aktiviti permulaan yang tenang atau untuk murid yang siap awal. Minta murid menerangkan setiap perkataan yang dijumpai."}
@@ -208,29 +208,31 @@ WQ.css("words",`
 .cw-board{position:relative;margin:0 auto;width:min(100%,calc(var(--cols)*42px))}
 .cw-grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:2px;touch-action:manipulation;user-select:none}
 .cw-c,.cw-x{aspect-ratio:1;border-radius:5px;min-width:0}
-.cw-c{position:relative;background:#fff;box-shadow:0 0 0 2px var(--ink);display:grid;place-items:center;cursor:pointer;font-family:"Baloo 2";font-weight:800;font-size:clamp(.85rem,3.4vw,1.45rem);text-transform:uppercase;line-height:1}
+.cw-c{position:relative;background:#fff;box-shadow:0 0 0 2px var(--ink);display:grid;place-items:center;cursor:pointer;font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;font-size:clamp(.85rem,3.4vw,1.45rem);text-transform:uppercase;line-height:1}
 .cw-c.word{background:#fff4c7}.cw-c.cur{background:var(--gold)}
 .cw-c.bad{color:var(--red);background:#fde3e6}.cw-c.bad.cur{background:#ffc2c9}
 .cw-c.rev:after{content:"";position:absolute;top:0;right:0;border:5px solid transparent;border-top-color:var(--blue);border-right-color:var(--blue);border-radius:0 5px 0 0}
 .cw-solved .cw-c{background:#e3f7dc;color:var(--grass-d)}
-.cw-n{position:absolute;top:1px;left:3px;font-family:Nunito,sans-serif;font-size:clamp(.45rem,1.6vw,.66rem);font-weight:800;color:var(--muted)}
+.cw-n{position:absolute;top:1px;left:3px;font-family:Nunito,sans-serif;font-size:clamp(.5rem,1.6vw,.66rem);font-weight:800;color:var(--muted)}
+.cw-board:focus-within .cw-grid{outline:3px solid #1a1932;outline-offset:5px;box-shadow:0 0 0 9px #ffeb57}
 .cw-in{position:absolute;opacity:0;font-size:16px;border:0;padding:0;caret-color:transparent;color:transparent;background:transparent;pointer-events:none}
 .cw-tools{margin:0 0 14px}.cw-tools .btn{padding:9px 16px;font-size:.95rem}
 .cw-msg{text-align:center;font-weight:700;min-height:1.5em;margin:6px 0;font-size:.95rem}
 .cw-msg:empty:before{content:"\\a0"}
 #cwEnd .card{margin-top:16px}
-.cw-clues h3{font-size:1.2rem;margin:4px 0 6px}.cw-clues ol{list-style:none;margin:0 0 12px;padding:0}
+.cw-clues h2{font-size:1.2rem;margin:4px 0 6px}.cw-clues ol{list-style:none;margin:0 0 12px;padding:0}
 .cw-clues button{display:flex;gap:8px;width:100%;text-align:left;padding:6px 10px;border-radius:10px;font-weight:600;line-height:1.3}
 .cw-clues button b{min-width:1.6em}.cw-clues button:hover{background:var(--soft)}.cw-clues button.on{background:#fff4c7}
 .ws-wrap{display:grid;gap:18px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}
 .ws-grid{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:2px;width:min(100%,560px);margin:0 auto;touch-action:none;user-select:none;-webkit-user-select:none;container-type:inline-size;background:#fff;border-radius:16px;padding:8px;box-shadow:var(--shadow)}
-.ws-c{aspect-ratio:1;display:grid;place-items:center;border-radius:50%;font-family:"Baloo 2";font-weight:800;font-size:1rem;font-size:calc(100cqw / var(--n) * .52);cursor:pointer;line-height:1;transition:background .15s}
-.ws-c.sel{background:var(--gold)!important;transform:scale(1.06)}.ws-c.start{box-shadow:0 0 0 3px var(--blue) inset}
+.ws-c{aspect-ratio:1;display:grid;place-items:center;border-radius:50%;padding:0;min-width:0;color:#1a1932;font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;font-size:1rem;font-size:calc(100cqw / var(--n) * .52);cursor:pointer;line-height:1;transition:background .15s}
+.ws-c.sel{background:var(--gold)!important;transform:scale(1.06)}.ws-c:focus-visible{outline:3px solid #1a1932;outline-offset:0;box-shadow:0 0 0 5px #ffeb57;position:relative;z-index:1}.ws-c.start{box-shadow:0 0 0 3px var(--blue) inset}
 .ws-c.hint{animation:wsHint .5s 3}@keyframes wsHint{50%{background:var(--orange);color:#fff}}
 .ws-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:8px 0 12px}
 .ws-list li{background:#fff;border-radius:999px;padding:5px 12px;font-weight:800;box-shadow:var(--shadow);letter-spacing:.04em}
 .ws-list li.got{text-decoration:line-through 3px;color:var(--muted);box-shadow:none;background:var(--h)}
-.wd-end{text-align:center}.wd-end h2{margin-bottom:4px}
+.wd-end{text-align:center}.wd-end h2{margin-bottom:4px}.wd-end h2:focus{outline:none;box-shadow:none}.ws-side h2{font-size:1.2rem}
+.wd-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:760px){.cw-wrap,.ws-wrap{grid-template-columns:1fr}.cw-tools{gap:8px}.cw-tools .btn{padding:7px 11px;font-size:.85rem}.cw-tools .spacer{display:none}.ws-bar .btn{padding:7px 12px;font-size:.88rem}.ws-grid{padding:4px;gap:1px}}
 `);
 
@@ -250,11 +252,11 @@ WQ.registerGame("crossword",{order:3,kind:"game",icon:"✏️",ages:"8+",
         ${WQ.aud==="teacher"?`<p class="note small">${L().cwTip}</p>`:""}${langNote(cw.lang,"cwLang")}
         <div class="row cw-tools"><span class="pill">⏱️ <span id="cwTime"></span></span><button class="btn" id="cwChk">${L().check}</button><button class="btn blue" id="cwRl">${L().rl}</button><button class="btn red" id="cwRa">${L().ra}</button><span class="spacer"></span><button class="btn alt" id="cwNew">${L().neu}</button></div>
         <div class="cw-wrap"><div>
-          <div class="cw-cur" id="cwCur" aria-live="polite"></div><div class="cw-msg" id="cwMsg" role="status" aria-live="polite"></div>
+          <div class="cw-cur" id="cwCur" aria-live="polite" aria-atomic="true"></div><div class="cw-msg" id="cwMsg" role="status" aria-live="polite"></div>
           <div class="cw-board" style="--cols:${cw.W}"><div class="cw-grid" id="cwGrid" style="--cols:${cw.W}"></div>
-            <input class="cw-in" id="cwIn" aria-label="${L().tap}" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next"></div>
+            <input class="cw-in" id="cwIn" aria-label="${L().type}" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="next"></div>
           <div id="cwEnd"></div></div>
-          <div class="cw-clues card">${[0,1].map(d=>`<h3>${d?L().down:L().across}</h3><ol>${cw.words.map((w,i)=>w.d===d?`<li><button data-w="${i}"><b>${w.num}</b><span>${WQ.esc(w.clue)} (${w.ans.length})</span></button></li>`:"").join("")}</ol>`).join("")}</div></div>`;
+          <div class="cw-clues card">${[0,1].map(d=>`<h2>${d?L().down:L().across}</h2><ol>${cw.words.map((w,i)=>w.d===d?`<li><button data-w="${i}"><b>${w.num}</b><span>${WQ.esc(w.clue)} (${w.ans.length})</span></button></li>`:"").join("")}</ol>`).join("")}</div></div>`;
       $("#cwNew").onclick=start; if($("#cwLang")) $("#cwLang").onclick=start;
       $("#cwChk").onclick=check; $("#cwRl").onclick=revealLetter; $("#cwRa").onclick=revealAll;
       el.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const w=cw.words[+b.dataset.w];
@@ -275,10 +277,10 @@ WQ.registerGame("crossword",{order:3,kind:"game",icon:"✏️",ages:"8+",
       inp.addEventListener("input",e=>{const v=inp.value;inp.value=PAD;try{inp.setSelectionRange(1,1);}catch(er){}
         if((e.inputType||"").startsWith("delete")||v.length<PAD.length){back();return;}
         const ch=v.replace(/[^a-z]/gi,"").slice(-1).toUpperCase();if(ch)type(ch);});
-      paint();
+      curHTML="";paint();
       if(matchMedia("(pointer:fine)").matches) focus();
     }
-    const this_=this;
+    const this_=this; let curHTML="", endFocus=false;
     const focus=()=>{const i=$("#cwIn");if(i&&!cwDone){i.focus({preventScroll:true});}};
     const wordOf=()=>{const x=cw.cells[key(sel.r,sel.c)];return cw.words[x[sel.d?"d":"a"]];};
     const cellsOf=w=>[...Array(w.ans.length).keys()].map(i=>key(w.r+w.d*i,w.c+(1-w.d)*i));
@@ -292,13 +294,16 @@ WQ.registerGame("crossword",{order:3,kind:"game",icon:"✏️",ages:"8+",
         h+=`<div class="cw-c${wc.has(k)?" word":""}${k===cur?" cur":""}${bad.has(k)?" bad":""}${rev.has(k)?" rev":""}" data-k="${k}">${num?`<span class="cw-n">${num.num}</span>`:""}${ent[k]||""}</div>`;}
       const g=$("#cwGrid");g.innerHTML=h;g.classList.toggle("cw-solved",cwDone&&!usedAll);
       const i=$("#cwIn");i.style.left=sel.c/cw.W*100+"%";i.style.top=sel.r/cw.H*100+"%";i.style.width=100/cw.W+"%";i.style.height=100/cw.H+"%";
-      $("#cwCur").innerHTML=`<b>${w.num} ${w.d?L().down:L().across}</b>${WQ.esc(w.clue)} (${w.ans.length})`;
+      const ch=`<b>${w.num} ${w.d?L().down:L().across}</b>${WQ.esc(w.clue)} (${w.ans.length})`;
+      if(ch!==curHTML){curHTML=ch;$("#cwCur").innerHTML=ch;}
+      i.setAttribute("aria-label",`${L().type}. ${w.num} ${w.d?L().down:L().across}: ${w.clue} (${w.ans.length}). ${cellsOf(w).map(k=>ent[k]||L().blank).join(", ")}`);
       el.querySelectorAll("[data-w]").forEach(b=>b.classList.toggle("on",cw.words[+b.dataset.w]===w));
       $("#cwMsg").textContent=cwMsg; $("#cwTime").textContent=mmss((cwDone?cwTEnd:Date.now())-cwT0);
       ["#cwChk","#cwRl","#cwRa"].forEach(s=>$(s).disabled=cwDone);
-      $("#cwEnd").innerHTML=cwDone?`<div class="card wd-end"><h2>${usedAll?"👀":"🎉 "+L().solved}</h2><p>${usedAll?L().shown:L().solvedS(mmss(cwTEnd-cwT0),rev.size)}</p>
+      $("#cwEnd").innerHTML=cwDone?`<div class="card wd-end"><h2 tabindex="-1" id="cwEndH">${usedAll?"👀":"🎉 "+L().solved}</h2><p>${usedAll?L().shown:L().solvedS(mmss(cwTEnd-cwT0),rev.size)}</p>
         <div class="row" style="justify-content:center"><button class="btn" id="cwAgain">${L().neu}</button><a class="btn alt" href="#/games">${L().map}</a></div></div>`:"";
       if($("#cwAgain")) $("#cwAgain").onclick=start;
+      if(cwDone&&endFocus){endFocus=false;$("#cwEndH").focus({preventScroll:true});}
     }
     function step(dr,dc){let r=sel.r+dr,c=sel.c+dc;while(r>=0&&c>=0&&r<cw.H&&c<cw.W){if(cw.cells[key(r,c)]){sel.r=r;sel.c=c;return true;}r+=dr;c+=dc;}return false;}
     function type(ch){
@@ -325,7 +330,7 @@ WQ.registerGame("crossword",{order:3,kind:"game",icon:"✏️",ages:"8+",
       const ks=Object.keys(cw.cells);
       if(ks.some(k=>!ent[k])) return false;
       if(ks.every(k=>ent[k]===cw.cells[k].ch)){
-        cwDone=true;cwTEnd=Date.now();cwMsg="";
+        cwDone=true;cwTEnd=Date.now();cwMsg="";endFocus=true;
         if(!usedAll){WQ.beep(true);if(!WQ.award("crossword"))WQ.confetti();}
         const i=$("#cwIn"); if(i) i.blur(); return true;
       }
@@ -336,7 +341,7 @@ WQ.registerGame("crossword",{order:3,kind:"game",icon:"✏️",ages:"8+",
       cwMsg=bad.size?L().wrong(bad.size):L().ok; WQ.beep(!bad.size); if(bad.size) WQ.anim($("#cwGrid"),"shake");
       paint(); focus();
     }
-    function revealLetter(){const k=key(sel.r,sel.c);ent[k]=cw.cells[k].ch;rev.add(k);bad.delete(k);cwMsg="";type(ent[k]);focus();}
+    function revealLetter(){if(cwDone)return;const k=key(sel.r,sel.c);if(ent[k]!==cw.cells[k].ch)rev.add(k);bad.delete(k);cwMsg="";type(cw.cells[k].ch);focus();}
     function revealAll(){if(!confirm(L().raQ))return;usedAll=true;Object.keys(cw.cells).forEach(k=>{if(ent[k]!==cw.cells[k].ch){ent[k]=cw.cells[k].ch;rev.add(k);}});bad.clear();isSolved();paint();}
     const tick=setInterval(()=>{if(el.isConnected&&cw&&!cwDone&&$("#cwTime"))$("#cwTime").textContent=mmss(Date.now()-cwT0);},1000);
     if(relang&&cw) build(); else start();
@@ -352,34 +357,54 @@ WQ.registerGame("wordsearch",{order:4,kind:"game",icon:"🔎",ages:"7+",
   mount(el,{relang}){
     const L=()=>T[WQ.lang], $=s=>el.querySelector(s), self=this;
     const HUES=[48,130,200,280,330,20,170,90,240,0,300,60];
+    let kf={r:0,c:0}, endFocus=false;   // kf = the grid cell that holds keyboard focus (roving tabindex)
+    const say=m=>{const s=$("#wsSay");if(s)s.textContent=m;};
     function start(){
       const kids=WQ.aud==="kids";
       ws=genSearch(WORDS[WQ.lang][kids?"k":"o"],kids?10:12,kids?DIRS_K:DIRS_O,kids?8:10);ws.lang=WQ.lang;ws.kids=kids;
       found=[];wsT0=Date.now();wsTEnd=0;wsDone=false;pend=null;build();
     }
     function build(){
+      kf={r:0,c:0};
       el.innerHTML=WQ.head("🔎",self.title,self.desc)+`
         ${WQ.aud==="teacher"?`<p class="note small">${L().wsTip}</p>`:""}${langNote(ws.lang,"wsLang")}
-        <div class="row ws-bar" style="margin:0 0 12px"><span class="pill">⏱️ <span id="wsTime"></span></span><span class="pill">🔎 <span id="wsCount"></span></span><span class="spacer"></span>
+        <div class="row ws-bar" style="margin:0 0 12px"><span class="pill"><span aria-hidden="true">⏱️</span> <span id="wsTime"></span></span><span class="pill"><span aria-hidden="true">🔎</span> <span id="wsCount"></span></span><span class="spacer"></span>
           <button class="btn blue" id="wsHint">${L().hint}</button><button class="btn alt" id="wsNew">${L().neu}</button></div>
-        <div class="ws-wrap"><div><div class="ws-grid" id="wsGrid" style="--n:${ws.N}"></div></div>
-          <div class="card"><h3>${L().find}</h3><p class="small muted">${L().how} ${ws.kids?L().dK:L().dO}</p><ul class="ws-list" id="wsList" aria-live="polite"></ul><div id="wsEnd"></div></div></div>`;
+        <div class="ws-wrap"><div><div class="ws-grid" id="wsGrid" role="group" aria-label="${L().grid}" style="--n:${ws.N}"></div></div>
+          <div class="card ws-side"><h2>${L().find}</h2><p class="small muted">${L().how} ${ws.kids?L().dK:L().dO}</p><ul class="ws-list" id="wsList"></ul><p class="wd-vh" id="wsSay" role="status"></p><div id="wsEnd"></div></div></div>`;
       $("#wsNew").onclick=start; if($("#wsLang")) $("#wsLang").onclick=start; $("#wsHint").onclick=hint;
       const g=$("#wsGrid");
-      g.innerHTML=ws.g.map((row,r)=>row.map((ch,c)=>`<div class="ws-c" data-r="${r}" data-c="${c}">${ch}</div>`).join("")).join("");
+      g.innerHTML=ws.g.map((row,r)=>row.map((ch,c)=>`<button class="ws-c" data-r="${r}" data-c="${c}" tabindex="${r||c?-1:0}" aria-label="${ch}, ${L().row} ${r+1}, ${L().col} ${c+1}">${ch}</button>`).join("")).join("");
       // pointer drag from first to last letter; a tap without moving sets/uses a start letter
       let drag=null;
       const cellAt=e=>{const t=document.elementFromPoint(e.clientX,e.clientY);const c=t&&t.closest(".ws-c");return c&&g.contains(c)?{r:+c.dataset.r,c:+c.dataset.c}:null;};
-      g.addEventListener("pointerdown",e=>{if(wsDone)return;const c=cellAt(e);if(!c)return;e.preventDefault();try{g.setPointerCapture(e.pointerId);}catch(er){}
+      g.addEventListener("pointerdown",e=>{if(wsDone||e.button>0)return;const c=cellAt(e);if(!c)return;e.preventDefault();try{g.setPointerCapture(e.pointerId);}catch(er){}
         drag={...c,cur:c,moved:false};mark(line(c,c));});
       g.addEventListener("pointermove",e=>{if(!drag)return;const c=cellAt(e);if(!c)return;
         if(c.r!==drag.r||c.c!==drag.c)drag.moved=true;drag.cur=c;mark(line(drag,c));});
       const up=()=>{if(!drag)return;const s=drag;drag=null;
-        if(!s.moved){if(pend&&(pend.r!==s.r||pend.c!==s.c)){const p=pend;pend=null;test(line(p,s));}else{pend=pend?null:{r:s.r,c:s.c};mark([]);}}
-        else{pend=null;test(line(s,s.cur));}
+        if(!s.moved) tap(s); else{pend=null;test(line(s,s.cur));}
         paint();};
       g.addEventListener("pointerup",up);g.addEventListener("pointercancel",()=>{drag=null;mark([]);});
+      // keyboard: arrows move, Enter/Space picks the first then the last letter, Escape cancels
+      g.addEventListener("keydown",e=>{
+        const m={ArrowUp:[-1,0],ArrowDown:[1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[e.key];
+        if(m){e.preventDefault();move(Math.min(ws.N-1,Math.max(0,kf.r+m[0])),Math.min(ws.N-1,Math.max(0,kf.c+m[1])));}
+        else if(e.key==="Home"||e.key==="End"){e.preventDefault();move(kf.r,e.key==="Home"?0:ws.N-1);}
+        else if(e.key==="Enter"||e.key===" "){e.preventDefault();if(!wsDone){tap({...kf});paint();}}
+        else if(e.key==="Escape"&&pend){pend=null;mark([]);say(L().cancel);}
+      });
       paint();
+    }
+    function move(r,c){
+      const o=$(`.ws-c[data-r="${kf.r}"][data-c="${kf.c}"]`), n=$(`.ws-c[data-r="${r}"][data-c="${c}"]`); if(!n) return;
+      if(o) o.tabIndex=-1; n.tabIndex=0; n.focus(); kf={r,c};
+      if(pend) mark(line(pend,kf));
+    }
+    function tap(s){
+      if(pend&&(pend.r!==s.r||pend.c!==s.c)){const p=pend;pend=null;test(line(p,s));}
+      else if(pend){pend=null;mark([]);say(L().cancel);}
+      else{pend={r:s.r,c:s.c};mark([]);say(L().startAt(ws.g[s.r][s.c]));}
     }
     // cells from a to b, snapped to the nearest of the 8 directions and kept inside the grid
     function line(a,b){
@@ -390,20 +415,21 @@ WQ.registerGame("wordsearch",{order:4,kind:"game",icon:"🔎",ages:"7+",
       return out;
     }
     function mark(cells){const s=new Set(cells.map(([r,c])=>r*100+c));
-      el.querySelectorAll(".ws-c").forEach(d=>{d.classList.toggle("sel",s.has(+d.dataset.r*100+ +d.dataset.c));d.classList.toggle("start",!!pend&&pend.r===+d.dataset.r&&pend.c===+d.dataset.c);});}
+      el.querySelectorAll(".ws-c").forEach(d=>{const on=!!pend&&pend.r===+d.dataset.r&&pend.c===+d.dataset.c;d.classList.toggle("sel",s.has(+d.dataset.r*100+ +d.dataset.c));d.classList.toggle("start",on);
+        if(on)d.setAttribute("aria-pressed","true");else d.removeAttribute("aria-pressed");});}
     function test(cells){
-      mark([]); if(cells.length<2) return;
+      mark([]); if(cells.length<2){say(L().nope);return;}
       const s=cells.map(([r,c])=>ws.g[r][c]).join(""), rs=[...s].reverse().join("");
       const w=ws.words.find(w=>!found.includes(w.ans)&&(w.ans===s||w.ans===rs));
-      if(!w){WQ.beep(false);return;}
+      if(!w){WQ.beep(false);say(L().nope);return;}
       w.cells=cells.slice(); if(w.ans===rs) w.cells.reverse();
-      found.push(w.ans);WQ.beep(true);
-      if(found.length===ws.words.length){wsDone=true;wsTEnd=Date.now();if(!WQ.award("wordsearch"))WQ.confetti();}
+      found.push(w.ans);WQ.beep(true);say(L().got(w.ans,found.length,ws.words.length));
+      if(found.length===ws.words.length){wsDone=true;wsTEnd=Date.now();endFocus=true;if(!WQ.award("wordsearch"))WQ.confetti();}
     }
     function hint(){
       const left=ws.words.filter(w=>!found.includes(w.ans)); if(!left.length) return;
       const w=left[Math.floor(Math.random()*left.length)], [r,c]=w.cells[0], d=$(`.ws-c[data-r="${r}"][data-c="${c}"]`);
-      WQ.anim(d,"hint");
+      WQ.anim(d,"hint");say(L().hintAt(r+1,c+1));
     }
     function paint(){
       if(!$("#wsGrid")) return;
@@ -411,15 +437,16 @@ WQ.registerGame("wordsearch",{order:4,kind:"game",icon:"🔎",ages:"7+",
       ws.words.forEach((w,i)=>{if(found.includes(w.ans)) w.cells.forEach(([r,c])=>col[r*100+c]=`hsl(${HUES[i%HUES.length]} 85% 78%)`);});
       el.querySelectorAll(".ws-c").forEach(d=>{d.style.background=col[+d.dataset.r*100+ +d.dataset.c]||"";});
       mark([]);
-      $("#wsList").innerHTML=ws.words.map((w,i)=>`<li class="${found.includes(w.ans)?"got":""}" style="--h:hsl(${HUES[i%HUES.length]} 85% 85%)">${w.ans}</li>`).join("");
+      $("#wsList").innerHTML=ws.words.map((w,i)=>`<li class="${found.includes(w.ans)?"got":""}" style="--h:hsl(${HUES[i%HUES.length]} 85% 85%)">${w.ans}${found.includes(w.ans)?'<span class="wd-vh"> ✔</span>':""}</li>`).join("");
       $("#wsCount").textContent=L().foundN(found.length,ws.words.length);
       $("#wsTime").textContent=mmss((wsDone?wsTEnd:Date.now())-wsT0);
       $("#wsHint").disabled=wsDone;
-      $("#wsEnd").innerHTML=wsDone?`<div class="wd-end"><h2>${L().wsDone}</h2><p>${L().wsDoneS(mmss(wsTEnd-wsT0))}</p>
+      $("#wsEnd").innerHTML=wsDone?`<div class="wd-end"><h2 tabindex="-1" id="wsEndH">${L().wsDone}</h2><p>${L().wsDoneS(mmss(wsTEnd-wsT0))}</p>
         <div class="row" style="justify-content:center"><button class="btn" id="wsAgain">${L().neu}</button><a class="btn alt" href="#/games">${L().map}</a></div></div>`:"";
       if($("#wsAgain")) $("#wsAgain").onclick=start;
+      if(wsDone&&endFocus){endFocus=false;$("#wsEndH").focus({preventScroll:true});}
     }
-    const tick=setInterval(()=>{if(el.isConnected&&ws&&!wsDone&&$("#wsTime"))$("#wsTime").textContent=mmss(Date.now()-wsT0);},1000);
+    const tick=setInterval(()=>{if(ws&&!wsDone&&$("#wsTime"))$("#wsTime").textContent=mmss(Date.now()-wsT0);},1000);
     if(relang&&ws) build(); else start();
     return ()=>clearInterval(tick);
   }});

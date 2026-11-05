@@ -11,12 +11,12 @@
 const T={
  en:{waste:"Waste",prod:"Product",pairs:n=>`${n} pairs`,hard:"Hard",moves:"Moves",time:"Time",found:"Pairs",
   hint:"Flip two cards. Find a waste and the useful product it becomes!",match:"It's a match!",lab:"Try this lab →",
-  card:"Card",down:"face down",endT:"All pairs matched!",endS:(m,t)=>`You finished in ${m} moves and ${t}.`,learned:"What you learned",
+  card:"Card",down:"face down",got:"matched",miss:"Not a match. The cards will turn back.",lvl:"Level",stars:"stars",endT:"All pairs matched!",endS:(m,t)=>`You finished in ${m} moves and ${t}.`,learned:"What you learned",
   again:"Play again",harder:"Try a harder level",map:"All games",best:"Best",
   tip:"Teaching tip: project the game and let teams take turns. After each match ask: what makes this waste valuable? Then open the linked lab."},
  bm:{waste:"Sisa",prod:"Produk",pairs:n=>`${n} pasangan`,hard:"Sukar",moves:"Langkah",time:"Masa",found:"Pasangan",
-  hint:"Terbalikkan dua kad. Cari sisa dan produk berguna yang dihasilkan daripadanya!",match:"Padan!",lab:"Cuba makmal ini →",
-  card:"Kad",down:"tertutup",endT:"Semua pasangan dipadankan!",endS:(m,t)=>`Anda selesai dalam ${m} langkah dan ${t}.`,learned:"Apa yang anda pelajari",
+  hint:"Terbalikkan dua kad. Cari sisa dan produk berguna yang dihasilkan daripadanya!",match:"Sepadan!",lab:"Cuba makmal ini →",
+  card:"Kad",down:"tertutup",got:"sudah dipadankan",miss:"Tidak sepadan. Kad akan ditutup semula.",lvl:"Tahap",stars:"bintang",endT:"Semua pasangan dipadankan!",endS:(m,t)=>`Anda selesai dalam ${m} langkah dan ${t}.`,learned:"Apa yang anda pelajari",
   again:"Main lagi",harder:"Cuba tahap lebih sukar",map:"Semua permainan",best:"Terbaik",
   tip:"Tip pengajaran: tayangkan permainan dan biar kumpulan bergilir-gilir. Selepas setiap padanan, tanya: apakah yang menjadikan sisa ini bernilai? Kemudian buka makmal yang dipautkan."}
 };
@@ -24,7 +24,7 @@ const T={
 const P=[
  ["candle","🍳","Used cooking oil","Minyak masak terpakai","🕯️","Scented candle","Lilin wangi",
   "Used cooking oil + wax = a scented candle! Never pour oil down the sink: it blocks drains. Hot wax is for adults only.",
-  "Minyak masak terpakai + lilin = lilin wangi! Jangan tuang minyak ke dalam sinki: ia menyumbat longkang. Lilin panas untuk orang dewasa sahaja.",
+  "Minyak masak terpakai + lilin = lilin wangi! Jangan tuang minyak ke dalam sinki: ia menyumbat longkang. Lilin panas hanya boleh dikendalikan oleh orang dewasa.",
   "Filtered used cooking oil can replace part of the paraffin wax in a candle. That keeps oil out of drains, where it clogs pipes and pollutes rivers. Hot oil and wax need adult supervision.",
   "Minyak masak terpakai yang ditapis boleh menggantikan sebahagian lilin parafin. Ini menghalang minyak masuk ke longkang, yang boleh menyumbat paip dan mencemarkan sungai. Minyak dan lilin panas memerlukan pengawasan orang dewasa."],
  ["enzyme","🍊","Fruit peels","Kulit buah","🧪","Eco-enzyme","Eko-enzim",
@@ -74,36 +74,41 @@ const P=[
   "Kubis ungu mengandungi pigmen antosianin: merah jambu dalam asid, ungu pada pH neutral (pH 7), biru-hijau hingga kuning dalam alkali. Penunjuk pH percuma dari dapur."]
 ];
 const LEVELS=[6,8,10];
-let n=0, deck=[], up=[], moves=0, t0=0, tEnd=0, last=-1, done=false, wait=null;
+let n=0, deck=[], up=[], moves=0, t0=0, tEnd=0, last=-1, done=false, wait=null, endT=null, focusEnd=false;
+const starsFor=()=>moves<=Math.round(n*1.75)?3:moves<=Math.round(n*2.5)?2:1;
 
 WQ.css("match",`
 .mm-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 14px}
-.mm-lv{display:flex;gap:8px;flex-wrap:wrap}.mm-lv button{background:#fff;border-radius:999px;padding:6px 14px;font-weight:800;box-shadow:var(--shadow)}
-.mm-lv button[aria-pressed=true]{background:var(--grass);color:#fff}
-.mm-grid{display:grid;grid-template-columns:repeat(var(--c,4),1fr);margin:0 auto}
+.mm-lv{display:flex;gap:8px;flex-wrap:wrap}.mm-lv button{background:#f9e6cf;color:#1a1932;border:3px solid #1a1932;padding:6px 14px;min-height:40px;font-family:var(--pix,inherit);font-weight:700;box-shadow:3px 3px 0 rgba(26,25,50,.3)}
+.mm-lv button:hover{background:#ffeb57}.mm-lv button[aria-pressed=true]{background:#5ac54f;color:#1a1932}
+.mm-grid{display:grid;grid-template-columns:repeat(var(--c,4),minmax(0,1fr));margin:0 auto}
 .mm-card{position:relative;aspect-ratio:4/5;perspective:900px;padding:0;border-radius:16px;min-width:0}
 .mm-in{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
 .mm-card.up .mm-in{transform:rotateY(180deg)}
-.mm-f{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);overflow:hidden}
+.mm-f{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow);overflow:hidden;transition:visibility 0s .25s}
+.mm-card.up .mm-back,.mm-card:not(.up) .mm-face{visibility:hidden}.mm-card.up .mm-face{transition-delay:0s}
 .mm-back{background:radial-gradient(circle at 30% 25%,#7bd66a,var(--grass) 55%,var(--grass-d));border:3px solid rgba(255,255,255,.6)}
 .mm-logo{display:grid;place-items:center;width:58%;aspect-ratio:1;border-radius:50%;background:#fff;font-size:clamp(1.2rem,3.6vw,2rem);box-shadow:0 3px 0 rgba(0,0,0,.12);position:relative;z-index:1}
 .mm-back:after{content:"";position:absolute;inset:7px;border:2px dashed rgba(255,255,255,.45);border-radius:11px}
 .mm-card:hover:not(.up) .mm-back{filter:brightness(1.08)}
-.mm-face{transform:rotateY(180deg);background:#fff;padding:22px 5px 6px;gap:4px;text-align:center;border:3px solid var(--line)}
+.mm-card:focus-visible{z-index:2}
+.mm-face{transform:rotateY(180deg);background:#fff;padding:22px 5px 6px;gap:4px;text-align:center;border:3px solid var(--line);color:#1a1932}
 .mm-face.w{border-color:#f4c48f}.mm-face.p{border-color:#9fd98f}
-.mm-k{position:absolute;top:0;left:0;right:0;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 0;color:#fff}
-.mm-face.w .mm-k{background:var(--orange)}.mm-face.p .mm-k{background:var(--grass-d)}
+.mm-k{position:absolute;top:0;left:0;right:0;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 0;color:#fff}
+.mm-face.w .mm-k{background:var(--orange);color:#1a1932}.mm-face.p .mm-k{background:var(--grass-d)}
 .mm-em{font-size:clamp(1.9rem,4.6vw,2.6rem);line-height:1}.mm-em.purple{filter:hue-rotate(160deg) saturate(1.4)}
-.mm-nm{font-weight:800;font-size:clamp(.66rem,1.1vw + .35rem,.9rem);line-height:1.12;overflow-wrap:anywhere;hyphens:auto}
+.mm-nm{font-weight:800;font-size:clamp(.68rem,1.1vw + .35rem,.9rem);line-height:1.12;overflow-wrap:anywhere;hyphens:auto}
 .mm-card.got .mm-face{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),var(--shadow)}
 .mm-card.got .mm-face:after{content:"✔";position:absolute;bottom:3px;right:6px;color:var(--grass-d);font-weight:800;font-size:.8rem}
+.mm-card:not(.got) .mm-gt{display:none}
 .mm-fact{margin:16px auto 0;max-width:760px;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:var(--shadow);border-left:8px solid var(--blue);min-height:64px}
-.mm-fact.ok{border-left-color:var(--grass)}.mm-fact h3{font-size:1.15rem;margin-bottom:2px}.mm-fact p{margin:4px 0}
+.mm-fact.ok{border-left-color:var(--grass)}.mm-fact h2{font-size:1.15rem;margin-bottom:2px}.mm-fact p{margin:4px 0}
 .mm-fact a{font-weight:800}
-.mm-end{max-width:760px;margin:0 auto;text-align:center}.mm-stars{font-size:3rem;letter-spacing:6px}
+.mm-end{max-width:760px;margin:0 auto;text-align:center}.mm-end h2:focus{outline:none;box-shadow:none}.mm-stars{font-size:3rem;letter-spacing:6px}
 .mm-list{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));text-align:left;margin:14px 0}
-.mm-li{background:var(--soft);border-radius:14px;padding:10px 12px}.mm-li b{display:block;font-family:"Baloo 2";font-size:1.05rem}
+.mm-li{background:#fffaf2;border:2px solid #1a1932;padding:10px 12px}.mm-li b{display:block;font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-size:1.05rem}
 .mm-li p{margin:4px 0;font-size:.92rem}.mm-li a{font-weight:800;font-size:.9rem}
+.mm-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:600px){.mm-lv button{padding:5px 11px;font-size:.92rem}.mm-bar .pill{padding:5px 11px}}
 `);
 
@@ -116,39 +121,40 @@ WQ.registerGame("match",{order:2,kind:"game",icon:"🃏",ages:"7+",
     const wName=p=>bm?p[3]:p[2], pName=p=>bm?p[6]:p[5], fact=p=>kids?(bm?p[8]:p[7]):(bm?p[10]:p[9]);
     const mmss=ms=>{const s=Math.floor(ms/1000);return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;};
     const elapsed=()=>t0?(done?tEnd:Date.now())-t0:0;
+    const say=m=>{const s=$("#mmSay");if(s)s.textContent=m;};
     el.innerHTML=WQ.head("🃏",this.title,this.desc)+`
       ${WQ.aud==="teacher"?`<p class="note small">${L().tip}</p>`:""}
-      <div class="mm-bar"><div class="mm-lv" role="group" aria-label="Level">${LEVELS.map(k=>`<button data-n="${k}">${k===10?"🔥 "+L().hard+" · ":""}${L().pairs(k)}</button>`).join("")}</div>
-      <span class="spacer"></span><span class="pill" title="${L().moves}">🔄 <span id="mmMoves"></span></span><span class="pill" title="${L().time}">⏱️ <span id="mmTime"></span></span><span class="pill" title="${L().found}">✅ <span id="mmFound"></span></span></div>
-      <div id="mmPlay"><div class="mm-grid" id="mmGrid"></div><div class="mm-fact" id="mmFact" role="status" aria-live="polite"></div></div>
+      <div class="mm-bar"><div class="mm-lv" role="group" aria-label="${L().lvl}">${LEVELS.map(k=>`<button data-n="${k}">${k===10?"🔥 "+L().hard+" · ":""}${L().pairs(k)}</button>`).join("")}</div>
+      <span class="spacer"></span><span class="pill"><span aria-hidden="true">🔄</span><span class="mm-vh">${L().moves}:</span> <span id="mmMoves"></span></span><span class="pill"><span aria-hidden="true">⏱️</span><span class="mm-vh">${L().time}:</span> <span id="mmTime"></span></span><span class="pill"><span aria-hidden="true">✅</span><span class="mm-vh">${L().found}:</span> <span id="mmFound"></span></span></div>
+      <div id="mmPlay"><div class="mm-grid" id="mmGrid"></div><p class="mm-vh" id="mmSay" role="status"></p><div class="mm-fact" id="mmFact" role="status" aria-live="polite"></div></div>
       <div id="mmEnd" hidden></div>`;
     el.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{n=+b.dataset.n;start();});
     function start(){
       if(!LEVELS.includes(n)) n=kids?6:8;
       const ps=WQ.shuffle(P.map((_,i)=>i)).slice(0,n);
       deck=WQ.shuffle(ps.flatMap(p=>[{p,s:0,m:false},{p,s:1,m:false}]));
-      clearTimeout(wait);wait=null;up=[];moves=0;t0=0;tEnd=0;last=-1;done=false;render();
+      clearTimeout(wait);wait=null;clearTimeout(endT);endT=null;up=[];moves=0;t0=0;tEnd=0;last=-1;done=false;focusEnd=false;render();
     }
-    function label(d,i){const p=P[d.p];return d.m||up.includes(i)?`${d.s?L().prod:L().waste}: ${d.s?pName(p):wName(p)}`:`${L().card} ${i+1}, ${L().down}`;}
+    const said=d=>{const p=P[d.p];return `${d.s?L().prod:L().waste}: ${d.s?pName(p):wName(p)}`;};
     function render(){
       el.querySelectorAll("[data-n]").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.n===n));
       $("#mmPlay").hidden=done;$("#mmEnd").hidden=!done;stats();
       if(done) return showEnd();
       $("#mmGrid").innerHTML=deck.map((d,i)=>{const p=P[d.p],w=!d.s;
-        return `<button class="mm-card${d.m||up.includes(i)?" up":""}${d.m?" got":""}" data-i="${i}" aria-label="${WQ.esc(label(d,i))}"><span class="mm-in">
-        <span class="mm-f mm-back" aria-hidden="true"><span class="mm-logo">♻️</span></span>
-        <span class="mm-f mm-face ${w?"w":"p"}" aria-hidden="true"><span class="mm-k">${w?L().waste:L().prod}</span><span class="mm-em${w&&p[0]==="litmus"?" purple":""}">${w?p[1]:p[4]}</span><span class="mm-nm">${w?wName(p):pName(p)}</span></span></span></button>`;}).join("");
+        return `<button class="mm-card${d.m||up.includes(i)?" up":""}${d.m?" got":""}" data-i="${i}"><span class="mm-in">
+        <span class="mm-f mm-back"><span class="mm-logo" aria-hidden="true">♻️</span><span class="mm-vh">${L().card} ${i+1}, ${L().down}</span></span>
+        <span class="mm-f mm-face ${w?"w":"p"}"><span class="mm-k">${w?L().waste:L().prod}</span><span class="mm-em${w&&p[0]==="litmus"?" purple":""}" aria-hidden="true">${w?p[1]:p[4]}</span><span class="mm-nm">${WQ.esc(w?wName(p):pName(p))}</span><span class="mm-vh mm-gt">, ${L().got}</span></span></span></button>`;}).join("");
       $("#mmGrid").querySelectorAll(".mm-card").forEach(b=>b.onclick=()=>flip(+b.dataset.i));
       fit();showFact();
     }
     function paint(i){const b=$(`.mm-card[data-i="${i}"]`),d=deck[i];if(!b)return;
-      b.classList.toggle("up",d.m||up.includes(i));b.classList.toggle("got",d.m);b.setAttribute("aria-label",label(d,i));}
+      b.classList.toggle("up",d.m||up.includes(i));b.classList.toggle("got",d.m);}
     function stats(){$("#mmMoves").textContent=moves;$("#mmTime").textContent=mmss(elapsed());$("#mmFound").textContent=`${deck.filter(d=>d.m).length/2}/${n}`;}
     function showFact(){
       const f=$("#mmFact");if(!f)return;
       if(last<0){f.className="mm-fact";f.innerHTML=`<p>💡 ${L().hint}</p>`;return;}
       const p=P[last];f.className="mm-fact ok";
-      f.innerHTML=`<h3>✅ ${L().match} ${p[1]} ${WQ.esc(wName(p))} → ${p[4]} ${WQ.esc(pName(p))}</h3><p>${WQ.esc(fact(p))}</p><a href="#/lab/${p[0]}">${L().lab}</a>`;
+      f.innerHTML=`<h2>✅ ${L().match} <span aria-hidden="true">${p[1]}</span> ${WQ.esc(wName(p))} → <span aria-hidden="true">${p[4]}</span> ${WQ.esc(pName(p))}</h2><p>${WQ.esc(fact(p))}</p><a href="#/lab/${p[0]}">${L().lab}</a>`;
     }
     function unflip(){clearTimeout(wait);wait=null;const ids=up;up=[];ids.forEach(paint);}
     function flip(i){
@@ -156,25 +162,25 @@ WQ.registerGame("match",{order:2,kind:"game",icon:"🃏",ages:"7+",
       const d=deck[i]; if(d.m||up.includes(i))return;
       if(!t0)t0=Date.now();
       up.push(i);paint(i);
-      if(up.length<2)return;
+      if(up.length<2){say(said(d));return;}
       moves++;const [a,b]=up.map(k=>deck[k]);
       if(a.p===b.p){
         a.m=b.m=true;const ids=up;up=[];ids.forEach(k=>{paint(k);WQ.anim($(`.mm-card[data-i="${k}"]`),"pop");});
-        last=a.p;WQ.beep(true);showFact();
-        if(deck.every(x=>x.m)){done=true;tEnd=Date.now();
-          const stars=moves<=Math.round(n*1.75)?3:moves<=Math.round(n*2.5)?2:1;WQ.best("match"+n,stars);
-          setTimeout(()=>{if(!el.isConnected)return;if(!WQ.award("match"))WQ.confetti();render();},900);}
-      }else wait=setTimeout(()=>{if(el.isConnected)unflip();},1000);
+        last=a.p;WQ.beep(true);say(said(d));showFact();
+        if(deck.every(x=>x.m)){done=true;tEnd=Date.now();focusEnd=true;WQ.best("match"+n,starsFor());if(!WQ.award("match"))WQ.confetti();
+          endT=setTimeout(()=>{endT=null;render();},1100);}
+      }else{say(`${said(d)}. ${L().miss}`);wait=setTimeout(unflip,1000);}
       stats();
     }
     function showEnd(){
-      const l=L(), stars=moves<=Math.round(n*1.75)?3:moves<=Math.round(n*2.5)?2:1, nx=LEVELS[LEVELS.indexOf(n)+1];
+      const l=L(), stars=starsFor(), nx=LEVELS[LEVELS.indexOf(n)+1];
       const seen=[...new Set(deck.map(d=>d.p))];
-      $("#mmEnd").innerHTML=`<div class="card mm-end"><h2>🎉 ${l.endT}</h2><div class="mm-stars" aria-label="${stars}/3">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
-        <p>${l.endS(moves,mmss(elapsed()))} ${l.best}: ${"⭐".repeat(WQ.best("match"+n))}</p>
-        <h3 style="margin-top:14px">${l.learned}</h3><div class="mm-list">${seen.map(i=>{const p=P[i];return `<div class="mm-li"><b>${p[1]} ${WQ.esc(wName(p))} → ${p[4]} ${WQ.esc(pName(p))}</b><p>${WQ.esc(fact(p))}</p><a href="#/lab/${p[0]}">${l.lab}</a></div>`;}).join("")}</div>
+      $("#mmEnd").innerHTML=`<div class="card mm-end"><h2 tabindex="-1" id="mmEndH">🎉 ${l.endT}</h2><div class="mm-stars" role="img" aria-label="${stars}/3 ${l.stars}">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
+        <p>${l.endS(moves,mmss(elapsed()))} ${l.best}: <span role="img" aria-label="${WQ.best("match"+n)}/3 ${l.stars}">${"⭐".repeat(WQ.best("match"+n))}</span></p>
+        <h3 style="margin-top:14px">${l.learned}</h3><div class="mm-list">${seen.map(i=>{const p=P[i];return `<div class="mm-li"><b><span aria-hidden="true">${p[1]}</span> ${WQ.esc(wName(p))} → <span aria-hidden="true">${p[4]}</span> ${WQ.esc(pName(p))}</b><p>${WQ.esc(fact(p))}</p><a href="#/lab/${p[0]}">${l.lab}</a></div>`;}).join("")}</div>
         <div class="row" style="justify-content:center"><button class="btn" id="mmA">${l.again}</button>${nx?`<button class="btn blue" id="mmN">${l.harder}</button>`:""}<a class="btn alt" href="#/games">${l.map}</a></div></div>`;
       $("#mmA").onclick=start; if($("#mmN")) $("#mmN").onclick=()=>{n=nx;start();};
+      if(focusEnd){focusEnd=false;$("#mmEndH").focus({preventScroll:true});$("#mmEndH").scrollIntoView({block:"nearest"});}
     }
     // pick a column count that keeps rows even and cards >= 70px wide; cap card width at 150px for projectors
     function fit(){
@@ -183,9 +189,9 @@ WQ.registerGame("match",{order:2,kind:"game",icon:"🃏",ages:"7+",
       const c=opts.find(k=>(W-(k-1)*gap)/k>=70)||opts[opts.length-1];
       g.style.setProperty("--c",c);g.style.gap=gap+"px";g.style.maxWidth=(c*150+(c-1)*gap)+"px";
     }
-    const tick=setInterval(()=>{if(el.isConnected&&t0&&!done)stats();},1000);
+    const tick=setInterval(()=>{if(t0&&!done&&$("#mmTime"))stats();},1000);
     window.addEventListener("resize",fit);
     if(relang&&deck.length) render(); else start();
-    return ()=>{clearInterval(tick);window.removeEventListener("resize",fit);if(wait)unflip();};
+    return ()=>{clearInterval(tick);window.removeEventListener("resize",fit);if(wait)unflip();clearTimeout(endT);endT=null;};
   }});
 })();

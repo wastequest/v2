@@ -19,12 +19,12 @@
 const T={
  en:{myth:"Myth",fact:"Fact",hint:"Drag the card left for Myth or right for Fact. You can also use the buttons or the ← → keys.",
   good:["Correct!","Well done!","You got it!","Spot on!"],bad:"Not quite!",itsF:"It's a FACT",itsM:"It's a MYTH",next:"Next →",see:"See my score",
-  endT:"Round complete!",endS:s=>`You got ${s} out of 10 right.`,goal:"Get 8 or more to earn the Myth Buster badge!",review:"Review the cards",
+  endT:"Round complete!",endS:(s,n)=>`You got ${s} out of ${n} right.`,stars:"stars",goal:"Get 8 or more to earn the Myth Buster badge!",review:"Review the cards",
   you:"You said",again:"Play again",map:"All games",best:"Best",
   tip:"Teaching tip: before each swipe, the class votes with thumbs left (myth) or right (fact). Discuss the explanation before moving on."},
  bm:{myth:"Mitos",fact:"Fakta",hint:"Seret kad ke kiri untuk Mitos atau ke kanan untuk Fakta. Anda juga boleh guna butang atau kekunci ← →.",
   good:["Betul!","Syabas!","Tepat sekali!","Hebat!"],bad:"Belum tepat!",itsF:"Ini FAKTA",itsM:"Ini MITOS",next:"Seterusnya →",see:"Lihat markah saya",
-  endT:"Pusingan tamat!",endS:s=>`Anda betul ${s} daripada 10.`,goal:"Dapatkan 8 atau lebih untuk lencana Pembongkar Mitos!",review:"Ulang kaji kad",
+  endT:"Pusingan tamat!",endS:(s,n)=>`Anda betul ${s} daripada ${n}.`,stars:"bintang",goal:"Dapatkan 8 atau lebih untuk lencana Pembongkar Mitos!",review:"Ulang kaji kad",
   you:"Jawapan anda",again:"Main lagi",map:"Semua permainan",best:"Terbaik",
   tip:"Tip pengajaran: sebelum setiap leretan, kelas mengundi dengan ibu jari ke kiri (mitos) atau ke kanan (fakta). Bincangkan penerangan sebelum meneruskan."}
 };
@@ -136,15 +136,16 @@ WQ.css("myth",`
 .my-card.fly{transition:transform .32s ease-in,opacity .32s}
 .my-card.lf{border-color:var(--grass)}.my-card.lm{border-color:var(--red)}
 .my-em{font-size:3.6rem;line-height:1}
-.my-s{font-family:"Baloo 2";font-weight:800;font-size:clamp(1.2rem,3.2vw,1.55rem);line-height:1.25;margin:0}
-.my-stamp{position:absolute;top:16px;font-family:"Baloo 2";font-weight:800;font-size:1.4rem;padding:2px 12px;border:4px solid;border-radius:10px;opacity:0;text-transform:uppercase;pointer-events:none}
+.my-s{font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;font-size:clamp(1.2rem,3.2vw,1.55rem);line-height:1.25;margin:0}
+.my-stamp{position:absolute;top:16px;font-family:"Baloo 2",Nunito,system-ui,sans-serif;font-weight:800;font-size:1.4rem;padding:2px 12px;border:4px solid;border-radius:10px;opacity:0;text-transform:uppercase;pointer-events:none}
 .my-stamp.m{right:16px;color:var(--red);transform:rotate(12deg)}.my-stamp.f{left:16px;color:var(--grass-d);transform:rotate(-12deg)}
 .my-btns{justify-content:center;margin:18px 0 6px}.my-btns .btn{min-width:150px;font-size:1.15rem;padding:13px 22px}
 .my-hint{text-align:center;color:var(--muted);font-weight:600;font-size:.92rem;margin:6px auto;max-width:520px}
 .my-why{cursor:default;touch-action:auto}.my-why.ok{border-color:var(--grass);background:#f2fcef}.my-why.no{border-color:var(--red);background:#fff4f5}
 .my-why h2{font-size:1.6rem}.my-why .tag{font-size:.95rem;padding:4px 12px;align-self:center}
 .my-why p{margin:0;font-weight:600}.my-why .my-q{color:var(--muted);font-style:italic;font-weight:600}
-.my-end{max-width:760px;margin:0 auto;text-align:center}.my-stars{font-size:3rem;letter-spacing:6px}
+.my-end{max-width:760px;margin:0 auto;text-align:center}.my-end h2:focus{outline:none;box-shadow:none}.my-card:focus{outline:none;box-shadow:var(--shadow)}.my-card:focus-visible{border-color:#1a1932}
+.my-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.my-stars{font-size:3rem;letter-spacing:6px}
 .my-rev{display:grid;gap:10px;text-align:left;margin:14px 0;padding:0;list-style:none}
 .my-rev li{background:var(--soft);border-radius:14px;padding:10px 14px;border-left:6px solid var(--grass)}.my-rev li.no{border-left-color:var(--red)}
 .my-rev b{display:block}.my-rev p{margin:4px 0 0;font-size:.92rem}
@@ -158,8 +159,10 @@ WQ.registerGame("myth",{order:5,kind:"game",icon:"🕵️",ages:"7+",
     const L=()=>T[WQ.lang], $=s=>el.querySelector(s), bm=WQ.lang==="bm";
     const st=i=>bm?S[i][4]:S[i][3], why=i=>bm?S[i][6]:S[i][5];
     el.innerHTML=WQ.head("🕵️",this.title,this.desc)+`${WQ.aud==="teacher"?`<p class="note small">${L().tip}</p>`:""}
-      <div class="my-bar"><span class="pill">🃏 <span id="myProg"></span></span><div class="meter my-meter"><i id="myMeter"></i></div><span class="spacer"></span><span class="pill">✅ <span id="myScore"></span></span></div>
+      <div class="my-bar"><span class="pill"><span aria-hidden="true">🃏</span> <span id="myProg"></span></span><div class="meter my-meter" aria-hidden="true"><i id="myMeter"></i></div><span class="spacer"></span><span class="pill"><span aria-hidden="true">✅</span> <span id="myScore"></span></span></div><p class="my-vh" id="mySay" role="status"></p>
       <div id="myPlay"><div class="my-stage" id="myStage"></div><div id="myCtl"></div></div><div id="myEnd" hidden></div>`;
+    let focusCard=false, focusEnd=false;
+    const say=m=>{const s=$("#mySay");if(s)s.textContent=m;};
     function start(){
       const a=WQ.aud==="kids"?"k":WQ.aud==="teens"?"t":"a", pool=S.map((s,i)=>i).filter(i=>S[i][0].includes(a));
       const half=f=>WQ.shuffle(pool.filter(i=>S[i][2]===f)).slice(0,ROUND/2);
@@ -172,39 +175,42 @@ WQ.registerGame("myth",{order:5,kind:"game",icon:"🕵️",ages:"7+",
       if(done) return showEnd();
       const i=deck[idx], l=L();
       if(phase==="ask"){
-        $("#myStage").innerHTML=`<div class="my-card" id="myCard" role="group" aria-label="${WQ.esc(st(i))}"><span class="my-stamp f" id="myStF">${l.fact}</span><span class="my-stamp m" id="myStM">${l.myth}</span>
+        $("#myStage").innerHTML=`<div class="my-card" id="myCard" role="group" tabindex="-1" aria-label="${WQ.esc(st(i))}"><span class="my-stamp f" id="myStF">${l.fact}</span><span class="my-stamp m" id="myStM">${l.myth}</span>
           <div class="my-em" aria-hidden="true">${S[i][1]}</div><p class="my-s">${WQ.esc(st(i))}</p></div>`;
         $("#myCtl").innerHTML=`<div class="row my-btns"><button class="btn red" id="myM">👈 ${l.myth}</button><button class="btn" id="myF">${l.fact} 👉</button></div><p class="my-hint">${l.hint}</p>`;
         $("#myM").onclick=()=>answer(0);$("#myF").onclick=()=>answer(1);
         drag($("#myCard"));
+        if(focusCard){focusCard=false;$("#myCard").focus({preventScroll:true});}
       }else{
         const ok=ans[idx]===S[i][2], g=l.good;
-        $("#myStage").innerHTML=`<div class="my-card my-why ${ok?"ok":"no"}" role="status" aria-live="polite"><h2>${ok?"✅ "+g[idx%g.length]:"❌ "+l.bad}</h2>
+        $("#myStage").innerHTML=`<div class="my-card my-why ${ok?"ok":"no"}"><h2>${ok?"✅ "+g[idx%g.length]:"❌ "+l.bad}</h2>
           <span class="tag ${S[i][2]?"go":"red"}">${S[i][2]?l.itsF:l.itsM}</span><p class="my-q">“${WQ.esc(st(i))}”</p><p>${WQ.esc(why(i))}</p></div>`;
         $("#myCtl").innerHTML=`<div class="row my-btns"><button class="btn blue" id="myN">${idx+1<deck.length?l.next:l.see}</button></div>`;
-        $("#myN").onclick=next;$("#myN").focus({preventScroll:true});
+        $("#myN").onclick=next;$("#myN").focus({preventScroll:true});$("#myN").scrollIntoView({block:"nearest"});
       }
     }
     function answer(f){
       if(phase!=="ask"||done||flyT) return;
       const i=deck[idx], ok=f===S[i][2], c=$("#myCard");
       ans[idx]=f; if(ok) score++; phase="why"; WQ.beep(ok);
+      say(`${ok?L().good[idx%L().good.length]:L().bad} ${S[i][2]?L().itsF:L().itsM}. ${why(i)}`);
       if(c){c.classList.remove("drag","snap");c.classList.add("fly",f?"lf":"lm");c.style.transform=`translateX(${f?130:-130}%) rotate(${f?24:-24}deg)`;c.style.opacity="0";}
       flyT=setTimeout(()=>{flyT=null;if(el.isConnected)render();},c?300:0);
     }
     function next(){
       if(phase!=="why") return; idx++; phase="ask";
-      if(idx>=deck.length){done=true;WQ.best("myth",score);if(score>=8){if(!WQ.award("myth"))WQ.confetti();}}
+      if(idx>=deck.length){done=true;focusEnd=true;WQ.best("myth",score);if(score>=8){if(!WQ.award("myth"))WQ.confetti();}}else focusCard=true;
       render();
     }
     function showEnd(){
       const l=L(), stars=score>=9?3:score>=7?2:1;
-      $("#myEnd").innerHTML=`<div class="card my-end"><h2>${l.endT}</h2><div class="my-stars" aria-label="${stars}/3">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
-        <p><b>${l.endS(score)}</b> ${l.best}: ${WQ.best("myth")}/10</p>${score<8?`<p class="note warn">${l.goal}</p>`:""}
+      $("#myEnd").innerHTML=`<div class="card my-end"><h2 tabindex="-1" id="myEndH">${l.endT}</h2><div class="my-stars" role="img" aria-label="${stars}/3 ${l.stars}">${"⭐".repeat(stars)}${"☆".repeat(3-stars)}</div>
+        <p><b>${l.endS(score,deck.length)}</b> ${l.best}: ${WQ.best("myth")}/${ROUND}</p>${score<8?`<p class="note warn">${l.goal}</p>`:""}
         <h3 style="margin-top:14px">${l.review}</h3><ul class="my-rev">${deck.map((i,k)=>{const ok=ans[k]===S[i][2];
-          return `<li class="${ok?"":"no"}"><b>${ok?"✅":"❌"} ${S[i][1]} ${WQ.esc(st(i))}</b><p><span class="tag ${S[i][2]?"go":"red"}">${S[i][2]?l.itsF:l.itsM}</span> ${WQ.esc(why(i))}</p>${ok?"":`<p class="small muted">${l.you}: ${ans[k]?l.fact:l.myth}</p>`}</li>`;}).join("")}</ul>
+          return `<li class="${ok?"":"no"}"><b>${ok?"✅":"❌"} <span aria-hidden="true">${S[i][1]}</span> ${WQ.esc(st(i))}</b><p><span class="tag ${S[i][2]?"go":"red"}">${S[i][2]?l.itsF:l.itsM}</span> ${WQ.esc(why(i))}</p>${ok?"":`<p class="small muted">${l.you}: ${ans[k]?l.fact:l.myth}</p>`}</li>`;}).join("")}</ul>
         <div class="row" style="justify-content:center"><button class="btn" id="myA">${l.again}</button><a class="btn alt" href="#/games">${l.map}</a></div></div>`;
       $("#myA").onclick=start;
+      if(focusEnd){focusEnd=false;$("#myEndH").focus({preventScroll:true});$("#myEndH").scrollIntoView({block:"nearest"});}
     }
     // swipe with Pointer Events: tilt + coloured border + stamp while dragging; release past the threshold to answer
     function drag(c){
@@ -218,7 +224,7 @@ WQ.registerGame("myth",{order:5,kind:"game",icon:"🕵️",ages:"7+",
         else{c.classList.add("snap");dx=0;set();}};
       c.addEventListener("pointerup",end);c.addEventListener("pointercancel",end);
     }
-    const key=e=>{if(phase!=="ask"||done||e.target.closest&&e.target.closest("input,textarea,select"))return;
+    const key=e=>{if(phase!=="ask"||done||e.ctrlKey||e.metaKey||e.altKey||e.target.closest&&e.target.closest("input,textarea,select"))return;
       if(e.key==="ArrowLeft"){e.preventDefault();answer(0);}else if(e.key==="ArrowRight"){e.preventDefault();answer(1);}};
     document.addEventListener("keydown",key);
     if(relang&&deck.length) render(); else start();

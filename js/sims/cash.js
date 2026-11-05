@@ -19,7 +19,7 @@ const PRODUCTS = [
  { id:"planter", e:"🪴", need:{bottles:0.1},           cost:5,  units:3,  price:8,  demand:[1,4],  kids:true,  name:{en:"Self-watering planter",bm:"Pasu siram sendiri"}, buy:{en:"soil, seeds, cotton wick",bm:"tanah, benih, sumbu kapas"} },
  { id:"brick",   e:"🧱", need:{wrappers:0.6,bottles:0.07}, cost:0, units:2, price:2, demand:[0,3], kids:true,  name:{en:"Eco-brick",bm:"Eko-bata"}, buy:{en:"nothing",bm:"tiada"} },
  { id:"tote",    e:"👜", need:{shirts:0.4},            cost:1,  units:2,  price:12, demand:[1,4],  kids:true,  name:{en:"T-shirt tote bag",bm:"Beg tote baju-T"}, buy:{en:"thread",bm:"benang"} },
- { id:"compost", e:"🌱", need:{food:4},                cost:1,  units:2,  price:5,  demand:[1,4],  kids:true,  name:{en:"Compost (3 kg bag)",bm:"Kompos (beg 3 kg)"}, note:{en:"Bagged from a mature pile; today's scraps go into a new pile (compost takes weeks).",bm:"Dibungkus daripada timbunan matang; sisa hari ini masuk ke timbunan baharu (kompos mengambil masa berminggu-minggu)."}, buy:{en:"bags",bm:"beg"} }
+ { id:"compost", e:"🌱", need:{food:4},                cost:1,  units:2,  price:5,  demand:[1,4],  kids:true,  name:{en:"Compost (1 kg bag)",bm:"Kompos (beg 1 kg)"}, note:{en:"Bagged from a mature pile; today's scraps go into a new pile (compost takes weeks, and 4 kg of wet scraps shrink to about 2 kg of compost).",bm:"Dibungkus daripada timbunan matang; sisa hari ini masuk ke timbunan baharu (kompos mengambil masa berminggu-minggu, dan 4 kg sisa basah susut menjadi kira-kira 2 kg kompos)."}, buy:{en:"bags",bm:"beg"} }
 ];
 const SETUP = 150;      // example one-off starter kit (RM): moulds, pot, scale, scissors, compost bin
 const GOAL = { kids: 20, other: 35 }; // badge: finish with profit and at least this many kg diverted from landfill
@@ -72,23 +72,24 @@ WQ.css("cash", `
 .tc-cols{display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr)}
 @media (max-width:800px){.tc-cols{grid-template-columns:1fr}}
 .tc-inv{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-.tc-w{background:var(--soft);border-radius:12px;padding:6px 10px;font-size:.85rem;line-height:1.2}.tc-w b{font-size:1.05rem}
-.tc-w .new{color:var(--grass-d);font-weight:800}.tc-w.per{outline:2px dashed #f2b25c}
+.tc-w{background:var(--soft);border-radius:0;padding:6px 10px;font-size:.85rem;line-height:1.2}.tc-w b{font-size:1.05rem}
+.tc-w .new{color:#14533b;font-weight:800}.tc-w.per{outline:2px dashed #f2b25c}
 .tc-prods{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
-.tc-p{background:#fff;border:3px solid var(--line);border-radius:18px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
+.tc-p{background:#fff;border:3px solid var(--line);border-radius:0;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:.88rem}
 .tc-p h3{font-size:1.05rem;display:flex;gap:6px;align-items:center}.tc-p h3 span{font-size:1.5rem}
 .tc-p .btn{padding:8px 14px;font-size:.95rem;margin-top:auto}
-.tc-p.off{opacity:.55}
+.tc-p.off{background:#f3ebe0;border-style:dashed}.tc-p .why{font-weight:800;color:#7a4400}
 .tc-slots{display:flex;gap:8px;flex-wrap:wrap}
-.tc-slot{min-width:92px;min-height:64px;border:3px dashed var(--line);border-radius:16px;display:grid;place-items:center;font-weight:800;padding:6px 10px;text-align:center;background:#fff}
+.tc-slot{min-width:92px;min-height:64px;border:3px dashed var(--line);border-radius:0;display:grid;place-items:center;font-weight:800;padding:6px 10px;text-align:center;background:#fff}
 .tc-slot.on{border-style:solid;border-color:var(--orange);background:#fff5e6}
-.tc-slot .x{font-size:.75rem;color:var(--red)}
+.tc-slot .x{font-size:.75rem;color:#b4202a}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .tc-kiki{display:flex;gap:10px;align-items:flex-start}.tc-kiki svg{width:48px;flex:none}
 .tc-p .muted{font-size:.8rem}
 .tc-cols>.card{margin:0}
-.tc-big{font-family:"Baloo 2";font-size:1.45rem;white-space:nowrap;margin-top:4px;font-weight:800;line-height:1}
-.tc-kpi{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(125px,1fr))}
-.tc-kpi div{background:var(--soft);border-radius:14px;padding:10px 12px}
+.tc-big{font-family:var(--pix,"Baloo 2");font-size:1.35rem;margin-top:4px;font-weight:800;line-height:1}
+.tc-kpi{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.tc-kpi div{background:var(--soft);border-radius:0;padding:10px 12px}
 `);
 
 WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
@@ -99,14 +100,20 @@ WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
     const $ = s => el.querySelector(s);
     if (!G || G.kids !== kidsMode()) newGame();
     const money = x => G.kids ? `🪙 ${Math.round(x)}` : rm(x);
-    function render() {
+    el.innerHTML = WQ.head("💰", WQ.games.cash.title, WQ.games.cash.desc) + `<div id="tcKpi"></div><div id="tcBody"></div><p class="vh" id="tcLive" role="status" aria-live="polite"></p>`;
+    const say = t => { const l = $("#tcLive"); l.textContent = ""; setTimeout(() => { if (l.isConnected) l.textContent = t; }, 60); };
+    function render(focus) {
+      const a = document.activeElement, was = a && el.contains(a) ? (a.id ? "#" + a.id : a.dataset.add ? `[data-add="${a.dataset.add}"]` : a.dataset.rm ? "[data-rm]" : "") : "";
       const kpis = `<div class="tc-top"><span class="pill">📅 ${tx({en:"Day",bm:"Hari"})} ${Math.min(G.day, DAYS)}/${DAYS}</span><span class="pill">${G.kids ? "" : "💵 "}${money(G.rev - G.cost)}</span><span class="pill">♻️ ${r1(G.div)} kg ${tx({en:"diverted",bm:"dielakkan"})}</span><span class="pill">🗑️ ${r1(G.spoil)} kg ${tx({en:"rotted",bm:"reput"})}</span></div>`;
-      el.innerHTML = WQ.head("💰", WQ.games.cash.title, WQ.games.cash.desc) + kpis + `<div id="tcBody"></div>`;
+      $("#tcKpi").innerHTML = kpis;
       const b = $("#tcBody");
       if (G.phase === "end") b.innerHTML = endView();
       else if (G.phase === "result") b.innerHTML = resultView();
       else b.innerHTML = planView();
       bind();
+      // keep keyboard focus in a sensible place after the re-render
+      const t = focus === "top" ? b.querySelector("h2") : was && (b.querySelector(was + ":not([disabled])") || (/add|rm/.test(was) && (G.slots.length >= SLOTS ? $("#tcRun") : (was === "[data-rm]" && $("[data-rm]")) || $("[data-add]:not([disabled])") || $("#tcRun"))));
+      if (t) { if (t.tagName === "H2") t.tabIndex = -1; t.focus({ preventScroll: focus !== "top" }); }
     }
     function invView() {
       return `<div class="tc-inv">${Object.entries(WASTE).filter(([k]) => prods().some(p => p.need[k])).map(([k, w]) => `<div class="tc-w ${w.per ? "per" : ""}"><span>${w.e} ${tx(w.name)}</span><br><b>${r1(G.inv[k])} kg</b> ${G.phase === "plan" && G.arrived[k] ? `<span class="new">+${G.arrived[k]}</span>` : ""}</div>`).join("")}</div>
@@ -118,22 +125,22 @@ WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
           ${G.day === 1 ? `<div class="note small">${tx({en:"Each day you have 3 time slots. Each slot makes one batch of a product. Products sell to today's customers; extras stay in stock for later days.",bm:"Setiap hari anda ada 3 slot masa. Setiap slot menghasilkan satu kelompok produk. Produk dijual kepada pelanggan hari ini; lebihan disimpan untuk hari berikutnya."})}</div>` : ""}
           <div class="note danger small">⚠️ ${G.kids ? tx({en:"Cutting bottles and cloth needs sharp tools: ask an adult to help with the real thing.",bm:"Memotong botol dan kain memerlukan alat tajam: minta orang dewasa membantu untuk kerja sebenar."}) : tx({en:"Candle-making uses heat and hot wax, and cutting needs sharp tools: adult supervision for the real thing.",bm:"Membuat lilin melibatkan haba dan lilin panas, dan memotong memerlukan alat tajam: perlu pengawasan orang dewasa untuk kerja sebenar."})}</div></div>
         <div class="card stack"><h2>🏭 ${tx({en:"Plan today's production",bm:"Rancang pengeluaran hari ini"})}</h2>
-          <div class="tc-slots" aria-live="polite">${Array.from({ length: SLOTS }, (_, i) => { const id = G.slots[i]; return id ? `<button class="tc-slot on" data-rm="${i}" aria-label="${WQ.esc(tx({en:"Remove",bm:"Buang"}))} ${WQ.esc(tx(P(id).name))}"><span style="font-size:1.6rem">${P(id).e}</span><span class="x">✕ ${tx({en:"remove",bm:"buang"})}</span></button>` : `<div class="tc-slot">⏱️ ${tx({en:"free",bm:"kosong"})}</div>`; }).join("")}
+          <div class="tc-slots" role="group" aria-label="${WQ.esc(tx({en:"Today's time slots",bm:"Slot masa hari ini"}))}">${Array.from({ length: SLOTS }, (_, i) => { const id = G.slots[i]; return id ? `<button class="tc-slot on" data-rm="${i}" aria-label="${WQ.esc(tx({en:"Remove",bm:"Buang"}))} ${WQ.esc(tx(P(id).name))}"><span style="font-size:1.6rem" aria-hidden="true">${P(id).e}</span><span class="x" aria-hidden="true">✕ ${tx({en:"remove",bm:"buang"})}</span></button>` : `<div class="tc-slot"><span aria-hidden="true">⏱️</span> ${tx({en:"free",bm:"kosong"})}</div>`; }).join("")}
             <button class="btn" id="tcRun">▶ ${tx({en:"Run the day",bm:"Jalankan hari"})}</button></div>
-          <div class="tc-prods">${prods().map(p => { const m = G.market[p.id], ok = canMake(p.id);
+          <div class="tc-prods">${prods().map(p => { const m = G.market[p.id], ok = canMake(p.id), why = ok ? "" : G.slots.length >= SLOTS ? tx({en:"All 3 slots are used",bm:"Ketiga-tiga slot sudah digunakan"}) : tx({en:"Not enough waste",bm:"Sisa tidak mencukupi"});
             return `<div class="tc-p ${ok ? "" : "off"}"><h3><span>${p.e}</span>${tx(p.name)}</h3>${p.note ? `<div class="muted">${tx(p.note)}</div>` : ""}
               <div>🧺 ${tx({en:"Needs",bm:"Perlu"})}: ${Object.entries(p.need).map(([k, kg]) => `${WASTE[k].e} ${kg} kg`).join(" + ")}</div>
               ${G.kids ? "" : `<div>🛒 ${tx({en:"Buy",bm:"Beli"})}: ${rm(p.cost)} <span class="muted">(${tx(p.buy)})</span></div>`}
               <div>📦 ${tx({en:"Makes",bm:"Hasil"})} ${p.units} · ${G.kids ? "🪙" : "🏷️"} ${G.kids ? m.price : rm(m.price)} ${tx({en:"each",bm:"seunit"})}${m.price > p.price ? " 📈" : m.price < p.price ? " 📉" : ""}</div>
               <div>🙋 ${tx({en:"Customers today",bm:"Pelanggan hari ini"})}: <b>${m.demand}</b> · ${tx({en:"in stock",bm:"dalam stok"})}: ${G.stock[p.id]}</div>
-              <button class="btn ${ok ? "" : "alt"}" data-add="${p.id}" ${ok ? "" : "disabled"}>＋ ${tx({en:"Make a batch",bm:"Buat satu kelompok"})}</button></div>`; }).join("")}</div>
+              ${why ? `<div class="why">⛔ ${why}</div>` : ""}<button class="btn ${ok ? "" : "alt"}" data-add="${p.id}" ${ok ? "" : "disabled"} aria-label="${WQ.esc(tx({en:"Make a batch of",bm:"Buat satu kelompok"}) + " " + tx(p.name))}">＋ ${tx({en:"Make a batch",bm:"Buat satu kelompok"})}</button></div>`; }).join("")}</div>
         </div></div>`;
     }
     function resultView() {
       const r = G.last, lines = Object.keys({ ...r.made, ...r.sold }).map(id => `<tr><td>${P(id).e} ${tx(P(id).name)}</td><td>${r.made[id] || 0}</td><td>${r.sold[id] || 0}</td><td>${G.stock[id]}</td></tr>`).join("");
       const left = PRODUCTS.filter(p => G.stock[p.id] > 0 && (r.made[p.id] || 0) > (r.sold[p.id] || 0)).length;
       return `<div class="card stack"><h2>🌙 ${tx({en:"End of day",bm:"Akhir hari"})} ${G.day}</h2>
-        ${lines ? `<div class="tablewrap"><table class="tbl"><tr><th>${tx({en:"Product",bm:"Produk"})}</th><th>${tx({en:"Made",bm:"Dibuat"})}</th><th>${tx({en:"Sold",bm:"Dijual"})}</th><th>${tx({en:"Stock left",bm:"Baki stok"})}</th></tr>${lines}</table></div>` : `<p class="muted">${tx({en:"Nothing made or sold today.",bm:"Tiada apa dibuat atau dijual hari ini."})}</p>`}
+        ${lines ? `<div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"Made and sold today",bm:"Dibuat dan dijual hari ini"}))}"><table class="tbl"><tr><th>${tx({en:"Product",bm:"Produk"})}</th><th>${tx({en:"Made",bm:"Dibuat"})}</th><th>${tx({en:"Sold",bm:"Dijual"})}</th><th>${tx({en:"Stock left",bm:"Baki stok"})}</th></tr>${lines}</table></div>` : `<p class="muted">${tx({en:"Nothing made or sold today.",bm:"Tiada apa dibuat atau dijual hari ini."})}</p>`}
         <div class="tc-kpi"><div>${tx({en:"Sales",bm:"Jualan"})}<div class="tc-big">${money(r.rev)}</div></div>${G.kids ? "" : `<div>${tx({en:"Materials bought",bm:"Bahan dibeli"})}<div class="tc-big">${rm(r.cost)}</div></div><div>${tx({en:"Profit today",bm:"Untung hari ini"})}<div class="tc-big" style="color:${r.rev - r.cost >= 0 ? "var(--grass-d)" : "var(--red)"}">${rm(r.rev - r.cost)}</div></div>`}
           <div>♻️ ${tx({en:"Waste used",bm:"Sisa digunakan"})}<div class="tc-big">${r1(r.div)} kg</div></div><div>🗑️ ${tx({en:"Rotted → landfill",bm:"Reput → tapak pelupusan"})}<div class="tc-big">${r1(r.spoil)} kg</div></div></div>
         <div class="note tc-kiki">${WQ.MASCOT}<div><b>Kiki:</b> ${tx(r.spoil > 2 ? {en:"Food scraps and peels rot fast. Compost or eco-enzyme keeps them out of landfill.",bm:"Sisa makanan dan kulit buah cepat reput. Kompos atau eko-enzim mengelakkannya dari tapak pelupusan."}
@@ -146,7 +153,7 @@ WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
       const rows = prods().filter(p => G.per[p.id].b).map(p => { const s = G.per[p.id], pr = s.rev - s.cost;
         return `<tr><td>${p.e} ${tx(p.name)}</td><td>${s.b}</td><td>${s.sold}/${s.b * p.units}</td><td>${money(s.rev)}</td>${G.kids ? "" : `<td>${rm(s.cost)}</td><td>${rm(pr)}</td><td>${s.rev ? Math.round(pr / s.rev * 100) + "%" : "–"}</td>`}<td>${r1(s.kg)}</td></tr>`; }).join("");
       const unit = !G.kids ? `<h3>📐 ${tx({en:"Unit economics (at normal prices)",bm:"Ekonomi unit (pada harga biasa)"})}</h3>
-        <div class="tablewrap"><table class="tbl small"><tr><th>${tx({en:"Product",bm:"Produk"})}</th><th>${tx({en:"Revenue / batch",bm:"Hasil / kelompok"})}</th><th>${tx({en:"Materials / batch",bm:"Bahan / kelompok"})}</th><th>${tx({en:"Contribution margin",bm:"Margin sumbangan"})}</th><th>${tx({en:"Margin %",bm:"Margin %"})}</th><th>${tx({en:"RM per kg waste",bm:"RM sekg sisa"})}</th><th>${tx({en:`Batches to recover ${rm(SETUP)} setup`,bm:`Kelompok untuk pulang modal ${rm(SETUP)}`})}</th></tr>
+        <div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"Unit economics",bm:"Ekonomi unit"}))}"><table class="tbl small"><tr><th>${tx({en:"Product",bm:"Produk"})}</th><th>${tx({en:"Revenue / batch",bm:"Hasil / kelompok"})}</th><th>${tx({en:"Materials / batch",bm:"Bahan / kelompok"})}</th><th>${tx({en:"Contribution margin",bm:"Margin sumbangan"})}</th><th>${tx({en:"Margin %",bm:"Margin %"})}</th><th>${tx({en:"RM per kg waste",bm:"RM sekg sisa"})}</th><th>${tx({en:`Batches to recover ${rm(SETUP)} setup`,bm:`Kelompok untuk pulang modal ${rm(SETUP)}`})}</th></tr>
         ${PRODUCTS.map(p => { const rv = p.units * p.price, cm = rv - p.cost, kg = Object.values(p.need).reduce((a, b) => a + b, 0);
           return `<tr><td>${p.e} ${tx(p.name)}</td><td>${rm(rv)}</td><td>${rm(p.cost)}</td><td><b>${rm(cm)}</b></td><td>${Math.round(cm / rv * 100)}%</td><td>${rm(cm / kg)}</td><td>${Math.ceil(SETUP / cm)}</td></tr>`; }).join("")}</table></div>
         <p class="small">${tx({en:`Break-even: a one-off starter kit (moulds, pot, scale, scissors, bin) of ${rm(SETUP)} is recovered when total contribution margin reaches ${rm(SETUP)}. Your 10 days earned ${rm(profit)}, so you ${profit >= SETUP ? "have" : "have not yet"} broken even. Labour time is not costed here; a real business must pay for it too.`,bm:`Titik pulang modal: kit permulaan sekali beli (acuan, periuk, penimbang, gunting, tong) bernilai ${rm(SETUP)} pulang modal apabila jumlah margin sumbangan mencapai ${rm(SETUP)}. 10 hari anda memperoleh ${rm(profit)}, jadi anda ${profit >= SETUP ? "sudah" : "belum"} pulang modal. Kos masa tenaga kerja tidak dikira di sini; perniagaan sebenar perlu membayarnya juga.`})}</p>` : "";
@@ -156,7 +163,7 @@ WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
           <div>♻️ ${tx({en:"Kept out of landfill",bm:"Dielakkan dari tapak pelupusan"})}<div class="tc-big">${r1(G.div)} kg</div></div><div>🗑️ ${tx({en:"Rotted → landfill",bm:"Reput → tapak pelupusan"})}<div class="tc-big">${r1(G.spoil)} kg</div></div><div>📦 ${tx({en:"Unsold items",bm:"Barang tidak terjual"})}<div class="tc-big">${unsold}</div></div></div>
         <div class="note ${win ? "ok" : "warn"}">${win ? tx({en:"You ran a profitable business AND kept waste out of landfill. That is waste-to-wealth!",bm:"Anda menjalankan perniagaan yang menguntungkan DAN mengelakkan sisa ke tapak pelupusan. Itulah sisa kepada kekayaan!"})
           : tx({en:`Badge goal: finish with ${G.kids ? "coins" : "a profit"} and at least ${goal()} kg diverted. Tip: compost uses the most kilograms.`,bm:`Sasaran lencana: tamat dengan ${G.kids ? "syiling" : "untung"} dan sekurang-kurangnya ${goal()} kg dielakkan. Tip: kompos menggunakan paling banyak kilogram.`})}</div>
-        ${rows ? `<div class="tablewrap"><table class="tbl small"><tr><th>${tx({en:"Product",bm:"Produk"})}</th><th>${tx({en:"Batches",bm:"Kelompok"})}</th><th>${tx({en:"Sold",bm:"Dijual"})}</th><th>${tx({en:"Sales",bm:"Jualan"})}</th>${G.kids ? "" : `<th>${tx({en:"Materials",bm:"Bahan"})}</th><th>${tx({en:"Profit",bm:"Untung"})}</th><th>${tx({en:"Margin",bm:"Margin"})}</th>`}<th>kg</th></tr>${rows}</table></div>` : ""}
+        ${rows ? `<div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"Results by product",bm:"Keputusan mengikut produk"}))}"><table class="tbl small"><tr><th>${tx({en:"Product",bm:"Produk"})}</th><th>${tx({en:"Batches",bm:"Kelompok"})}</th><th>${tx({en:"Sold",bm:"Dijual"})}</th><th>${tx({en:"Sales",bm:"Jualan"})}</th>${G.kids ? "" : `<th>${tx({en:"Materials",bm:"Bahan"})}</th><th>${tx({en:"Profit",bm:"Untung"})}</th><th>${tx({en:"Margin",bm:"Margin"})}</th>`}<th>kg</th></tr>${rows}</table></div>` : ""}
         ${unit}
         <h3>💡 ${tx({en:"Lessons",bm:"Pengajaran"})}</h3>
         <ul>${(G.kids ? [
@@ -165,7 +172,7 @@ WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
           {en:"Some products earn lots of coins; others save lots of waste. Both matter!",bm:"Sesetengah produk memberi banyak syiling; yang lain menjimatkan banyak sisa. Kedua-duanya penting!"}] : [
           {en:"Cost vs price: profit = sales − costs. A high price means little if materials eat it up.",bm:"Kos vs harga: untung = jualan − kos. Harga tinggi tidak bermakna jika bahan menghabiskannya."},
           {en:"Demand: making more than customers want leaves unsold stock, which is money tied up.",bm:"Permintaan: membuat lebih daripada kehendak pelanggan meninggalkan stok tidak terjual, iaitu wang yang terikat."},
-          {en:"Value-adding: a 0.4 kg T-shirt becomes a tote worth far more per kg than compost. But compost handles the heavy, perishable waste.",bm:"Nilai tambah: baju-T 0.4 kg menjadi beg tote yang jauh lebih bernilai sekilogram berbanding kompos. Tetapi kompos mengendalikan sisa berat yang mudah reput."},
+          {en:"Value-adding: an old 0.2 kg T-shirt becomes a tote bag worth far more per kg than compost. But compost handles the heavy, perishable waste.",bm:"Nilai tambah: baju-T lama 0.2 kg menjadi beg tote yang jauh lebih bernilai sekilogram berbanding kompos. Tetapi kompos mengendalikan sisa berat yang mudah reput."},
           {en:"Perishable waste must be processed quickly or it is lost to landfill.",bm:"Sisa mudah reput mesti diproses dengan cepat atau ia hilang ke tapak pelupusan."}])
           .map(l => `<li>${tx(l)}</li>`).join("")}</ul>
         <p class="small muted">${tx({en:"Prices are example values for teaching, not market data. Real buy-back rates vary by buyer, place and date: for example, used cooking oil fetched about RM2.50–3.00/kg at Malaysian collection points in 2025–2026. CO₂ savings are not shown because they depend on what each product replaces.",bm:"Harga ialah nilai contoh untuk pengajaran, bukan data pasaran. Kadar belian semula sebenar berbeza mengikut pembeli, tempat dan tarikh: contohnya, minyak masak terpakai dibeli kira-kira RM2.50–3.00/kg di pusat kutipan di Malaysia pada 2025–2026. Penjimatan CO₂ tidak ditunjukkan kerana ia bergantung pada apa yang digantikan oleh setiap produk."})}</p>
@@ -173,14 +180,16 @@ WQ.registerGame("cash", { order: 13, kind: "sim", icon: "💰", ages: "7+",
         <div class="row"><button class="btn" id="tcNew">🔁 ${tx({en:"Play again",bm:"Main lagi"})}</button><a class="btn blue" href="#/labs">🧪 ${tx({en:"Make these for real",bm:"Buat yang sebenar"})}</a><a class="btn alt" href="#/games">${tx({en:"All games",bm:"Semua permainan"})}</a></div></div>`;
     }
     function bind() {
-      el.querySelectorAll("[data-add]").forEach(b => b.onclick = () => { if (canMake(b.dataset.add)) { G.slots.push(b.dataset.add); WQ.beep(true); render(); } });
-      el.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { G.slots.splice(+b.dataset.rm, 1); render(); });
-      if ($("#tcRun")) $("#tcRun").onclick = () => { runDay(); render(); };
+      const slotsTxt = () => `${G.slots.length}/${SLOTS} ${tx({en:"slots used",bm:"slot digunakan"})}`;
+      el.querySelectorAll("[data-add]").forEach(b => b.onclick = () => { const id = b.dataset.add; if (canMake(id)) { G.slots.push(id); WQ.beep(true); render(); say(`＋ ${tx(P(id).name)}. ${slotsTxt()}.`); } });
+      el.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { const id = G.slots.splice(+b.dataset.rm, 1)[0]; render(); say(`✕ ${tx(P(id).name)}. ${slotsTxt()}.`); });
+      if ($("#tcRun")) $("#tcRun").onclick = () => { runDay(); render("top"); const r = G.last;
+        say(`${tx({en:"End of day",bm:"Akhir hari"})} ${G.day}. ${tx({en:"Sales",bm:"Jualan"})} ${money(r.rev)}${G.kids ? "" : `, ${tx({en:"profit today",bm:"untung hari ini"})} ${rm(r.rev - r.cost)}`}. ♻️ ${r1(r.div)} kg, 🗑️ ${r1(r.spoil)} kg.`); };
       if ($("#tcNext")) $("#tcNext").onclick = () => {
         if (G.day < DAYS) nextDay();
         else { G.phase = "end"; const profit = G.rev - G.cost; WQ.best("cash", Math.round(profit)); if (profit > 0 && G.div >= goal()) WQ.award("cash"); }
-        render(); scrollTo(0, 0); };
-      if ($("#tcNew")) $("#tcNew").onclick = () => { newGame(); render(); };
+        scrollTo(0, 0); render("top"); };
+      if ($("#tcNew")) $("#tcNew").onclick = () => { newGame(); scrollTo(0, 0); render("top"); };
     }
     render();
   }});

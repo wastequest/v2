@@ -28,7 +28,7 @@ const ING = [
 const TURN = [[0,{en:"Never",bm:"Tidak pernah"}],[14,{en:"Every 2 weeks",bm:"Setiap 2 minggu"}],[7,{en:"Every week",bm:"Setiap minggu"}],[3,{en:"Every 3 days",bm:"Setiap 3 hari"}]];
 const TA = 30, DAYS = 56, CAP = 30; // ambient °C, days simulated, max pails
 
-let mix = {}, water = 0, turn = 7, res = null, shown = 0, timer = null;
+let mix = {}, water = 0, turn = 7, res = null, shown = 0, timer = null, hist = [];
 
 function stats() {
   let wet = 0, dry = 0, C = 0, N = 0, h2o = water, S0 = 0, browns = 0;
@@ -63,16 +63,17 @@ function simulate() {
   let out = "good";
   if (s.m > 0.66 || wetDays > 20) out = "wet";
   else if (anaer >= 18) out = "smelly";
-  else if (done < 0.5 || s.cn > 45) out = s.m < 0.38 ? "dry" : "slow";
+  else if (s.m < 0.4) out = "dry";                       // same limits as the gauges and Kiki's tips (Rynk et al.: 40–65%, C:N 20–40)
+  else if (done < 0.5 || s.cn > 40) out = "slow";
   else if (s.cn < 20) out = "ammonia";
   return { days, out, cn: s.cn, m0: s.m, maxT, d55, done, anaer, wet: s.wet };
 }
 
 const OUT = {
- good:{i:"🌟",c:"ok",t:{en:"Rich, crumbly compost!",bm:"Kompos subur dan rapuh!"},d:{en:"Dark brown, smells like forest soil. Your microbes had the right food, water and air.",bm:"Perang gelap, berbau seperti tanah hutan. Mikrob anda mendapat makanan, air dan udara yang betul."}},
+ good:{i:"🌟",c:"ok",t:{en:"Rich, crumbly compost!",bm:"Kompos subur dan gembur!"},d:{en:"Dark brown, smells like forest soil. Your microbes had the right food, water and air.",bm:"Perang gelap, berbau seperti tanah hutan. Mikrob anda mendapat makanan, air dan udara yang betul."}},
  smelly:{i:"🤢",c:"danger",t:{en:"Smelly, anaerobic pile",bm:"Longgokan busuk (anaerobik)"},d:{en:"Oxygen ran out, so microbes that live without air took over. They make rotten-egg and sour smells (hydrogen sulfide, organic acids) and work slowly.",bm:"Oksigen habis, jadi mikrob yang hidup tanpa udara mengambil alih. Mereka menghasilkan bau telur busuk dan masam (hidrogen sulfida, asid organik) dan bekerja perlahan."}},
  wet:{i:"💦",c:"danger",t:{en:"Too wet: soggy and slimy",bm:"Terlalu basah: lembik dan berlendir"},d:{en:"Water filled the air spaces, so air could not get in. The pile turned slimy and smelly.",bm:"Air memenuhi ruang udara, jadi udara tidak dapat masuk. Longgokan menjadi berlendir dan berbau."}},
- dry:{i:"🏜️",c:"warn",t:{en:"Too dry: almost nothing happened",bm:"Terlalu kering: hampir tiada perubahan"},d:{en:"Microbes need water to live and move. Below about 40% moisture they slow right down.",bm:"Mikrob perlukan air untuk hidup dan bergerak. Di bawah kira-kira 40% kelembapan, mereka menjadi sangat perlahan."}},
+ dry:{i:"🏜️",c:"warn",t:{en:"Too dry: the microbes slowed down",bm:"Terlalu kering: mikrob menjadi perlahan"},d:{en:"Microbes need water to live and move. Below about 40% moisture they slow right down, so much of the pile is still raw.",bm:"Mikrob perlukan air untuk hidup dan bergerak. Di bawah kira-kira 40% kelembapan, mereka menjadi sangat perlahan, jadi banyak bahan masih mentah."}},
  slow:{i:"🐌",c:"warn",t:{en:"Too slow: still mostly raw",bm:"Terlalu perlahan: masih banyak bahan mentah"},d:{en:"Too many browns and too little nitrogen, so the microbes are starving for protein. It will take many months.",bm:"Terlalu banyak bahan perang dan terlalu sedikit nitrogen, jadi mikrob kekurangan protein. Ia akan mengambil masa berbulan-bulan."}},
  ammonia:{i:"😷",c:"warn",t:{en:"Compost, but it smelled of ammonia",bm:"Jadi kompos, tetapi berbau ammonia"},d:{en:"Too many greens: extra nitrogen escaped as ammonia gas. That smell is lost fertiliser. Add more browns next time.",bm:"Terlalu banyak bahan hijau: nitrogen berlebihan terlepas sebagai gas ammonia. Bau itu ialah baja yang hilang. Tambah lebih banyak bahan perang lain kali."}}
 };
@@ -99,23 +100,25 @@ WQ.css("compost", `
 .cm-wrap{display:grid;gap:16px;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
 @media (max-width:760px){.cm-wrap{grid-template-columns:1fr}}
 .cm-ings{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}
-.cm-ing{position:relative;display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--line);border-radius:16px;padding:8px 10px;font-weight:800;text-align:left;touch-action:none;user-select:none;min-height:56px;line-height:1.15}
+.cm-ing{position:relative;display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--line);border-radius:0;padding:8px 10px;font-weight:800;text-align:left;touch-action:none;user-select:none;min-height:56px;line-height:1.15}
 .cm-ing.g{border-color:#9fd98f}.cm-ing.b{border-color:#d9b88f}
 .cm-ing .e{font-size:1.7rem}.cm-ing .n{font-size:.9rem;flex:1}
-.cm-ing .c{position:absolute;top:-8px;right:-6px;background:var(--ink);color:#fff;border-radius:999px;font-size:.75rem;padding:1px 7px}
+.cm-ing .c{position:absolute;top:-8px;right:-6px;background:var(--ink);color:#fff;border-radius:0;font-size:.75rem;padding:1px 7px}
 .cm-ghost{position:fixed;z-index:70;font-size:2.4rem;pointer-events:none;transform:translate(-50%,-50%)}
 .cm-bin{position:relative;text-align:center}
 .cm-bin svg{width:100%;max-width:320px;height:auto}
 .cm-bin.hover svg{transform:scale(1.04)}
-.cm-meter{position:relative;height:16px;border-radius:999px;background:linear-gradient(90deg,#f2c14e 0,#f2c14e var(--a),#7bd36a var(--a),#7bd36a var(--b),#5aa8e6 var(--b))}
-.cm-meter i{position:absolute;top:-5px;width:6px;height:26px;border-radius:3px;background:var(--ink);transform:translateX(-50%)}
+.cm-meter{position:relative;height:16px;border-radius:0;background:linear-gradient(90deg,#f2c14e 0,#f2c14e var(--a),#7bd36a var(--a),#7bd36a var(--b),#5aa8e6 var(--b))}
+.cm-meter i{position:absolute;top:-5px;width:6px;height:26px;border-radius:0;background:var(--ink);transform:translateX(-50%)}
 .cm-lbl{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);font-weight:700}
 .cm-ctl label{font-weight:800;display:block;margin-top:10px}
-.cm-ctl input[type=range]{width:100%;accent-color:var(--blue)}
-.cm-seg{display:flex;flex-wrap:wrap;gap:6px}.cm-seg button{background:#fff;border:3px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:800}
+.cm-ctl input[type=range]{width:100%;height:32px;accent-color:var(--blue)}
+@media (max-width:760px){.cm-ing{touch-action:pan-y}}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cm-seg{display:flex;flex-wrap:wrap;gap:6px}.cm-seg button{background:#fff;border:3px solid var(--line);border-radius:0;padding:6px 12px;font-weight:800}
 .cm-seg button[aria-pressed=true]{border-color:var(--blue);background:#eaf2ff}
 .cm-chart svg{width:100%;height:auto;display:block}
-.cm-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;font-weight:700}.cm-leg span:before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;background:var(--c);vertical-align:-1px}
+.cm-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;font-weight:700}.cm-leg span:before{content:"";display:inline-block;width:12px;height:12px;border-radius:0;margin-right:5px;background:var(--c);vertical-align:-1px}
 .cm-kiki{display:flex;gap:12px;align-items:flex-start}.cm-kiki svg{width:62px;flex:none}
 .cm-kiki ul{margin:0;padding-left:18px}
 .cm-out{font-size:1.05rem}.cm-out .big{font-size:2.6rem;line-height:1}
@@ -135,7 +138,7 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
       <div class="cm-wrap">
         <div class="card stack">
           <h2>1. ${tx({en:"Fill your bin",bm:"Isi tong anda"})}</h2>
-          <p class="small muted">${tx({en:`Tap or drag. One tap = one pail (about ${PAIL} kg).`,bm:`Tekan atau seret. Satu tekan = satu baldi (kira-kira ${PAIL} kg).`})}</p>
+          <p class="small muted" id="cmHow">${tx({en:`Tap or drag into the bin. One tap = one pail (about ${PAIL} kg).`,bm:`Tekan atau seret ke dalam tong. Satu tekan = satu baldi (kira-kira ${PAIL} kg).`})}</p>
           <h3 class="small">🟩 ${tx({en:"Greens (nitrogen-rich)",bm:"Bahan hijau (kaya nitrogen)"})}</h3><div class="cm-ings" id="cmG"></div>
           <h3 class="small">🟫 ${tx({en:"Browns (carbon-rich)",bm:"Bahan perang (kaya karbon)"})}</h3><div class="cm-ings" id="cmB"></div>
           <div class="note warn small">🍗🧀 ${tx({en:"No meat, fish, bones, dairy or oily food in a home compost bin: they smell, attract rats, flies and stray animals, and can carry germs (such as Salmonella) that a small home pile may not get hot enough to kill. Bokashi can handle them (see below).",bm:"Jangan masukkan daging, ikan, tulang, tenusu atau makanan berminyak ke dalam tong kompos rumah: ia berbau, menarik tikus, lalat dan haiwan liar, serta boleh membawa kuman (seperti Salmonella) yang mungkin tidak terbunuh kerana longgokan kecil di rumah tidak cukup panas. Bokashi boleh mengendalikannya (lihat di bawah)."})}</div>
@@ -145,21 +148,28 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
           <div id="cmGauges"></div>
           <label for="cmW">💧 ${tx({en:"Water added",bm:"Air ditambah"})}: <span id="cmWv"></span> L</label>
           <input type="range" id="cmW" min="0" max="30" step="1">
-          <label>🔄 ${tx({en:"Turn the pile",bm:"Gaul longgokan"})}</label>
-          <div class="cm-seg" id="cmT" role="group" aria-label="${WQ.esc(tx({en:"Turning frequency",bm:"Kekerapan menggaul"}))}"></div>
-          <div class="row"><button class="btn" id="cmGo">▶ ${tx({en:"Simulate 8 weeks",bm:"Simulasi 8 minggu"})}</button><button class="btn alt" id="cmClr">🗑️ ${tx({en:"Empty bin",bm:"Kosongkan tong"})}</button></div>
+          <p id="cmTl" style="font-weight:800;margin-top:10px">🔄 ${tx({en:"Turn the pile",bm:"Gaul longgokan"})}</p>
+          <div class="cm-seg" id="cmT" role="group" aria-labelledby="cmTl"></div>
+          <div class="row"><button class="btn" id="cmGo">▶ ${tx({en:"Simulate 8 weeks",bm:"Simulasi 8 minggu"})}</button><button class="btn alt" id="cmUndo">↩️ ${tx({en:"Undo",bm:"Buat asal"})}</button><button class="btn alt" id="cmClr">🗑️ ${tx({en:"Empty bin",bm:"Kosongkan tong"})}</button></div>
         </div>
       </div>
-      <div class="card cm-kiki" id="cmKiki" aria-live="polite"></div>
+      <div class="card cm-kiki" id="cmKiki"></div><p class="vh" id="cmLive" role="status" aria-live="polite"></p>
       <div class="card stack" id="cmRes" hidden></div>
       <div id="cmAdv"></div>`;
-    const ingBtn = i => `<button class="cm-ing ${i.g ? "g" : "b"}" data-ing="${i.id}"><span class="e" aria-hidden="true">${i.e}</span><span class="n">${tx(i.name)}</span><span class="c" id="cmc-${i.id}"></span></button>`;
+    const ingBtn = i => `<button class="cm-ing ${i.g ? "g" : "b"}" data-ing="${i.id}" aria-describedby="cmHow"><span class="e" aria-hidden="true">${i.e}</span><span class="n">${tx(i.name)}</span><span class="c" id="cmc-${i.id}"></span></button>`;
+    const pails = n => `${n} ${tx({en: n === 1 ? "pail" : "pails",bm:"baldi"})}`;
+    const say = t => { const l = $("#cmLive"); l.textContent = ""; setTimeout(() => { if (l.isConnected) l.textContent = t; }, 60); };
+    const changed = () => { stop(); res = null; refresh(); };
+    let kikiH = "";
     $("#cmG").innerHTML = ING.filter(i => i.g).map(ingBtn).join("");
     $("#cmB").innerHTML = ING.filter(i => !i.g).map(ingBtn).join("");
     $("#cmT").innerHTML = TURN.map(([v, n]) => `<button data-t="${v}">${tx(n)}</button>`).join("");
     $("#cmW").value = water;
 
-    const add = id => { const tot = Object.values(mix).reduce((a, b) => a + b, 0); if (tot >= CAP) { WQ.toast(tx({en:"The bin is full!",bm:"Tong sudah penuh!"})); return; } mix[id] = (mix[id] || 0) + 1; res = null; WQ.anim($("#cmBin"), "pop"); refresh(); };
+    const add = id => { const tot = Object.values(mix).reduce((a, b) => a + b, 0), i = ING.find(x => x.id === id);
+      if (tot >= CAP) { const t = tx({en:"The bin is full!",bm:"Tong sudah penuh!"}); WQ.toast(t); say(t); return; }
+      mix[id] = (mix[id] || 0) + 1; hist.push(id); WQ.anim($("#cmBin"), "pop"); changed();
+      say(`${tx(i.name)}: ${pails(mix[id])}. ${tx({en:"Bin",bm:"Tong"})} ${tot + 1}/${CAP}.`); };
     // pointer: tap adds; drag onto the bin adds
     el.querySelectorAll(".cm-ing").forEach(b => {
       let sx, sy, ghost = null, moved = false;
@@ -178,9 +188,11 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
       b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up);
       b.onclick = e => { if (e.detail === 0) add(b.dataset.ing); }; // keyboard / assistive tech
     });
-    $("#cmW").oninput = e => { water = +e.target.value; res = null; refresh(); };
-    el.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { turn = +b.dataset.t; res = null; refresh(); });
-    $("#cmClr").onclick = () => { mix = {}; water = 0; res = null; $("#cmW").value = 0; stop(); refresh(); };
+    $("#cmW").oninput = e => { water = +e.target.value; changed(); };
+    el.querySelectorAll("[data-t]").forEach(b => b.onclick = () => { turn = +b.dataset.t; changed(); });
+    $("#cmClr").onclick = () => { mix = {}; hist = []; water = 0; $("#cmW").value = 0; changed(); say(tx({en:"The bin is empty.",bm:"Tong sudah kosong."})); };
+    $("#cmUndo").onclick = () => { const id = hist.pop(); if (!id || !mix[id]) return; if (!--mix[id]) delete mix[id]; changed();
+      say(`↩️ ${tx(ING.find(x => x.id === id).name)}: ${pails(mix[id] || 0)}.`); };
     $("#cmGo").onclick = () => {
       const s = stats(); if (s.wet < 10) { WQ.beep(false); WQ.anim($("#cmBin"), "shake"); refresh(); return; }
       res = simulate(); shown = 0; run();
@@ -188,11 +200,12 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
     const run = () => {
       stop();
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) { shown = DAYS; finish(); return; }
+      say(tx({en:"Simulating 8 weeks…",bm:"Menyimulasikan 8 minggu…"}));
       timer = setInterval(() => { if (!el.isConnected) return stop(); shown++; drawRes(); if (shown >= DAYS) { stop(); finish(); } }, 70);
       drawRes();
     };
-    const stop = () => { if (timer) { clearInterval(timer); timer = null; } };
-    const finish = () => { drawRes(); if (res.out === "good") { WQ.beep(true); WQ.award("compost"); } else WQ.beep(false); };
+    const stop = () => { if (timer) { clearInterval(timer); timer = null; } document.querySelectorAll(".cm-ghost").forEach(g => g.remove()); };
+    const finish = () => { drawRes(); const o = OUT[res.out]; say(`${tx(o.t)} ${tx(o.d)}`); if (res.out === "good") { WQ.beep(true); WQ.award("compost"); } else WQ.beep(false); };
 
     function binSVG(s, day) {
       const fill = Math.min(1, s.wet / (CAP * PAIL)), h = 30 + fill * 110, top = 190 - h;
@@ -208,7 +221,7 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
         ${!day ? emo.map((e, k) => `<text x="${50 + (k % 7) * 22}" y="${top + 26 + Math.floor(k / 7) * 26}" font-size="20">${e}</text>`).join("") : ""}
         <rect x="20" y="30" width="200" height="16" rx="8" fill="#2e7d23"/>
         <g fill="#2e7d23">${[60, 100, 140, 180].map(x => `<circle cx="${x}" cy="215" r="5"/>`).join("")}</g>
-        ${day ? `<g><rect x="214" y="70" width="14" height="110" rx="7" fill="#fff" stroke="#55657a" stroke-width="2"/><rect x="217" y="${178 - Math.min(104, (hotT - 20) * 2)}" width="8" height="${Math.min(104, (hotT - 20) * 2)}" rx="4" fill="#d62839"/><circle cx="221" cy="186" r="9" fill="#d62839"/></g>` : ""}
+        ${day ? `<g><rect x="214" y="70" width="14" height="110" rx="7" fill="#fff" stroke="#55657a" stroke-width="2"/><rect x="217" y="${178 - Math.max(0, Math.min(104, (hotT - 20) * 2))}" width="8" height="${Math.max(0, Math.min(104, (hotT - 20) * 2))}" rx="4" fill="#d62839"/><circle cx="221" cy="186" r="9" fill="#d62839"/></g>` : ""}
       </svg>`;
     }
     function gauges(s) {
@@ -232,7 +245,7 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
       const grid = [30, 40, 50, 60, 70].map(t => `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="#dde5ee"/><text x="${L - 6}" y="${y(t) + 4}" text-anchor="end" font-size="12" fill="#55657a">${t}</text>`).join("");
       const weeks = Array.from({ length: 9 }, (_, w) => `<text x="${x(w * 7)}" y="${H - B + 16}" text-anchor="middle" font-size="12" fill="#55657a">${w}</text>`).join("");
       const turns = ds.filter(p => p.turned).map(p => `<text x="${x(p.d)}" y="${H - B - 4}" text-anchor="middle" font-size="13">🔄</text>`).join("");
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${WQ.esc(tx({en:"Temperature over 8 weeks",bm:"Suhu sepanjang 8 minggu"}))}">
+      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${WQ.esc(tx({en:"Temperature over 8 weeks",bm:"Suhu sepanjang 8 minggu"}) + (upto >= DAYS ? `: ${tx({en:"peak",bm:"puncak"})} ${r.maxT.toFixed(0)} °C, ${r.d55} ${tx({en:"day(s) at 55 °C or more",bm:"hari pada 55 °C atau lebih"})}` : ""))}">
         ${bands}${grid}
         <rect x="${L}" y="${y(65)}" width="${W - L - R}" height="${y(55) - y(65)}" fill="none" stroke="#d62839" stroke-dasharray="6 5" stroke-width="2"/>
         <text x="${W - R - 4}" y="${y(65) - 4}" text-anchor="end" font-size="12" fill="#d62839" font-weight="700">55–65 °C</text>
@@ -264,7 +277,8 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
         : res.out === "dry" ? [{en:"Add water: squeeze a handful, a few drops should come out.",bm:"Tambah air: genggam segenggam, beberapa titis air patut keluar."}]
         : res.out === "slow" ? [{en:"Add more greens such as vegetable scraps or coffee grounds.",bm:"Tambah bahan hijau seperti sisa sayur atau hampas kopi."}]
         : [{en:"Add more browns to lock in the nitrogen.",bm:"Tambah bahan perang untuk mengekalkan nitrogen."}];
-      $("#cmKiki").innerHTML = `${WQ.MASCOT}<div><b>Kiki:</b><ul>${list.map(t => `<li>${tx(t)}</li>`).join("")}</ul></div>`;
+      const h = `<div><b>Kiki:</b><ul>${list.map(t => `<li>${tx(t)}</li>`).join("")}</ul></div>`, k = $("#cmKiki");
+      if (kikiH !== h) { kikiH = h; k.innerHTML = WQ.MASCOT + h; }
     }
     function advPanel() {
       if (!adv()) return "";
@@ -273,13 +287,13 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
         <p>${tx({en:"Microbes use carbon (C) for energy and nitrogen (N) to build proteins. They work fastest at about 25–30 parts C to 1 part N. You cannot just average the ratios: each ingredient must be weighted by its dry mass and its carbon and nitrogen content.",bm:"Mikrob menggunakan karbon (C) untuk tenaga dan nitrogen (N) untuk membina protein. Mereka bekerja paling pantas pada kira-kira 25–30 bahagian C kepada 1 bahagian N. Anda tidak boleh sekadar mempuratakan nisbah: setiap bahan mesti diberi pemberat mengikut jisim kering serta kandungan karbon dan nitrogennya."})}</p>
         <p style="text-align:center;font-weight:800">C:N<sub>mix</sub> = Σ (m<sub>i</sub> × (1 − w<sub>i</sub>) × C<sub>i</sub>) ÷ Σ (m<sub>i</sub> × (1 − w<sub>i</sub>) × N<sub>i</sub>)</p>
         <p class="small muted">${tx({en:"m = wet mass, w = moisture fraction, C and N = % of dry mass. Values are typical mid-range figures from Rynk et al. (1992) On-Farm Composting Handbook and Cornell Waste Management Institute; real materials vary widely.",bm:"m = jisim basah, w = pecahan kelembapan, C dan N = % jisim kering. Nilai ialah angka sederhana tipikal daripada Rynk et al. (1992) On-Farm Composting Handbook dan Cornell Waste Management Institute; bahan sebenar sangat berbeza."})}</p>
-        ${rows ? `<div class="tablewrap"><table class="tbl small"><tr><th>${tx({en:"Ingredient",bm:"Bahan"})}</th><th>kg</th><th>w %</th><th>${tx({en:"dry kg",bm:"kg kering"})}</th><th>C %</th><th>N %</th><th>C kg</th><th>N kg</th></tr>${rows}
-          <tr><th colspan="3">${tx({en:"Total",bm:"Jumlah"})}</th><th>${s.dry.toFixed(2)}</th><th></th><th></th><th>${s.C.toFixed(3)}</th><th>${s.N.toFixed(3)}</th></tr></table></div>
+        ${rows ? `<div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"The C:N maths",bm:"Matematik C:N"}))}"><table class="tbl small"><tr><th>${tx({en:"Ingredient",bm:"Bahan"})}</th><th>kg</th><th>w %</th><th>${tx({en:"dry kg",bm:"kg kering"})}</th><th>C %</th><th>N %</th><th>C kg</th><th>N kg</th></tr>${rows}
+          <tr><th colspan="3">${tx({en:"Total",bm:"Jumlah"})}</th><th>${s.dry.toFixed(2)}</th><td></td><td></td><th>${s.C.toFixed(3)}</th><th>${s.N.toFixed(3)}</th></tr></table></div>
           <p><b>C:N = ${s.C.toFixed(3)} ÷ ${s.N.toFixed(3)} = ${s.cn.toFixed(1)} : 1</b> · ${tx({en:"moisture",bm:"kelembapan"})} = ${(s.h2o).toFixed(1)} ÷ ${(s.wet + water).toFixed(1)} = ${(s.m * 100).toFixed(0)}%</p>` : `<p class="muted">${tx({en:"Add ingredients to see the calculation.",bm:"Tambah bahan untuk melihat pengiraan."})}</p>`}
         <p class="small">${tx({en:"Why it matters: below about 20:1 the surplus nitrogen is lost as ammonia (NH₃) gas; above about 40:1 microbes run short of nitrogen and decomposition crawls. Notice that 1 kg of wet vegetable scraps holds only about 0.15 kg of dry matter, while 1 kg of cardboard is over 0.9 kg dry: that is why a little cardboard shifts the ratio a lot.",bm:"Mengapa penting: di bawah kira-kira 20:1, nitrogen berlebihan hilang sebagai gas ammonia (NH₃); di atas kira-kira 40:1, mikrob kekurangan nitrogen dan penguraian menjadi sangat perlahan. Perhatikan bahawa 1 kg sisa sayur basah hanya mengandungi kira-kira 0.15 kg bahan kering, manakala 1 kg kadbod melebihi 0.9 kg kering: itulah sebabnya sedikit kadbod mengubah nisbah dengan banyak."})}</p></div>
       <div class="card stack"><h2>⚖️ ${tx({en:"Hot compost vs bokashi vs vermicompost",bm:"Kompos panas vs bokashi vs vermikompos"})}</h2>
-        <div class="tablewrap"><table class="tbl small">
-          <tr><th></th><th>🔥 ${tx({en:"Hot (aerobic) compost",bm:"Kompos panas (aerobik)"})}</th><th>🪣 Bokashi</th><th>🪱 ${tx({en:"Vermicompost",bm:"Vermikompos"})}</th></tr>
+        <div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"Compost methods compared",bm:"Perbandingan kaedah kompos"}))}"><table class="tbl small">
+          <tr><td></td><th>🔥 ${tx({en:"Hot (aerobic) compost",bm:"Kompos panas (aerobik)"})}</th><th>🪣 Bokashi</th><th>🪱 ${tx({en:"Vermicompost",bm:"Vermikompos"})}</th></tr>
           <tr><th>${tx({en:"Process",bm:"Proses"})}</th><td>${tx({en:"Aerobic microbes; needs oxygen and turning",bm:"Mikrob aerobik; perlukan oksigen dan digaul"})}</td><td>${tx({en:"Anaerobic fermentation by lactic acid bacteria on inoculated bran, in a sealed bucket",bm:"Penapaian anaerobik oleh bakteria asid laktik pada dedak berinokulum, dalam baldi tertutup"})}</td><td>${tx({en:"Earthworms plus microbes; tropical species such as Eudrilus eugeniae",bm:"Cacing tanah dan mikrob; spesies tropika seperti Eudrilus eugeniae"})}</td></tr>
           <tr><th>${tx({en:"Temperature",bm:"Suhu"})}</th><td>55–65 °C</td><td>${tx({en:"Ambient",bm:"Suhu bilik"})}</td><td>${tx({en:"Must stay cool (worms die if the bedding overheats)",bm:"Mesti kekal sejuk (cacing mati jika media terlalu panas)"})}</td></tr>
           <tr><th>${tx({en:"Meat / dairy",bm:"Daging / tenusu"})}</th><td>${tx({en:"Not at home",bm:"Tidak untuk di rumah"})}</td><td>${tx({en:"Yes, small amounts",bm:"Ya, dalam jumlah kecil"})}</td><td>${tx({en:"No",bm:"Tidak"})}</td></tr>
@@ -287,13 +301,14 @@ WQ.registerGame("compost", { order: 11, kind: "sim", icon: "🌱", ages: "7+",
           <tr><th>${tx({en:"Kills weed seeds / pathogens?",bm:"Membunuh biji rumpai / patogen?"})}</th><td>${tx({en:"Yes, if ≥55 °C long enough",bm:"Ya, jika ≥55 °C cukup lama"})}</td><td>${tx({en:"Partly (acidic)",bm:"Sebahagian (berasid)"})}</td><td>${tx({en:"No heat step",bm:"Tiada peringkat haba"})}</td></tr>
           <tr><th>${tx({en:"Best for",bm:"Sesuai untuk"})}</th><td>${tx({en:"Gardens, schools, garden waste",bm:"Taman, sekolah, sisa taman"})}</td><td>${tx({en:"Flats and apartments with all kitchen waste",bm:"Rumah pangsa dan apartmen dengan semua sisa dapur"})}</td><td>${tx({en:"Kitchen scraps, very rich product",bm:"Sisa dapur, hasil sangat subur"})}</td></tr>
         </table></div>
-        <p class="small muted">${tx({en:"Pathogen standard: the US EPA rule (40 CFR 503) requires ≥55 °C for 3 days in an aerated pile, or for 15 days with 5 turnings in a windrow.",bm:"Piawaian patogen: peraturan US EPA (40 CFR 503) memerlukan ≥55 °C selama 3 hari dalam longgokan beraerasi, atau 15 hari dengan 5 kali gaul dalam windrow."})}</p></div>
+        <p class="small muted">${tx({en:"Pathogen standard: the US EPA rule (40 CFR 503) requires ≥55 °C for 3 days in an aerated pile, or for 15 days with 5 turnings in a windrow.",bm:"Piawaian patogen: peraturan US EPA (40 CFR 503) memerlukan ≥55 °C selama 3 hari dalam longgokan beraerasi, atau 15 hari dengan 5 kali gaul dalam longgokan memanjang (windrow)."})}</p></div>
       ${WQ.aud === "teacher" ? `<div class="note small">🧑‍🏫 ${tx({en:"Teaching note: run three groups with the same ingredients but different turning (never / weekly / every 3 days) and compare the curves. Then link to the hands-on compost lab.",bm:"Nota pengajaran: jalankan tiga kumpulan dengan bahan yang sama tetapi kekerapan gaul berbeza (tidak pernah / mingguan / setiap 3 hari) dan bandingkan lengkung. Kemudian hubungkan dengan makmal kompos amali."})}</div>` : ""}`;
     }
     function refresh() {
       const s = stats();
-      ING.forEach(i => { const c = $("#cmc-" + i.id); c.textContent = mix[i.id] || ""; c.hidden = !mix[i.id]; });
-      $("#cmWv").textContent = water;
+      ING.forEach(i => { const c = $("#cmc-" + i.id); c.innerHTML = mix[i.id] ? `${mix[i.id]}<span class="vh"> ${tx({en: mix[i.id] === 1 ? "pail" : "pails",bm:"baldi"})}</span>` : ""; c.hidden = !mix[i.id]; });
+      $("#cmWv").textContent = water; $("#cmW").setAttribute("aria-valuetext", `${water} L` + (s.wet ? `, ${tx({en:"moisture",bm:"kelembapan"})} ${(s.m * 100).toFixed(0)}%` : ""));
+      $("#cmUndo").disabled = !hist.length;
       el.querySelectorAll("[data-t]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.t === turn));
       $("#cmGauges").innerHTML = gauges(s);
       $("#cmAdv").innerHTML = advPanel() + `<p class="row" style="margin-top:16px"><a class="btn blue" href="#/lab/compost">🧪 ${tx({en:"Try the real compost lab",bm:"Cuba makmal kompos sebenar"})}</a><a class="btn alt" href="#/games">${tx({en:"All games",bm:"Semua permainan"})}</a></p>`;

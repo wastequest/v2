@@ -34,7 +34,7 @@ const PLEDGES = [
   {id:"box",e:"🍱",cut:{box:0.8},n:{en:"Bring my own container for takeaway",bm:"Bawa bekas sendiri untuk bungkus makanan"}},
   {id:"bag",e:"👜",cut:{bag:0.9},n:{en:"Say no to plastic bags",bm:"Tolak beg plastik"}},
   {id:"plate",e:"🍽️",cut:{left:0.5},n:{en:"Take only what I can finish",bm:"Ambil hanya apa yang boleh dihabiskan"}},
-  {id:"paper",e:"📄",cut:{paper:0.3},n:{en:"Reuse paper and choose e-bills",bm:"Guna semula kertas dan pilih bil-e"}},
+  {id:"paper",e:"📄",cut:{paper:0.3},n:{en:"Reuse paper and choose e-bills",bm:"Guna semula kertas dan pilih e-bil"}},
   {id:"comp",e:"🌱",divert:"comp",n:{en:"Compost our food scraps",bm:"Kompos sisa makanan kami"}},
   {id:"sep",e:"♻️",divert:"rec",n:{en:"Separate recyclables into SWCorp bins",bm:"Asingkan bahan kitar semula ke tong SWCorp"}},
   {id:"cloth",e:"🧷",cut:{diaper:0.3},needs:"diaper",n:{en:"Use cloth diapers some of the time",bm:"Guna lampin kain sebahagian masa"}}
@@ -60,19 +60,20 @@ WQ.css("footprint", `
 .fp-it{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
 .fp-it .lb{flex:1;min-width:0;line-height:1.2}.fp-it .lb small{color:var(--muted)}
 .fp-step{display:flex;align-items:center;gap:4px;flex:none}
-.fp-step button{width:38px;height:38px;border-radius:50%;background:var(--soft);border:2px solid var(--line);font-weight:800;font-size:1.2rem;line-height:1}
-.fp-step input{width:52px;text-align:center;font-weight:800;font-size:1.05rem;border:2px solid var(--line);border-radius:10px;padding:5px 2px}
+.fp-step button{width:38px;height:38px;border-radius:0;background:var(--soft);border:2px solid var(--line);font-weight:800;font-size:1.2rem;line-height:1}
+.fp-step input{width:52px;text-align:center;font-weight:800;font-size:1.05rem;border:2px solid var(--line);border-radius:0;padding:5px 2px}
 .fp-donut{display:flex;gap:14px;align-items:center;flex-wrap:wrap}.fp-donut svg{width:170px;flex:none}
-.fp-leg{display:grid;gap:3px;font-size:.88rem}.fp-leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
-.fp-bar{height:22px;border-radius:999px;background:var(--soft);overflow:hidden;margin:3px 0 8px}.fp-bar i{display:block;height:100%;border-radius:999px;transition:width .4s}
-.fp-big{font-family:"Baloo 2";font-size:1.7rem;font-weight:800;line-height:1.1}
+.fp-leg{display:grid;gap:3px;font-size:.88rem}.fp-leg i{display:inline-block;width:12px;height:12px;border-radius:0;margin-right:6px;vertical-align:-1px}
+.fp-bar{height:22px;border-radius:0;background:var(--soft);overflow:hidden;margin:3px 0 8px}.fp-bar i{display:block;height:100%;border-radius:0;transition:width .4s}
+.fp-big{font-family:var(--pix,"Baloo 2");font-size:1.7rem;font-weight:800;line-height:1.1}
 .fp-pl{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 .fp-pl .choice{display:flex;gap:10px;align-items:center}.fp-pl .choice span{font-size:1.5rem}
 .fp-pl .choice.on{border-color:var(--grass);background:#eafbe4}.fp-pl .choice:disabled{opacity:.5}
 @media (max-width:480px){.fp-step button{width:34px;height:34px}.fp-step input{width:44px}.fp-it .lb{font-size:.9rem}}
-.fp-card{border:4px dashed var(--grass);border-radius:22px;padding:18px;background:#fff;text-align:center;max-width:560px;margin:0 auto}
+.fp-card{border:4px dashed var(--grass);border-radius:0;padding:18px;background:#fff;text-align:center;max-width:560px;margin:0 auto}
 .fp-card .mascot{width:80px}.fp-card ul{text-align:left;display:inline-block;margin:8px 0;font-size:1.05rem}
 .fp-card h2{font-size:1.6rem}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media print{.fp-hide{display:none!important}.fp-card{border-color:#3a9a2c;margin-top:0}.fp-card .mascot{animation:none}}
 `);
 
@@ -88,18 +89,22 @@ WQ.registerGame("footprint", { order: 14, kind: "sim", icon: "👣", ages: "7+",
         <div id="fpItems"></div>
         <label class="row small" style="margin-top:8px;gap:8px"><input type="checkbox" id="fpDia" ${S.diaper ? "checked" : ""} style="width:22px;height:22px"> ${tx({en:"We use disposable diapers",bm:"Kami guna lampin pakai buang"})}</label>
         <p class="small muted">${tx({en:"Weights are typical estimates (≈) for one item.",bm:"Berat ialah anggaran biasa (≈) bagi satu barang."})}</p></div>
-        <div class="card stack" id="fpRes" aria-live="polite"></div></div>
+        <div class="card stack" id="fpRes"></div></div><p class="vh" id="fpLive" role="status" aria-live="polite"></p>
       <div class="card stack fp-hide" id="fpPledge"></div>
       <div id="fpCardWrap"></div>`;
-    function step(id, v, lab) { return `<div class="fp-step"><button data-dec="${id}" aria-label="−">−</button><input type="number" inputmode="numeric" min="${id === "size" ? 1 : 0}" max="${id === "size" ? 20 : 200}" value="${v}" data-in="${id}" aria-label="${WQ.esc(lab)}"><button data-inc="${id}" aria-label="+">+</button></div>`; }
+    function step(id, v, lab) { return `<div class="fp-step"><button data-dec="${id}" aria-label="${WQ.esc(tx({en:"Fewer",bm:"Kurangkan"}) + ": " + lab)}">−</button><input type="number" inputmode="numeric" min="${id === "size" ? 1 : 0}" max="${id === "size" ? 20 : 200}" step="1" value="${v}" data-in="${id}" aria-label="${WQ.esc(lab)}"><button data-inc="${id}" aria-label="${WQ.esc(tx({en:"More",bm:"Tambah"}) + ": " + lab)}">+</button></div>`; }
+    let sayT = 0;
+    const say = (t, wait = 60) => { const l = $("#fpLive"); clearTimeout(sayT); sayT = setTimeout(() => { if (!l.isConnected) return; l.textContent = ""; setTimeout(() => { if (l.isConnected) l.textContent = t; }, 40); }, wait); };
+    const sumTxt = () => { const c = calc([]); return `${r1(c.tot)} kg/${tx({en:"week",bm:"minggu"})}, ${r2(c.tot / S.size / 7)} kg ${tx({en:"per person per day",bm:"seorang sehari"})}`; };
     function itemsView() {
-      $("#fpItems").innerHTML = items().map(i => `<div class="fp-it"><span style="font-size:1.5rem">${i.e}</span><div class="lb">${tx(i.n)}<br><small>≈${i.g} g ${tx({en:"each",bm:"sebiji"})}</small></div>${step(i.id, S.cnt[i.id], tx(i.n))}</div>`).join("");
+      $("#fpItems").innerHTML = items().map(i => `<div class="fp-it"><span style="font-size:1.5rem">${i.e}</span><div class="lb">${tx(i.n)}<br><small>≈${i.g} g ${tx({en:"each",bm:"setiap satu"})}</small></div>${step(i.id, S.cnt[i.id], tx(i.n))}</div>`).join("");
     }
-    function set(id, v) {
+    function set(id, v, typing) { // typing: leave the box alone while the user is still typing
       const lo = id === "size" ? 1 : 0, hi = id === "size" ? 20 : 200; v = Math.max(lo, Math.min(hi, Math.round(+v || 0)));
       if (id === "size") S.size = v; else S.cnt[id] = v;
-      const inp = el.querySelector(`[data-in="${id}"]`); if (inp && +inp.value !== v) inp.value = v;
-      results(); pledges();
+      const inp = el.querySelector(`[data-in="${id}"]`); if (inp && !typing && inp.value !== String(v)) inp.value = v;
+      results(); pledges(); card(); // the pledge card's kg/year must follow the inputs
+      const it = ITEMS.find(i => i.id === id); say(`${it ? tx(it.n) : tx({en:"People at home",bm:"Bilangan orang di rumah"})}: ${v}. ${sumTxt()}.`, typing ? 700 : 60);
     }
     function donut(c) {
       const R = 60, C = 2 * Math.PI * R; let off = 0;
@@ -118,16 +123,16 @@ WQ.registerGame("footprint", { order: 14, kind: "sim", icon: "👣", ages: "7+",
         <p class="small muted">${tx({en:"Your number counts only the items listed, so your real total is higher. The national figure (SWCorp, 2024) covers all solid waste.",bm:"Nombor anda hanya mengira barang yang disenaraikan, jadi jumlah sebenar lebih tinggi. Angka nasional (SWCorp, 2024) merangkumi semua sisa pepejal."})}</p>
         ${donut(c)}
         <div class="small"><b>♻️ ${tx({en:"Recyclable",bm:"Boleh dikitar semula"})}: ${sh("rec")}%</b> · <b>🌱 ${tx({en:"Compostable",bm:"Boleh dikompos"})}: ${sh("comp")}%</b> · <b>🗑️ ${tx({en:"Hard to recycle",bm:"Sukar dikitar semula"})}: ${sh("hard")}%</b></div>
-        <div class="note small">${tx({en:`Up to ${sh("rec") + sh("comp")}% of your counted waste could stay out of landfill: paper in the blue bin, plastic bottles and cans in the orange bin, glass in the brown bin, and food in compost.`,bm:`Sehingga ${sh("rec") + sh("comp")}% sisa yang dikira boleh dielakkan dari tapak pelupusan: kertas ke tong biru, botol plastik dan tin ke tong oren, kaca ke tong perang, dan makanan ke kompos.`})}</div>
+        <div class="note small">${tx({en:`Up to ${sh("rec") + sh("comp")}% of your counted waste could stay out of landfill: paper in the blue bin, plastic bottles and cans in the orange bin, glass in the brown bin, and food in compost.`,bm:`Sehingga ${sh("rec") + sh("comp")}% sisa yang dikira boleh dielakkan dari tapak pelupusan: kertas ke tong biru, botol plastik dan tin ke tong oren, kaca ke tong coklat, dan makanan ke kompos.`})}</div>
         ${adv ? advView(c) : ""}`;
     }
     function advView(c) {
       const my = [["food",30.6],["plastic",21.9],["paper",15.3],["diaper",8.2],["glass",2.7],["metal",2.4]];
       return `<details><summary><b>🔍 ${tx({en:"Show the maths & compare with Malaysia",bm:"Tunjuk kiraan & banding dengan Malaysia"})}</b></summary>
-        <div class="tablewrap"><table class="tbl small"><tr><th>${tx({en:"Item",bm:"Barang"})}</th><th>${tx({en:"Count",bm:"Bilangan"})}</th><th>g</th><th>kg</th></tr>${items().filter(i => S.cnt[i.id]).map(i => `<tr><td>${i.e} ${tx(i.n)}</td><td>${S.cnt[i.id]}</td><td>${i.g}</td><td>${r2(kg(i))}</td></tr>`).join("")}
+        <div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"Item weights",bm:"Berat barang"}))}"><table class="tbl small"><tr><th>${tx({en:"Item",bm:"Barang"})}</th><th>${tx({en:"Count",bm:"Bilangan"})}</th><th>g</th><th>kg</th></tr>${items().filter(i => S.cnt[i.id]).map(i => `<tr><td>${i.e} ${tx(i.n)}</td><td>${S.cnt[i.id]}</td><td>${i.g}</td><td>${r2(kg(i))}</td></tr>`).join("")}
         <tr><td colspan="3"><b>${tx({en:"Total ÷ people ÷ 7 days",bm:"Jumlah ÷ orang ÷ 7 hari"})}</b></td><td><b>${r1(c.tot)} ÷ ${S.size} ÷ 7 = ${r2(c.tot / S.size / 7)}</b></td></tr></table></div>
         <p class="small">${tx({en:"Malaysian household waste by weight (SWCorp, 2024) vs your counted items:",bm:"Sisa isi rumah Malaysia mengikut berat (SWCorp, 2024) berbanding barang anda:"})}</p>
-        <div class="tablewrap"><table class="tbl small"><tr><th></th><th>Malaysia</th><th>${tx({en:"You",bm:"Anda"})}</th></tr>${my.map(([k, v]) => `<tr><td><i style="display:inline-block;width:10px;height:10px;background:${CAT[k].c};border-radius:2px"></i> ${tx(CAT[k].n)}</td><td>${v}%</td><td>${Math.round((c.byCat[k] || 0) / c.tot * 100)}%</td></tr>`).join("")}</table></div>
+        <div class="tablewrap" tabindex="0" role="region" aria-label="${WQ.esc(tx({en:"Compared with Malaysia",bm:"Berbanding Malaysia"}))}"><table class="tbl small"><tr><td></td><th>Malaysia</th><th>${tx({en:"You",bm:"Anda"})}</th></tr>${my.map(([k, v]) => `<tr><td><i style="display:inline-block;width:10px;height:10px;background:${CAT[k].c};border-radius:0"></i> ${tx(CAT[k].n)}</td><td>${v}%</td><td>${Math.round((c.byCat[k] || 0) / c.tot * 100)}%</td></tr>`).join("")}</table></div>
         <p class="small muted">${tx({en:"Malaysia's list also includes hazardous waste, garden waste, textiles, cartons, rubber, wood and face masks, which are not counted here. Light items like bags matter more by number and litter than by weight.",bm:"Senarai Malaysia juga termasuk sisa berbahaya, sisa taman, tekstil, karton, getah, kayu dan pelitup muka, yang tidak dikira di sini. Barang ringan seperti beg lebih penting dari segi bilangan dan sampah sarap berbanding berat."})}</p></details>`;
     }
     function pledges() {
@@ -138,11 +143,14 @@ WQ.registerGame("footprint", { order: 14, kind: "sim", icon: "👣", ages: "7+",
         <div class="fp-pl">${avail.map(p => { const on = S.pick.includes(p.id), yr = calc([p.id]).saved * 52;
           return `<button class="choice ${on ? "on" : ""}" data-pl="${p.id}" aria-pressed="${on}" ${!on && full ? "disabled" : ""}><span>${p.e}</span><div>${tx(p.n)}<br><small class="muted">≈${r1(yr)} kg/${tx({en:"year",bm:"tahun"})}</small></div></button>`; }).join("")}</div>
         ${S.pick.length ? `<div class="note ok">${tx({en:`Your household could keep about <b>${r1(c.saved * 52)} kg</b> of waste out of landfill each year with these pledges.`,bm:`Isi rumah anda boleh mengelakkan kira-kira <b>${r1(c.saved * 52)} kg</b> sisa dari tapak pelupusan setiap tahun dengan ikrar ini.`})}</div>` : ""}
-        ${full ? `<div class="row"><label class="stack" style="gap:4px;flex:1;min-width:200px">${tx({en:"Your name",bm:"Nama anda"})}<input id="fpName" maxlength="40" value="${WQ.esc(S.name)}" style="border:2px solid var(--line);border-radius:12px;padding:10px;font-size:1rem"></label><button class="btn" id="fpMake">🖊️ ${tx({en:"Make my pledge card",bm:"Buat kad ikrar saya"})}</button></div>` : `<p class="small muted">${tx({en:"Choose 3 to unlock your pledge card. Numbers use your inputs above.",bm:"Pilih 3 untuk membuka kad ikrar anda. Nombor menggunakan input anda di atas."})}</p>`}
+        ${full ? `<div class="row"><label style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px;font-weight:700">${tx({en:"Your name",bm:"Nama anda"})}<input id="fpName" maxlength="40" value="${WQ.esc(S.name)}" style="border:2px solid var(--line);border-radius:0;padding:10px;font-size:1rem"></label><button class="btn" id="fpMake">🖊️ ${tx({en:"Make my pledge card",bm:"Buat kad ikrar saya"})}</button></div>` : `<p class="small muted">${tx({en:"Choose 3 to unlock your pledge card. Numbers use your inputs above.",bm:"Pilih 3 untuk membuka kad ikrar anda. Nombor menggunakan input anda di atas."})}</p>`}
         ${WQ.aud === "teacher" ? `<div class="note small">🧑‍🏫 ${tx({en:"Teaching note: set this as a one-week home audit. Pupils tally items daily, enter totals in class, then compare class results with the Malaysian average.",bm:"Nota pengajaran: jadikan ini audit rumah selama seminggu. Murid mengira barang setiap hari, masukkan jumlah dalam kelas, kemudian banding keputusan kelas dengan purata Malaysia."})}</div>` : ""}`;
-      el.querySelectorAll("[data-pl]").forEach(b => b.onclick = () => { const id = b.dataset.pl, i = S.pick.indexOf(id); if (i >= 0) S.pick.splice(i, 1); else if (S.pick.length < 3) S.pick.push(id); S.card = false; pledges(); card(); });
+      el.querySelectorAll("[data-pl]").forEach(b => b.onclick = () => { const id = b.dataset.pl, i = S.pick.indexOf(id); if (i >= 0) S.pick.splice(i, 1); else if (S.pick.length < 3) S.pick.push(id); S.card = false; pledges(); card();
+        const f = $(`[data-pl="${id}"]`); if (f) f.focus();
+        say(`${S.pick.length}/3 ${tx({en:"pledges chosen",bm:"ikrar dipilih"})}.` + (S.pick.length === 3 ? " " + tx({en:"You can now make your pledge card.",bm:"Anda kini boleh membuat kad ikrar."}) : "")); });
       if ($("#fpName")) $("#fpName").oninput = e => { S.name = e.target.value; };
-      if ($("#fpMake")) $("#fpMake").onclick = () => { S.name = $("#fpName").value.trim(); S.card = true; card(); WQ.award("footprint"); WQ.beep(true); $("#fpCardWrap").scrollIntoView({ behavior: "smooth" }); };
+      if ($("#fpMake")) $("#fpMake").onclick = () => { S.name = $("#fpName").value.trim(); S.card = true; card(); WQ.award("footprint"); WQ.beep(true);
+        const h = $("#fpCardWrap h2"); h.tabIndex = -1; h.focus({ preventScroll: true }); $("#fpCardWrap").scrollIntoView({ behavior: WQ.calm && WQ.calm() ? "auto" : "smooth" }); };
     }
     function card() {
       const w = $("#fpCardWrap"); if (!S.card || S.pick.length !== 3) { w.innerHTML = ""; return; }
@@ -157,7 +165,9 @@ WQ.registerGame("footprint", { order: 14, kind: "sim", icon: "👣", ages: "7+",
       $("#fpPrint").onclick = () => window.print();
     }
     el.onclick = e => { const b = e.target.closest("[data-inc],[data-dec]"); if (!b) return; const id = b.dataset.inc || b.dataset.dec; set(id, (id === "size" ? S.size : S.cnt[id]) + (b.dataset.inc ? 1 : -1)); };
-    el.onchange = e => { if (e.target.dataset.in) set(e.target.dataset.in, e.target.value); if (e.target.id === "fpDia") { S.diaper = e.target.checked; if (S.diaper && !S.cnt.diaper) S.cnt.diaper = 35; itemsView(); results(); pledges(); } };
+    el.oninput = e => { const v = e.target.dataset.in && e.target.value; if (v !== undefined && v !== "" && isFinite(+v)) set(e.target.dataset.in, v, true); };
+    el.onchange = e => { if (e.target.dataset.in) set(e.target.dataset.in, e.target.value); if (e.target.id === "fpDia") { S.diaper = e.target.checked; if (S.diaper && !S.cnt.diaper) S.cnt.diaper = 35; itemsView(); results(); pledges(); card(); say(sumTxt()); } };
     itemsView(); results(); pledges(); card();
+    return () => { clearTimeout(sayT); el.onclick = el.oninput = el.onchange = null; }; // #view is shared with other pages
   }});
 })();

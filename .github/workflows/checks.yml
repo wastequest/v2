@@ -1,0 +1,56 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: Assets, syntax and offline copy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Local files exist and every script parses
+        run: python3 tools/check_assets.py
+      - name: Offline copy is up to date
+        run: python3 tools/build_offline.py --check
+
+  smoke:
+    name: Every route in a browser (errors, layout, axe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PLAYWRIGHT_VERSION: 1.63.0
+      AXE_VERSION: 4.14.0
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Install Playwright and axe-core
+        run: |
+          npm install --prefix "$RUNNER_TEMP/tools" --no-save --no-audit --no-fund \
+            "playwright@$PLAYWRIGHT_VERSION" "axe-core@$AXE_VERSION"
+          cd "$RUNNER_TEMP/tools" && npx playwright install --with-deps --only-shell chromium
+      - name: Crawl every route
+        # The script serves the repository with python3 -m http.server and resolves
+        # playwright/axe-core from the working directory.
+        working-directory: ${{ runner.temp }}/tools
+        run: node "$GITHUB_WORKSPACE/tools/smoke.mjs"
